@@ -3,253 +3,35 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>兵庫県 市町村記憶ゲーム｜白地図（神戸市9区版）</title>
+<title>兵庫県 市町村記憶ゲーム｜学習モード</title>
 <style>
-  :root{
-    --ink:#1f2937;
-    --line:#374151;
-    --fill:#ffffff;
-    --sea:#eef7ff;
-    --panel:#ffffff;
-    --accent:#1d4ed8;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;color:var(--ink);background:var(--sea)}
-  body{display:flex;flex-direction:column}
-  header{
-    padding:14px 16px 10px;
-    text-align:center;
-    background:rgba(255,255,255,.94);
-    border-bottom:1px solid #dbe4ee;
-  }
-  h1{font-size:clamp(20px,5vw,30px);margin:0;font-weight:800}
-  .sub{margin-top:5px;font-size:13px;color:#4b5563}
-  #mapWrap{
-    position:relative;
-    flex:1;
-    min-height:68vh;
-    overflow:hidden;
-    touch-action:none;
-  }
-  svg{width:100%;height:100%;display:block}
-  .municipality{
-    fill:var(--fill);
-    stroke:var(--line);
-    stroke-width:1.15;
-    vector-effect:non-scaling-stroke;
-  }
-  .pref-outline{
-    fill:none;
-    stroke:#111827;
-    stroke-width:2.2;
-    vector-effect:non-scaling-stroke;
-    pointer-events:none;
-  }
-  .controls{
-    position:absolute;
-    top:12px;
-    right:12px;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-    z-index:3;
-  }
-  .controls button{
-    width:44px;height:44px;
-    border:1px solid #aeb9c6;
-    border-radius:10px;
-    background:rgba(255,255,255,.95);
-    font-size:23px;
-    font-weight:700;
-    box-shadow:0 2px 7px rgba(0,0,0,.12);
-  }
-  .controls button:last-child{font-size:12px;line-height:1.05}
-  #status{
-    position:absolute;
-    left:12px;
-    bottom:12px;
-    max-width:calc(100% - 24px);
-    padding:8px 11px;
-    border-radius:9px;
-    background:rgba(255,255,255,.9);
-    border:1px solid #cbd5e1;
-    font-size:12px;
-    line-height:1.45;
-  }
-  footer{
-    background:#fff;
-    padding:8px 12px 12px;
-    text-align:center;
-    font-size:10px;
-    line-height:1.45;
-    color:#667085;
-    border-top:1px solid #dbe4ee;
-  }
-  .error{color:#b91c1c;font-weight:700}
+:root{--ink:#1f2937;--line:#374151;--fill:#fff;--sea:#eef7ff;--selected:#fde68a}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;color:var(--ink);background:var(--sea)}body{display:flex;flex-direction:column}
+header{padding:12px 14px 8px;text-align:center;background:rgba(255,255,255,.96);border-bottom:1px solid #dbe4ee}h1{font-size:clamp(20px,5vw,30px);margin:0;font-weight:800}.sub{margin-top:5px;font-size:13px;color:#4b5563}
+#answerBox{margin:8px auto 0;min-height:34px;display:flex;align-items:center;justify-content:center;width:min(92vw,560px);padding:6px 10px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;font-size:clamp(15px,4.2vw,21px);font-weight:700;color:#0f172a}
+#mapWrap{position:relative;flex:1;min-height:68vh;overflow:hidden;touch-action:none}svg{width:100%;height:100%;display:block}.municipality{fill:var(--fill);stroke:var(--line);stroke-width:1.05;vector-effect:non-scaling-stroke;cursor:pointer}.municipality.selected{fill:var(--selected)}.pref-outline{fill:none;stroke:#111827;stroke-width:2.1;vector-effect:non-scaling-stroke;pointer-events:none}.label-line{stroke:#64748b;stroke-width:.7;vector-effect:non-scaling-stroke;pointer-events:none}.label{font-weight:700;fill:#111827;text-anchor:middle;dominant-baseline:middle;paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+.controls{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:8px;z-index:4}.controls button{width:44px;height:44px;border:1px solid #aeb9c6;border-radius:10px;background:rgba(255,255,255,.96);font-size:23px;font-weight:700;box-shadow:0 2px 7px rgba(0,0,0,.12)}.controls button:last-child{font-size:12px;line-height:1.05}
+#status{position:absolute;left:10px;bottom:10px;max-width:calc(100% - 20px);padding:7px 10px;border-radius:9px;background:rgba(255,255,255,.92);border:1px solid #cbd5e1;font-size:11px}footer{background:#fff;padding:7px 10px 10px;text-align:center;font-size:9px;line-height:1.45;color:#667085;border-top:1px solid #dbe4ee}.error{color:#b91c1c;font-weight:700}
 </style>
 </head>
 <body>
-<header>
-  <h1>兵庫県 市町村記憶ゲーム</h1>
-  <div class="sub">第1段階：49区域 白地図（神戸市9区版）</div>
-</header>
-
-<main id="mapWrap">
-  <svg id="map" aria-label="兵庫県49区域の白地図"></svg>
-  <div class="controls">
-    <button id="zoomIn" aria-label="拡大">＋</button>
-    <button id="zoomOut" aria-label="縮小">−</button>
-    <button id="reset" aria-label="全体表示">全体</button>
-  </div>
-  <div id="status">行政区域データを読み込んでいます…</div>
-</main>
-
-<footer>
-  出典：『歴史的行政区域データセットβ版』（CODH作成）／国土数値情報「行政区域データ」を加工<br>
-  CC BY 4.0　© KUSSOON 2026 All Rights Reserved
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<header><h1>兵庫県 市町村記憶ゲーム</h1><div class="sub">学習モード（49区域）</div><div id="answerBox">地図の区域をタップしてください</div></header>
+<main id="mapWrap"><svg id="map" aria-label="兵庫県49区域 名前入り学習地図"></svg><div class="controls"><button id="zoomIn">＋</button><button id="zoomOut">−</button><button id="reset">全体</button></div><div id="status">行政区域データを読み込んでいます…</div></main>
+<footer>出典：『歴史的行政区域データセットβ版』（CODH作成）／国土数値情報「行政区域データ」を加工<br>CC BY 4.0　© KUSSOON 2026 All Rights Reserved</footer>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script><script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 <script>
-/*
-  仕様：
-  - 神戸市のみ9区に分ける
-  - それ以外は市町単位
-  - 町は将来の表示用に郡名付き正式表記を内部保持
-*/
-const DATA_URL = "https://geoshape.ex.nii.ac.jp/city/topojson/20230101/28/28_city.i.topojson";
-
-const svg = d3.select("#map");
-const wrap = document.getElementById("mapWrap");
-const status = document.getElementById("status");
-const root = svg.append("g");
-const mapLayer = root.append("g");
-
-let zoom, initialTransform = d3.zoomIdentity;
-
-// 町の正式表記（将来の学習モード・クイズ用）
-const FORMAL_NAME_BY_CODE = {
-  "28301": "川辺郡猪名川町",
-  "28381": "加古郡稲美町",
-  "28382": "加古郡播磨町",
-  "28442": "多可郡多可町",
-  "28443": "神崎郡市川町",
-  "28446": "神崎郡福崎町",
-  "28464": "神崎郡神河町",
-  "28481": "揖保郡太子町",
-  "28501": "赤穂郡上郡町",
-  "28585": "佐用郡佐用町",
-  "28586": "美方郡香美町",
-  "28587": "美方郡新温泉町"
-};
-
-// 神戸市9区は区名で表示
-const KOBE_WARD_NAME_BY_CODE = {
-  "28101": "神戸市東灘区",
-  "28102": "神戸市灘区",
-  "28105": "神戸市兵庫区",
-  "28106": "神戸市長田区",
-  "28107": "神戸市須磨区",
-  "28108": "神戸市垂水区",
-  "28109": "神戸市北区",
-  "28110": "神戸市中央区",
-  "28111": "神戸市西区"
-};
-
-function getCode(props){
-  return props.N03_007 || props.code || props.CITY_CODE || props["行政区域コード"] || "";
-}
-
-function getRawName(props){
-  return props.N03_004 || props.name || props.city || props.CITY_NAME || props["市区町村名"] || "";
-}
-
-function getDisplayName(props){
-  const code = getCode(props);
-  if (KOBE_WARD_NAME_BY_CODE[code]) return KOBE_WARD_NAME_BY_CODE[code];
-  if (FORMAL_NAME_BY_CODE[code]) return FORMAL_NAME_BY_CODE[code];
-  return getRawName(props);
-}
-
-function isHyogoArea(feature){
-  const code = String(feature.__code || "");
-  return code.startsWith("28");
-}
-
-async function draw(){
-  try{
-    const topo = await fetch(DATA_URL, {mode:"cors"}).then(r=>{
-      if(!r.ok) throw new Error("データ取得エラー: " + r.status);
-      return r.json();
-    });
-
-    const objectKey = Object.keys(topo.objects)[0];
-    const fc = topojson.feature(topo, topo.objects[objectKey]);
-    let features = (fc.features || []).map((f, i) => {
-      const props = f.properties || {};
-      const code = getCode(props);
-      f.__code = code;
-      f.__rawName = getRawName(props);
-      f.__displayName = getDisplayName(props);
-      f.__id = code ? "muni-" + code : "muni-" + (i+1);
-      return f;
-    }).filter(isHyogoArea);
-
-    const width = Math.max(320, wrap.clientWidth);
-    const height = Math.max(460, wrap.clientHeight);
-    svg.attr("viewBox", `0 0 ${width} ${height}`);
-
-    const projection = d3.geoMercator();
-    projection.fitExtent([[26,22],[width-26,height-26]], {type:"FeatureCollection",features});
-    const path = d3.geoPath(projection);
-
-    mapLayer.selectAll("path.municipality")
-      .data(features)
-      .join("path")
-      .attr("class","municipality")
-      .attr("id",d=>d.__id)
-      .attr("data-name",d=>d.__displayName)
-      .attr("data-raw-name",d=>d.__rawName)
-      .attr("data-code",d=>d.__code)
-      .attr("d",path);
-
-    // 外周
-    const merged = topojson.merge(
-      topo,
-      (topo.objects[objectKey].geometries || []).filter(g => {
-        const code = String(getCode(g.properties || {}));
-        return code.startsWith("28");
-      })
-    );
-
-    mapLayer.append("path")
-      .datum(merged)
-      .attr("class","pref-outline")
-      .attr("d",path);
-
-    zoom = d3.zoom()
-      .scaleExtent([1,10])
-      .on("zoom", e => root.attr("transform", e.transform));
-
-    svg.call(zoom);
-    svg.call(zoom.transform, initialTransform);
-
-    const count = features.length;
-    const note = (count === 49)
-      ? "49区域を表示中（40市町＋神戸市9区）"
-      : `${count}区域を表示中 ※件数を要確認`;
-    status.textContent = note;
-  }catch(err){
-    console.error(err);
-    status.innerHTML = '<span class="error">地図データを読み込めませんでした。</span><br>インターネット接続とNII側の配信状況を確認してください。';
-  }
-}
-
-document.getElementById("zoomIn").addEventListener("click",()=>svg.transition().duration(180).call(zoom.scaleBy,1.45));
-document.getElementById("zoomOut").addEventListener("click",()=>svg.transition().duration(180).call(zoom.scaleBy,1/1.45));
-document.getElementById("reset").addEventListener("click",()=>svg.transition().duration(220).call(zoom.transform,initialTransform));
-
+const DATA_URL="https://geoshape.ex.nii.ac.jp/city/topojson/20230101/28/28_city.i.topojson";
+const FORMAL={"28301":"川辺郡猪名川町","28365":"多可郡多可町","28381":"加古郡稲美町","28382":"加古郡播磨町","28442":"神崎郡市川町","28443":"神崎郡福崎町","28446":"神崎郡神河町","28464":"揖保郡太子町","28481":"赤穂郡上郡町","28501":"佐用郡佐用町","28585":"美方郡香美町","28586":"美方郡新温泉町"};
+const KOBE={"28101":"神戸市東灘区","28102":"神戸市灘区","28105":"神戸市兵庫区","28106":"神戸市長田区","28107":"神戸市須磨区","28108":"神戸市垂水区","28109":"神戸市北区","28110":"神戸市中央区","28111":"神戸市西区"};
+const SHORT={"28101":"東灘区","28102":"灘区","28105":"兵庫区","28106":"長田区","28107":"須磨区","28108":"垂水区","28109":"北区","28110":"中央区","28111":"西区","28301":"猪名川町","28365":"多可町","28381":"稲美町","28382":"播磨町","28442":"市川町","28443":"福崎町","28446":"神河町","28464":"太子町","28481":"上郡町","28501":"佐用町","28585":"香美町","28586":"新温泉町"};
+const OFFSET={"28101":[15,-5],"28102":[10,-16],"28110":[7,-3],"28105":[-2,13],"28106":[-8,18],"28107":[-14,18],"28108":[3,17],"28111":[-4,-5],"28202":[16,6],"28204":[12,2],"28206":[17,-10],"28207":[8,-8],"28214":[2,-12],"28217":[7,-12],"28301":[10,-4],"28203":[0,12],"28382":[0,13],"28381":[0,-7],"28216":[-4,11],"28464":[0,8]};
+const svg=d3.select("#map"),wrap=document.getElementById("mapWrap"),status=document.getElementById("status"),answerBox=document.getElementById("answerBox");const root=svg.append("g"),mapLayer=root.append("g"),lineLayer=root.append("g"),labelLayer=root.append("g");let zoom,currentSelected=null;
+function code(p){return String(p.N03_007||p.code||p.CITY_CODE||p["行政区域コード"]||"")}function raw(p){return p.N03_004||p.name||p.city||p.CITY_NAME||p["市区町村名"]||""}function formal(p){const c=code(p);return KOBE[c]||FORMAL[c]||raw(p)}function short(p){const c=code(p);return SHORT[c]||raw(p)}
+async function draw(){try{const topo=await fetch(DATA_URL,{mode:"cors"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()});const key=Object.keys(topo.objects)[0];const fc=topojson.feature(topo,topo.objects[key]);let fs=(fc.features||[]).map((f,i)=>{const p=f.properties||{};f.__code=code(p);f.__formal=formal(p);f.__label=short(p);f.__id=f.__code?"muni-"+f.__code:"muni-"+(i+1);return f}).filter(f=>f.__code.startsWith("28"));const w=Math.max(320,wrap.clientWidth),h=Math.max(500,wrap.clientHeight);svg.attr("viewBox",`0 0 ${w} ${h}`);const projection=d3.geoMercator();projection.fitExtent([[22,18],[w-22,h-22]],{type:"FeatureCollection",features:fs});const path=d3.geoPath(projection);
+mapLayer.selectAll("path.municipality").data(fs).join("path").attr("class","municipality").attr("id",d=>d.__id).attr("data-code",d=>d.__code).attr("data-name",d=>d.__formal).attr("d",path).on("click",(e,d)=>{if(currentSelected)d3.select("#"+currentSelected).classed("selected",false);currentSelected=d.__id;d3.select("#"+d.__id).classed("selected",true);answerBox.textContent=d.__formal;e.stopPropagation()});
+const geoms=(topo.objects[key].geometries||[]).filter(g=>String(code(g.properties||{})).startsWith("28"));mapLayer.append("path").datum(topojson.merge(topo,geoms)).attr("class","pref-outline").attr("d",path);
+fs.forEach(f=>{const c=f.__code,ctr=path.centroid(f);if(!Number.isFinite(ctr[0])||!Number.isFinite(ctr[1]))return;const off=OFFSET[c]||[0,0],x=ctr[0]+off[0],y=ctr[1]+off[1];if(off[0]||off[1])lineLayer.append("line").attr("class","label-line").attr("x1",ctr[0]).attr("y1",ctr[1]).attr("x2",x).attr("y2",y);const t=labelLayer.append("text").attr("class","label").attr("x",x).attr("y",y).text(f.__label);let s=9.5;if(/^281/.test(c))s=7.2;if(["28202","28204","28206","28207","28214","28217","28203","28381","28382"].includes(c))s=7.5;if(f.__label.length>=5)s=Math.min(s,8.3);t.style("font-size",s+"px")});
+zoom=d3.zoom().scaleExtent([1,12]).on("zoom",e=>root.attr("transform",e.transform));svg.call(zoom);document.getElementById("zoomIn").onclick=()=>svg.transition().duration(180).call(zoom.scaleBy,1.45);document.getElementById("zoomOut").onclick=()=>svg.transition().duration(180).call(zoom.scaleBy,1/1.45);document.getElementById("reset").onclick=()=>{svg.transition().duration(220).call(zoom.transform,d3.zoomIdentity);if(currentSelected)d3.select("#"+currentSelected).classed("selected",false);currentSelected=null;answerBox.textContent="地図の区域をタップしてください"};status.textContent=`${fs.length}区域を表示中（40市町＋神戸市9区）`}catch(err){console.error(err);status.innerHTML='<span class="error">地図データを読み込めませんでした。</span>'}}
 draw();
 </script>
 </body>
