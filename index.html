@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>兵庫県 市町村記憶ゲーム｜学習モード v0.4</title>
+<title>兵庫県 市町村記憶ゲーム｜学習モード v0.5</title>
 <style>
 :root{
   --ink:#1f2937;
@@ -132,37 +132,37 @@ const MAP_LABEL_BY_CODE = {
   "28481":"上郡町","28501":"佐用町","28585":"香美町","28586":"新温泉町"
 };
 
-// 読みやすさを優先して、阪神・神戸周辺は個別に位置とサイズを調整
+// なるべく線を使わず、必要最小限だけリーダー線を使う
 const LABEL_LAYOUT = {
   // 神戸9区
-  "28109": {dx: 0, dy: 0, size: 8.3, anchor: "middle"},
-  "28111": {dx: -28, dy: -14, size: 7.8, anchor: "end"},
-  "28107": {dx: -32, dy: 38, size: 7.6, anchor: "end"},
-  "28108": {dx: -6, dy: 56, size: 7.6, anchor: "middle"},
-  "28105": {dx: -12, dy: 56, size: 7.6, anchor: "middle"},
-  "28110": {dx: 14, dy: 38, size: 7.6, anchor: "middle"},
-  "28106": {dx: 28, dy: 56, size: 7.6, anchor: "start"},
-  "28102": {dx: 38, dy: 8, size: 7.6, anchor: "start"},
-  "28101": {dx: 58, dy: 28, size: 7.6, anchor: "start"},
+  "28109": {dx: 0,  dy: 0,  size: 7.9, anchor: "middle", leader: false},
+  "28111": {dx: -18, dy: -8, size: 7.2, anchor: "end",    leader: false},
+  "28107": {dx: -18, dy: 28, size: 7.0, anchor: "end",    leader: false},
+  "28108": {dx: -8,  dy: 42, size: 7.0, anchor: "middle", leader: false},
+  "28105": {dx: -6,  dy: 34, size: 7.0, anchor: "middle", leader: false},
+  "28110": {dx: 6,   dy: 28, size: 7.0, anchor: "middle", leader: false},
+  "28106": {dx: 20,  dy: 36, size: 7.0, anchor: "start",  leader: false},
+  "28102": {dx: 22,  dy: 8,  size: 7.0, anchor: "start",  leader: false},
+  "28101": {dx: 36,  dy: 20, size: 7.0, anchor: "start",  leader: false},
 
   // 阪神周辺
-  "28202": {dx: 0, dy: -10, size: 8.2, anchor: "middle"},   // 尼崎
-  "28204": {dx: 18, dy: 10, size: 8.2, anchor: "start"},    // 西宮
-  "28206": {dx: 44, dy: -4, size: 8.0, anchor: "start"},    // 芦屋
-  "28207": {dx: 40, dy: -2, size: 8.0, anchor: "start"},    // 伊丹
-  "28214": {dx: 6, dy: -18, size: 8.2, anchor: "middle"},   // 宝塚
-  "28217": {dx: 34, dy: -28, size: 8.1, anchor: "start"},   // 川西
-  "28301": {dx: 40, dy: -28, size: 8.0, anchor: "start"},   // 猪名川町
-  "28219": {dx: 0, dy: -6, size: 8.4, anchor: "middle"},    // 三田
+  "28202": {dx: 0,  dy: -8, size: 7.7, anchor: "middle", leader: false},  // 尼崎
+  "28204": {dx: -8, dy: 8,  size: 7.6, anchor: "end",    leader: false},  // 西宮
+  "28206": {dx: 10, dy: 8,  size: 7.3, anchor: "start",  leader: false},  // 芦屋
+  "28207": {dx: 22, dy: -2, size: 7.4, anchor: "start",  leader: false},  // 伊丹
+  "28214": {dx: 4,  dy: -16,size: 7.8, anchor: "middle", leader: true},   // 宝塚
+  "28217": {dx: 26, dy: -18,size: 7.5, anchor: "start",  leader: true},   // 川西
+  "28301": {dx: 30, dy: -24,size: 7.5, anchor: "start",  leader: true},   // 猪名川町
+  "28219": {dx: 0,  dy: -6, size: 7.9, anchor: "middle", leader: false},  // 三田
 
   // 東播磨周辺
-  "28203": {dx: 0, dy: 8, size: 8.0, anchor: "middle"},     // 明石
-  "28382": {dx: 8, dy: 24, size: 7.7, anchor: "start"},     // 播磨町
-  "28381": {dx: -12, dy: -8, size: 7.9, anchor: "end"},     // 稲美町
+  "28203": {dx: 0,   dy: 8,  size: 7.5, anchor: "middle", leader: false}, // 明石
+  "28382": {dx: 6,   dy: 18, size: 7.0, anchor: "start",  leader: false}, // 播磨町
+  "28381": {dx: -10, dy: -6, size: 7.1, anchor: "end",    leader: false}, // 稲美町
 
-  // 北播磨南部など少し調整
-  "28216": {dx: 0, dy: 10, size: 8.0, anchor: "middle"},    // 高砂
-  "28464": {dx: 0, dy: 8, size: 7.8, anchor: "middle"}      // 太子町
+  // その他少し
+  "28216": {dx: 0, dy: 8, size: 7.5, anchor: "middle", leader: false},    // 高砂
+  "28464": {dx: 0, dy: 8, size: 7.1, anchor: "middle", leader: false}     // 太子町
 };
 
 const svg = d3.select("#map");
@@ -192,7 +192,7 @@ function mapLabel(p){
   return MAP_LABEL_BY_CODE[c] || rawName(p);
 }
 function makeLayout(code){
-  return LABEL_LAYOUT[code] || {dx:0, dy:0, size:8.4, anchor:"middle"};
+  return LABEL_LAYOUT[code] || {dx:0, dy:0, size:7.8, anchor:"middle", leader:false};
 }
 
 async function draw(){
@@ -251,7 +251,7 @@ async function draw(){
       const y=centroid[1]+layout.dy;
       const anchor=layout.anchor || "middle";
 
-      if(layout.dx!==0 || layout.dy!==0){
+      if(layout.leader){
         lineLayer.append("line")
           .attr("class","label-line")
           .attr("x1",centroid[0]).attr("y1",centroid[1])
@@ -262,7 +262,7 @@ async function draw(){
         .attr("class","label")
         .attr("x",x)
         .attr("y",y)
-        .style("font-size", (layout.size || 8.4) + "px")
+        .style("font-size", (layout.size || 7.8) + "px")
         .style("text-anchor", anchor)
         .attr("data-code",code)
         .text(f.__label);
