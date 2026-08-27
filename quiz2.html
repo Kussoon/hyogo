@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>クイズ2 場所→名前｜兵庫県 市町村記憶ゲーム</title>
+<style>
+:root{
+  --ink:#1f2937;
+  --line:#5b6470;
+  --outline:#111827;
+  --fill:#f8fafc;
+  --kobe:#e5e7eb;
+  --sea:#eef4fb;
+  --panel:#ffffff;
+  --border:#dbe4ee;
+  --target:#fde68a;
+  --correct:#a7f3d0;
+  --wrong:#fee2e2;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;min-height:100%;
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  color:var(--ink);background:var(--sea)
+}
+body{display:flex;flex-direction:column}
+.topnav{
+  background:#fff;padding:8px 12px;border-bottom:1px solid var(--border)
+}
+.topnav a{color:#334155;text-decoration:none;font-size:14px;font-weight:700}
+header{
+  background:var(--panel);text-align:center;padding:10px 12px 10px
+}
+h1{margin:0;font-size:clamp(21px,5.5vw,30px)}
+.sub{margin-top:5px;font-size:16px;font-weight:700}
+#question{
+  margin:8px auto 0;
+  width:min(94vw,640px);
+  min-height:44px;
+  border:1px solid #cbd5e1;
+  border-radius:11px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:7px 12px;
+  font-size:clamp(18px,5vw,23px);
+  font-weight:800;
+}
+#progress{margin-top:6px;font-size:13px;color:#64748b;font-weight:700}
+#restartBtn{
+  margin-top:8px;
+  border:1px solid #aeb9c6;
+  background:#fff;
+  color:#334155;
+  border-radius:10px;
+  padding:8px 14px;
+  font-size:13px;
+  font-weight:800;
+}
+#choices{
+  background:#fff;
+  padding:9px 10px 11px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  border-bottom:1px solid var(--border);
+}
+.choice{
+  min-height:50px;
+  border:1px solid #9fb1c4;
+  border-radius:11px;
+  background:#f8fbff;
+  color:#17324d;
+  padding:8px 7px;
+  font-size:clamp(12px,3.5vw,16px);
+  line-height:1.3;
+  font-weight:800;
+}
+.choice.correct-choice{background:var(--correct);border-color:#34d399}
+.choice.wrong-choice{background:var(--wrong);border-color:#f87171}
+.choice:disabled{opacity:1}
+#mapWrap{
+  position:relative;flex:1;min-height:54vh;overflow:hidden;touch-action:none;background:var(--sea)
+}
+svg{width:100%;height:100%;display:block}
+.municipality{
+  fill:var(--fill);stroke:var(--line);stroke-width:1.05;
+  vector-effect:non-scaling-stroke
+}
+.municipality.kobe-base{fill:var(--kobe)}
+.municipality.target{fill:var(--target)}
+.municipality.answer-correct{fill:var(--correct)}
+.pref-outline{
+  fill:none;stroke:var(--outline);stroke-width:1.8;
+  vector-effect:non-scaling-stroke;pointer-events:none
+}
+.kobe-outline{
+  fill:none;stroke:var(--outline);stroke-width:1.5;
+  vector-effect:non-scaling-stroke;pointer-events:none
+}
+.controls{
+  position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:8px;z-index:5
+}
+.controls button{
+  width:46px;height:46px;border:1px solid #aeb9c6;border-radius:10px;
+  background:rgba(255,255,255,.96);box-shadow:0 2px 7px rgba(0,0,0,.12);
+  font-weight:700;color:#1f2937
+}
+.controls button.zoom{font-size:24px}
+.controls button.reset{font-size:12px;line-height:1.05}
+#feedback{
+  position:absolute;
+  left:50%;top:18px;transform:translateX(-50%);
+  z-index:6;
+  min-width:160px;max-width:88vw;
+  text-align:center;
+  padding:9px 16px;
+  border-radius:999px;
+  background:rgba(255,255,255,.97);
+  border:1px solid #cbd5e1;
+  box-shadow:0 2px 8px rgba(0,0,0,.10);
+  font-size:16px;
+  font-weight:900;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .12s ease;
+}
+#feedback.show{opacity:1}
+#feedback.ok{color:#047857}
+#feedback.ng{color:#b91c1c}
+#result{
+  display:none;
+  position:absolute;
+  inset:0;
+  z-index:10;
+  background:rgba(238,244,251,.96);
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.result-card{
+  width:min(92vw,460px);
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:22px;
+  text-align:center;
+  box-shadow:0 8px 24px rgba(15,23,42,.12);
+}
+.result-card h2{margin:0 0 10px;font-size:25px}
+.result-card p{font-size:16px;line-height:1.6;margin:8px 0 18px}
+.result-card button,.result-card a{
+  display:block;width:100%;padding:12px 14px;margin-top:9px;
+  border-radius:12px;font-size:16px;font-weight:800;text-decoration:none
+}
+.result-card button{
+  border:1px solid #9fb1c4;background:#f8fbff;color:#17324d
+}
+.result-card .primary{background:#315f8c;color:#fff;border-color:#315f8c}
+.result-card a{border:1px solid #cbd5e1;color:#334155;background:#fff}
+footer{
+  background:#fff;border-top:1px solid var(--border);
+  text-align:center;font-size:9px;line-height:1.45;color:#667085;padding:8px 10px 10px
+}
+</style>
+</head>
+<body>
+<div class="topnav"><a href="index.html">← トップへ</a></div>
+<header>
+  <h1>兵庫県 市町村記憶ゲーム</h1>
+  <div class="sub">🎯 クイズ2「場所 → 名前」</div>
+  <div id="question">黄色く光っている場所はどこですか？</div>
+  <div id="progress"></div>
+  <button id="restartBtn" type="button">もう一度最初から</button>
+</header>
+
+<div id="choices"></div>
+
+<main id="mapWrap">
+  <svg id="map" aria-label="兵庫県 市町村名当てクイズ"></svg>
+  <div class="controls">
+    <button id="zoomIn" class="zoom" type="button" aria-label="拡大">＋</button>
+    <button id="zoomOut" class="zoom" type="button" aria-label="縮小">−</button>
+    <button id="resetButton" class="reset" type="button" aria-label="全体表示">全体</button>
+  </div>
+  <div id="feedback"></div>
+
+  <div id="result">
+    <div class="result-card">
+      <h2>採点結果</h2>
+      <p id="resultText"></p>
+      <button id="againBtn" class="primary">もう一度最初から</button>
+      <button id="wrongBtn">間違えた問題だけもう一度</button>
+      <a href="index.html">トップへ</a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  地図境界データ：『歴史的行政区域データセットβ版』（CODH作成）／国土数値情報「行政区域データ」を加工。CC BY 4.0<br>
+  © KUSSOON 2026 All Rights Reserved.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script>
+const DATA_URL="https://geoshape.ex.nii.ac.jp/city/topojson/20230101/28/28_city.i.topojson";
+
+const FORMAL_NAME_BY_CODE={
+  "28101":"神戸市東灘区","28102":"神戸市灘区","28105":"神戸市兵庫区","28106":"神戸市長田区",
+  "28107":"神戸市須磨区","28108":"神戸市垂水区","28109":"神戸市北区","28110":"神戸市中央区","28111":"神戸市西区",
+  "28301":"川辺郡猪名川町","28365":"多可郡多可町","28381":"加古郡稲美町","28382":"加古郡播磨町",
+  "28442":"神崎郡市川町","28443":"神崎郡福崎町","28446":"神崎郡神河町","28464":"揖保郡太子町",
+  "28481":"赤穂郡上郡町","28501":"佐用郡佐用町","28585":"美方郡香美町","28586":"美方郡新温泉町"
+};
+
+const REGIONS=[
+  ["28101","28102","28105","28106","28107","28108","28109","28110","28111"],
+  ["28202","28204","28206"],
+  ["28207","28214","28217","28219","28301"],
+  ["28203","28210","28216","28381","28382"],
+  ["28213","28215","28218","28220","28228","28365"],
+  ["28201","28442","28443","28446"],
+  ["28208","28212","28227","28229","28464","28481","28501"],
+  ["28209","28222","28225","28585","28586"],
+  ["28221","28223"],
+  ["28205","28224","28226"]
+];
+
+const svg=d3.select("#map");
+const mapWrap=document.getElementById("mapWrap");
+const progressEl=document.getElementById("progress");
+const choicesEl=document.getElementById("choices");
+const feedback=document.getElementById("feedback");
+const result=document.getElementById("result");
+const resultText=document.getElementById("resultText");
+const wrongBtn=document.getElementById("wrongBtn");
+const root=svg.append("g");
+const mapLayer=root.append("g");
+
+let zoom,features=[];
+let allCodes=[];
+let queue=[];
+let index=0;
+let currentCode=null;
+let wrongSet=new Set();
+let locked=false;
+
+function getCode(p){
+  return String(p.N03_007||p.code||p.CITY_CODE||p["行政区域コード"]||"");
+}
+function rawName(p){
+  return p.N03_004||p.name||p.city||p.CITY_NAME||p["市区町村名"]||"";
+}
+function formalName(feature){
+  return FORMAL_NAME_BY_CODE[feature.__code]||feature.__rawName;
+}
+function featureByCode(code){
+  return features.find(f=>f.__code===code);
+}
+function shuffle(a){
+  const x=[...a];
+  for(let i=x.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [x[i],x[j]]=[x[j],x[i]];
+  }
+  return x;
+}
+function showFeedback(text,type){
+  feedback.textContent=text;
+  feedback.className="show "+type;
+}
+function hideFeedback(){
+  feedback.className="";
+}
+function regionFor(code){
+  return REGIONS.find(r=>r.includes(code))||[];
+}
+function makeChoices(code){
+  const sameRegion=shuffle(regionFor(code).filter(c=>c!==code));
+  const others=shuffle(allCodes.filter(c=>c!==code && !sameRegion.includes(c)));
+  const picks=sameRegion.slice(0,3);
+  while(picks.length<3 && others.length)picks.push(others.shift());
+  return shuffle([code,...picks]);
+}
+function resetMap(){
+  mapLayer.selectAll(".municipality")
+    .classed("target",false)
+    .classed("answer-correct",false);
+}
+function startQuiz(codes){
+  queue=shuffle(codes);
+  index=0;
+  currentCode=null;
+  wrongSet=new Set();
+  locked=false;
+  result.style.display="none";
+  svg.call(zoom.transform,d3.zoomIdentity);
+  showQuestion();
+}
+function showQuestion(){
+  hideFeedback();
+  resetMap();
+  if(index>=queue.length){
+    finishQuiz();
+    return;
+  }
+  currentCode=queue[index];
+  progressEl.textContent=`${index+1} / ${queue.length}`;
+  locked=false;
+
+  d3.select("#muni-"+currentCode).classed("target",true);
+
+  choicesEl.innerHTML="";
+  makeChoices(currentCode).forEach(code=>{
+    const f=featureByCode(code);
+    const b=document.createElement("button");
+    b.className="choice";
+    b.textContent=formalName(f);
+    b.dataset.code=code;
+    b.addEventListener("click",()=>answerChoice(b,code));
+    choicesEl.appendChild(b);
+  });
+}
+function disableChoices(){
+  choicesEl.querySelectorAll("button").forEach(b=>b.disabled=true);
+}
+function answerChoice(button,selectedCode){
+  if(locked||!currentCode)return;
+  const correctFeature=featureByCode(currentCode);
+
+  if(selectedCode===currentCode){
+    locked=true;
+    button.classList.add("correct-choice");
+    d3.select("#muni-"+currentCode).classed("target",false).classed("answer-correct",true);
+    showFeedback("正解です！","ok");
+    disableChoices();
+    setTimeout(()=>{
+      index++;
+      showQuestion();
+    },2000);
+  }else{
+    locked=true;
+    wrongSet.add(currentCode);
+    button.classList.add("wrong-choice");
+    choicesEl.querySelectorAll("button").forEach(b=>{
+      if(b.dataset.code===currentCode)b.classList.add("correct-choice");
+    });
+    d3.select("#muni-"+currentCode).classed("target",false).classed("answer-correct",true);
+    showFeedback(`違います！ 正解は${formalName(correctFeature)}です。`,"ng");
+    disableChoices();
+    setTimeout(()=>{
+      index++;
+      showQuestion();
+    },2500);
+  }
+}
+function finishQuiz(){
+  locked=true;
+  const wrongCount=wrongSet.size;
+  const correctFirst=queue.length-wrongCount;
+  const score=Math.round((correctFirst/queue.length)*100);
+  progressEl.textContent="";
+  choicesEl.innerHTML="";
+  resultText.innerHTML=`<strong>${score}点</strong><br>${queue.length}問中 ${correctFirst}問正解しました。<br>間違えた問題：${wrongCount}問`;
+  wrongBtn.style.display=wrongCount?"block":"none";
+  result.style.display="flex";
+}
+async function draw(){
+  try{
+    const topo=await fetch(DATA_URL,{mode:"cors"}).then(r=>{
+      if(!r.ok)throw new Error("data");
+      return r.json();
+    });
+    const objectKey=Object.keys(topo.objects)[0];
+    const fc=topojson.feature(topo,topo.objects[objectKey]);
+    features=(fc.features||[]).map((f,i)=>{
+      const p=f.properties||{};
+      f.__code=getCode(p);
+      f.__rawName=rawName(p);
+      f.__id=f.__code?`muni-${f.__code}`:`muni-${i+1}`;
+      return f;
+    }).filter(f=>f.__code.startsWith("28"));
+    allCodes=features.map(f=>f.__code);
+
+    const width=Math.max(320,mapWrap.clientWidth);
+    const height=Math.max(470,mapWrap.clientHeight);
+    svg.attr("viewBox",`0 0 ${width} ${height}`);
+
+    const projection=d3.geoMercator();
+    projection.fitExtent([[22,18],[width-22,height-22]],{type:"FeatureCollection",features});
+    const path=d3.geoPath(projection);
+
+    mapLayer.selectAll("path.municipality")
+      .data(features).join("path")
+      .attr("class",d=>d.__code.startsWith("281")?"municipality kobe-base":"municipality")
+      .attr("id",d=>d.__id)
+      .attr("d",path);
+
+    const allGeoms=(topo.objects[objectKey].geometries||[]).filter(g=>getCode(g.properties||{}).startsWith("28"));
+    const kobeGeoms=allGeoms.filter(g=>getCode(g.properties||{}).startsWith("281"));
+    mapLayer.append("path")
+      .datum(topojson.merge(topo,kobeGeoms))
+      .attr("class","kobe-outline")
+      .attr("d",path);
+    mapLayer.append("path")
+      .datum(topojson.merge(topo,allGeoms))
+      .attr("class","pref-outline")
+      .attr("d",path);
+
+    zoom=d3.zoom().scaleExtent([1,12]).on("zoom",e=>root.attr("transform",e.transform));
+    svg.call(zoom);
+
+    document.getElementById("zoomIn").onclick=()=>svg.transition().duration(180).call(zoom.scaleBy,1.45);
+    document.getElementById("zoomOut").onclick=()=>svg.transition().duration(180).call(zoom.scaleBy,1/1.45);
+    document.getElementById("resetButton").onclick=()=>svg.transition().duration(220).call(zoom.transform,d3.zoomIdentity);
+
+    document.getElementById("restartBtn").onclick=()=>startQuiz(allCodes);
+    document.getElementById("againBtn").onclick=()=>startQuiz(allCodes);
+    wrongBtn.onclick=()=>{
+      const retry=[...wrongSet];
+      startQuiz(retry);
+    };
+
+    startQuiz(allCodes);
+  }catch(e){
+    console.error(e);
+    document.getElementById("question").textContent="地図データを読み込めませんでした。";
+  }
+}
+draw();
+</script>
+</body>
+</html>
