@@ -245,7 +245,7 @@ footer{
     <button id="zoomOut" class="zoom" type="button">−</button>
     <button id="resetButton" class="reset" type="button">全体</button>
   </div>
-  <div id="status">地域を選択してください</div>
+  <div id="status"></div>
 </main>
 
 <div id="quizLinks">
@@ -385,7 +385,7 @@ function showOverview(){
   currentRegion=null;
   document.getElementById("regionBack").style.display="none";
   regionTitle.textContent="地図から地域を選んでください";
-  status.textContent="地域名をタップしてください";
+  status.textContent="";
   mapLayer.style("display","none");
   labelLayer.style("display","none");
   overviewLayer.style("display",null);
