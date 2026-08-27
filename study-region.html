@@ -85,13 +85,29 @@ h1{margin:0;font-size:clamp(21px,5.5vw,30px)}
   color:#fff;
   border-color:#315f8c;
 }
+#mapStage{
+  background:#fff;
+  padding:8px 18px 10px;
+  touch-action:pan-y;
+}
 #mapWrap{
   position:relative;
-  flex:1;
-  min-height:62vh;
+  width:100%;
+  height:480px;
+  min-height:0;
   overflow:hidden;
   touch-action:none;
   background:var(--sea);
+  border:1px solid var(--border);
+  border-radius:12px;
+}
+@media(min-width:700px){
+  #mapStage{padding-left:28px;padding-right:28px}
+  #mapWrap{height:540px}
+}
+@media(max-width:390px){
+  #mapStage{padding-left:14px;padding-right:14px}
+  #mapWrap{height:440px}
 }
 svg{width:100%;height:100%;display:block}
 .region-shape{
@@ -238,15 +254,17 @@ footer{
 
 <div class="regions" id="regionButtons"></div>
 
-<main id="mapWrap">
-  <svg id="map" aria-label="兵庫県地域別学習地図"></svg>
-  <div class="controls">
-    <button id="zoomIn" class="zoom" type="button">＋</button>
-    <button id="zoomOut" class="zoom" type="button">−</button>
-    <button id="resetButton" class="reset" type="button">全体</button>
-  </div>
-  <div id="status"></div>
-</main>
+<div id="mapStage">
+  <main id="mapWrap">
+    <svg id="map" aria-label="兵庫県地域別学習地図"></svg>
+    <div class="controls">
+      <button id="zoomIn" class="zoom" type="button">＋</button>
+      <button id="zoomOut" class="zoom" type="button">−</button>
+      <button id="resetButton" class="reset" type="button">全体</button>
+    </div>
+    <div id="status"></div>
+  </main>
+</div>
 
 <div id="quizLinks">
   <a id="quiz1Link" href="quiz1.html">この地域でクイズ1</a>
@@ -364,7 +382,7 @@ function selectRegion(key){
     const fc={type:"FeatureCollection",features:selected};
     const bounds=path.bounds(fc);
     const width=Math.max(320,mapWrap.clientWidth);
-    const height=Math.max(520,mapWrap.clientHeight);
+    const height=Math.max(420,mapWrap.clientHeight);
     const dx=bounds[1][0]-bounds[0][0];
     const dy=bounds[1][1]-bounds[0][1];
     const cx=(bounds[0][0]+bounds[1][0])/2;
@@ -469,7 +487,7 @@ async function draw(){
     }).filter(f=>f.__code.startsWith("28"));
 
     const width=Math.max(320,mapWrap.clientWidth);
-    const height=Math.max(520,mapWrap.clientHeight);
+    const height=Math.max(420,mapWrap.clientHeight);
     svg.attr("viewBox",`0 0 ${width} ${height}`);
 
     const projection=d3.geoMercator();
