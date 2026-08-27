@@ -173,6 +173,57 @@ svg{width:100%;height:100%;display:block}
 }
 .result-card .primary{background:#315f8c;color:#fff;border-color:#315f8c}
 .result-card a{border:1px solid #cbd5e1;color:#334155;background:#fff}
+
+#startPanel{
+  position:absolute;
+  inset:0;
+  z-index:20;
+  background:rgba(238,244,251,.97);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+}
+.start-card{
+  width:min(94vw,520px);
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 8px 24px rgba(15,23,42,.12);
+}
+.start-card h2{
+  margin:0 0 8px;
+  text-align:center;
+  font-size:23px;
+}
+.start-card p{
+  margin:0 0 14px;
+  text-align:center;
+  color:#64748b;
+  font-size:13px;
+}
+.range-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.range-btn{
+  min-height:48px;
+  border:1px solid #9fb1c4;
+  background:#f8fbff;
+  color:#17324d;
+  border-radius:11px;
+  font-size:15px;
+  font-weight:800;
+}
+.range-btn.all{
+  grid-column:1/-1;
+  background:#315f8c;
+  color:#fff;
+  border-color:#315f8c;
+}
+
 footer{
   background:#fff;border-top:1px solid var(--border);
   text-align:center;font-size:9px;line-height:1.45;color:#667085;padding:8px 10px 10px
@@ -198,6 +249,13 @@ footer{
     <button id="zoomOut" class="zoom" type="button" aria-label="縮小">−</button>
     <button id="resetButton" class="reset" type="button" aria-label="全体表示">全体</button>
   </div>
+  <div id="startPanel">
+    <div class="start-card">
+      <h2>出題範囲を選択</h2>
+      <p>選んだ地域の市町・区だけを出題します。</p>
+      <div class="range-grid" id="rangeButtons"></div>
+    </div>
+  </div>
   <div id="feedback"></div>
 
   <div id="result">
@@ -206,6 +264,7 @@ footer{
       <p id="resultText"></p>
       <button id="againBtn" class="primary">もう一度最初から</button>
       <button id="wrongBtn">間違えた問題だけもう一度</button>
+      <button id="rangeBtn">出題範囲を選び直す</button>
       <a href="index.html">トップへ</a>
     </div>
   </div>
@@ -220,6 +279,21 @@ footer{
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 <script>
 const DATA_URL="https://geoshape.ex.nii.ac.jp/city/topojson/20230101/28/28_city.i.topojson";
+
+const QUIZ_RANGES = [
+  {key:"all", name:"全49区域", codes:null},
+  {key:"kobe", name:"神戸", codes:["28101","28102","28105","28106","28107","28108","28109","28110","28111"]},
+  {key:"hanshin-s", name:"阪神南", codes:["28202","28204","28206"]},
+  {key:"hanshin-n", name:"阪神北", codes:["28207","28214","28217","28219","28301"]},
+  {key:"higashi", name:"東播磨", codes:["28203","28210","28216","28381","28382"]},
+  {key:"kita", name:"北播磨", codes:["28213","28215","28218","28220","28228","28365"]},
+  {key:"naka", name:"中播磨", codes:["28201","28442","28443","28446"]},
+  {key:"nishi", name:"西播磨", codes:["28208","28212","28227","28229","28464","28481","28501"]},
+  {key:"tajima", name:"但馬", codes:["28209","28222","28225","28585","28586"]},
+  {key:"tamba", name:"丹波", codes:["28221","28223"]},
+  {key:"awaji", name:"淡路", codes:["28205","28224","28226"]}
+];
+
 
 const FORMAL_NAME_BY_CODE={
   "28101":"神戸市東灘区","28102":"神戸市灘区","28105":"神戸市兵庫区","28106":"神戸市長田区",
@@ -250,6 +324,8 @@ const feedback=document.getElementById("feedback");
 const result=document.getElementById("result");
 const resultText=document.getElementById("resultText");
 const wrongBtn=document.getElementById("wrongBtn");
+const startPanel=document.getElementById("startPanel");
+const rangeButtons=document.getElementById("rangeButtons");
 const root=svg.append("g");
 const mapLayer=root.append("g");
 
@@ -260,6 +336,7 @@ let index=0;
 let currentCode=null;
 let wrongSet=new Set();
 let locked=false;
+let currentRangeCodes=[];
 
 function getCode(p){
   return String(p.N03_007||p.code||p.CITY_CODE||p["行政区域コード"]||"");
@@ -273,6 +350,26 @@ function formalName(feature){
 function featureByCode(code){
   return features.find(f=>f.__code===code);
 }
+
+function buildRangeButtons(){
+  rangeButtons.innerHTML="";
+  QUIZ_RANGES.forEach(r=>{
+    const b=document.createElement("button");
+    b.className="range-btn"+(r.key==="all"?" all":"");
+    b.textContent=r.name;
+    b.addEventListener("click",()=>{
+      currentRangeCodes = r.codes ? r.codes.filter(c=>allCodes.includes(c)) : [...allCodes];
+      startPanel.style.display="none";
+      startQuiz(currentRangeCodes);
+    });
+    rangeButtons.appendChild(b);
+  });
+}
+function openRangeSelect(){
+  result.style.display="none";
+  startPanel.style.display="flex";
+}
+
 function shuffle(a){
   const x=[...a];
   for(let i=x.length-1;i>0;i--){
@@ -304,6 +401,7 @@ function resetMap(){
     .classed("answer-correct",false);
 }
 function startQuiz(codes){
+  currentRangeCodes=[...codes];
   queue=shuffle(codes);
   index=0;
   currentCode=null;
@@ -425,14 +523,16 @@ async function draw(){
     document.getElementById("zoomOut").onclick=()=>svg.transition().duration(180).call(zoom.scaleBy,1/1.45);
     document.getElementById("resetButton").onclick=()=>svg.transition().duration(220).call(zoom.transform,d3.zoomIdentity);
 
-    document.getElementById("restartBtn").onclick=()=>startQuiz(allCodes);
-    document.getElementById("againBtn").onclick=()=>startQuiz(allCodes);
+    document.getElementById("restartBtn").onclick=()=>startQuiz(currentRangeCodes);
+    document.getElementById("againBtn").onclick=()=>startQuiz(currentRangeCodes);
+    document.getElementById("rangeBtn").onclick=openRangeSelect;
     wrongBtn.onclick=()=>{
       const retry=[...wrongSet];
       startQuiz(retry);
     };
 
-    startQuiz(allCodes);
+    buildRangeButtons();
+    openRangeSelect();
   }catch(e){
     console.error(e);
     document.getElementById("question").textContent="地図データを読み込めませんでした。";
