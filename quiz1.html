@@ -60,7 +60,7 @@ h1{margin:0;font-size:clamp(21px,5.5vw,30px)}
   font-weight:800;
 }
 #mapWrap{
-  position:relative;flex:1;min-height:66vh;overflow:hidden;touch-action:none;background:var(--sea)
+  position:relative;flex:1;min-height:54vh;overflow:hidden;touch-action:none;background:var(--sea)
 }
 svg{width:100%;height:100%;display:block}
 .municipality{
@@ -138,6 +138,20 @@ svg{width:100%;height:100%;display:block}
 }
 .result-card .primary{background:#315f8c;color:#fff;border-color:#315f8c}
 .result-card a{border:1px solid #cbd5e1;color:#334155;background:#fff}
+
+
+body.range-selecting #mapWrap{
+  min-height:0;
+  height:auto;
+  flex:none;
+  overflow:visible;
+  padding-bottom:0;
+}
+body.range-selecting #startPanel{
+  position:relative;
+  inset:auto;
+  min-height:0;
+}
 
 #startPanel{
   position:absolute;
@@ -313,6 +327,7 @@ function buildRangeButtons(){
     b.textContent=r.name;
     b.addEventListener("click",()=>{
       currentRangeCodes = r.codes ? r.codes.filter(c=>allCodes.includes(c)) : [...allCodes];
+      document.body.classList.remove("range-selecting");
       startPanel.style.display="none";
       setQuizHeaderVisible(true);
       startQuiz(currentRangeCodes);
@@ -328,6 +343,7 @@ function tryAutoStartFromQuery(){
   const r=QUIZ_RANGES.find(x=>x.key===key);
   if(!r)return false;
   currentRangeCodes = r.codes ? r.codes.filter(c=>allCodes.includes(c)) : [...allCodes];
+  document.body.classList.remove("range-selecting");
   startPanel.style.display="none";
   if(typeof setQuizHeaderVisible==="function") setQuizHeaderVisible(true);
   startQuiz(currentRangeCodes);
@@ -337,6 +353,7 @@ function tryAutoStartFromQuery(){
 function openRangeSelect(){
   result.style.display="none";
   setQuizHeaderVisible(false);
+  document.body.classList.add("range-selecting");
   startPanel.style.display="flex";
 }
 
