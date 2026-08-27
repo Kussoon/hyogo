@@ -74,6 +74,13 @@ svg{width:100%;height:100%;display:block}
   stroke-width:1.05;
   vector-effect:non-scaling-stroke;
 }
+.kobe-outline{
+  fill:none;
+  stroke:var(--outline);
+  stroke-width:1.5;
+  vector-effect:non-scaling-stroke;
+  pointer-events:none;
+}
 .pref-outline{
   fill:none;
   stroke:var(--outline);
@@ -248,8 +255,16 @@ async function draw(){
       .attr("id", d => d.__id)
       .attr("d", path);
 
-    const geoms = (topo.objects[objectKey].geometries || []).filter(g => String(getCode(g.properties || {})).startsWith("28"));
-    const merged = topojson.merge(topo, geoms);
+    const allGeoms = (topo.objects[objectKey].geometries || []).filter(g => String(getCode(g.properties || {})).startsWith("28"));
+
+    const kobeGeoms = allGeoms.filter(g => String(getCode(g.properties || {})).startsWith("281"));
+    const kobeMerged = topojson.merge(topo, kobeGeoms);
+    mapLayer.append("path")
+      .datum(kobeMerged)
+      .attr("class", "kobe-outline")
+      .attr("d", path);
+
+    const merged = topojson.merge(topo, allGeoms);
     mapLayer.append("path")
       .datum(merged)
       .attr("class", "pref-outline")
