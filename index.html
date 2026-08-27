@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>兵庫県 市町村記憶ゲーム｜学習モード v0.8</title>
+<title>兵庫県 市町村記憶ゲーム｜学習モード v0.9</title>
 <style>
 :root{
   --ink:#1f2937;
@@ -134,21 +134,21 @@ const MAP_LABEL_BY_CODE = {
 
 // なるべく線を使わず、必要最小限だけリーダー線を使う
 const LABEL_LAYOUT = {
-  // 神戸9区：必要なものだけ引き出し線を使い、線の交差を避ける
+  // 神戸9区：文字をできるだけ陸地側に寄せ、必要なものだけ短い引き出し線を使う
   "28109": {dx: 0,   dy: 0,  size: 7.0, anchor: "middle", leader: false}, // 北区
   "28111": {dx: -8,  dy: -4, size: 7.0, anchor: "end",    leader: false}, // 西区
-  "28107": {dx: -30, dy: 40, size: 7.0, anchor: "end",    leader: true},  // 須磨区
-  "28108": {dx: -26, dy: 74, size: 7.0, anchor: "end",    leader: true},  // 垂水区
-  "28105": {dx: -6,  dy: 78, size: 7.0, anchor: "middle", leader: true},  // 兵庫区
-  "28110": {dx: 18,  dy: 60, size: 7.0, anchor: "middle", leader: true},  // 中央区
-  "28106": {dx: 34,  dy: 84, size: 7.0, anchor: "start",  leader: true},  // 長田区
-  "28102": {dx: 16,  dy: 26, size: 7.0, anchor: "start",  leader: true},  // 灘区
-  "28101": {dx: 48,  dy: 46, size: 7.0, anchor: "start",  leader: true},  // 東灘区
+  "28107": {dx: -18, dy: 22, size: 7.0, anchor: "end",    leader: true},  // 須磨区
+  "28108": {dx: -12, dy: 44, size: 7.0, anchor: "end",    leader: true},  // 垂水区
+  "28105": {dx: -2,  dy: 52, size: 7.0, anchor: "middle", leader: true},  // 兵庫区
+  "28110": {dx: 12,  dy: 42, size: 7.0, anchor: "middle", leader: true},  // 中央区
+  "28106": {dx: 18,  dy: 58, size: 7.0, anchor: "start",  leader: true},  // 長田区
+  "28102": {dx: 12,  dy: 16, size: 7.0, anchor: "start",  leader: true},  // 灘区
+  "28101": {dx: 26,  dy: 26, size: 7.0, anchor: "start",  leader: true},  // 東灘区
 
   // 阪神
-  "28202": {dx: 0,   dy: -4, size: 7.0, anchor: "middle", leader: false}, // 尼崎
+  "28202": {dx: 18,  dy: 2,  size: 7.0, anchor: "start",  leader: false}, // 尼崎
   "28204": {dx: -8,  dy: 2,  size: 7.0, anchor: "middle", leader: false}, // 西宮
-  "28206": {dx: 14,  dy: 2,  size: 7.0, anchor: "start",  leader: false}, // 芦屋
+  "28206": {dx: 4,   dy: 8,  size: 7.0, anchor: "start",  leader: false}, // 芦屋
   "28207": {dx: 12,  dy: -1, size: 7.0, anchor: "start",  leader: false}, // 伊丹
   "28214": {dx: 1,   dy: -7, size: 7.0, anchor: "middle", leader: false}, // 宝塚
   "28217": {dx: 15,  dy: -8, size: 7.0, anchor: "start",  leader: true},  // 川西
