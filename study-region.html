@@ -139,6 +139,27 @@ svg{width:100%;height:100%;display:block}
 }
 .controls button.zoom{font-size:24px}
 .controls button.reset{font-size:12px;line-height:1.05}
+#quizLinks{
+  background:#fff;
+  border-top:1px solid var(--border);
+  padding:10px 12px 12px;
+  display:flex;
+  gap:8px;
+  justify-content:center;
+}
+#quizLinks a{
+  flex:1;
+  max-width:280px;
+  text-align:center;
+  text-decoration:none;
+  border:1px solid #9fb1c4;
+  border-radius:11px;
+  background:#f8fbff;
+  color:#17324d;
+  padding:11px 8px;
+  font-size:15px;
+  font-weight:800;
+}
 #status{
   position:absolute;
   left:12px;
@@ -183,6 +204,11 @@ footer{
   </div>
   <div id="status">地域を選択してください</div>
 </main>
+
+<div id="quizLinks">
+  <a id="quiz1Link" href="quiz1.html">この地域でクイズ1</a>
+  <a id="quiz2Link" href="quiz2.html">この地域でクイズ2</a>
+</div>
 
 <footer>
   地図境界データ：『歴史的行政区域データセットβ版』（CODH作成）／国土数値情報「行政区域データ」を加工。CC BY 4.0<br>
@@ -279,6 +305,8 @@ function selectRegion(key){
 
   regionTitle.textContent=`${region.name}（${region.codes.length}区域）`;
   status.textContent=`${region.name}を表示中`;
+  document.getElementById("quiz1Link").href=`quiz1.html?range=${region.key}`;
+  document.getElementById("quiz2Link").href=`quiz2.html?range=${region.key}`;
 
   // 選択地域に自動ズーム
   const selected=features.filter(f=>active.has(f.__code));

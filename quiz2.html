@@ -373,6 +373,20 @@ function buildRangeButtons(){
     rangeButtons.appendChild(b);
   });
 }
+
+function tryAutoStartFromQuery(){
+  const params=new URLSearchParams(location.search);
+  const key=params.get("range");
+  if(!key)return false;
+  const r=QUIZ_RANGES.find(x=>x.key===key);
+  if(!r)return false;
+  currentRangeCodes = r.codes ? r.codes.filter(c=>allCodes.includes(c)) : [...allCodes];
+  startPanel.style.display="none";
+  if(typeof setQuizHeaderVisible==="function") setQuizHeaderVisible(true);
+  startQuiz(currentRangeCodes);
+  return true;
+}
+
 function openRangeSelect(){
   result.style.display="none";
   setQuizHeaderVisible(false);
@@ -541,7 +555,7 @@ async function draw(){
     };
 
     buildRangeButtons();
-    openRangeSelect();
+    if(!tryAutoStartFromQuery()) openRangeSelect();
   }catch(e){
     console.error(e);
     document.getElementById("question").textContent="地図データを読み込めませんでした。";
