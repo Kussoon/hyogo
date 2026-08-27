@@ -51,10 +51,21 @@ h1{margin:0;font-size:clamp(21px,5.5vw,30px)}
   font-size:18px;
   font-weight:800;
 }
+#regionBack{
+  display:none;
+  margin:8px auto 0;
+  border:1px solid #aeb9c6;
+  background:#fff;
+  color:#334155;
+  border-radius:10px;
+  padding:8px 14px;
+  font-size:14px;
+  font-weight:800;
+}
 .regions{
   background:#fff;
   padding:8px 8px 10px;
-  display:grid;
+  display:none;
   grid-template-columns:repeat(5,1fr);
   gap:6px;
   border-bottom:1px solid var(--border);
@@ -83,6 +94,25 @@ h1{margin:0;font-size:clamp(21px,5.5vw,30px)}
   background:var(--sea);
 }
 svg{width:100%;height:100%;display:block}
+.region-shape{
+  fill:#f8fafc;
+  stroke:#9aa8b8;
+  stroke-width:1.2;
+  vector-effect:non-scaling-stroke;
+  cursor:pointer;
+}
+.region-label{
+  fill:#111827;
+  font-weight:800;
+  font-size:18px;
+  text-anchor:middle;
+  dominant-baseline:middle;
+  paint-order:stroke;
+  stroke:#fff;
+  stroke-width:4px;
+  stroke-linejoin:round;
+  pointer-events:none;
+}
 .municipality{
   fill:var(--dim);
   stroke:var(--line);
@@ -190,7 +220,8 @@ footer{
 <header>
   <h1>兵庫県 市町村記憶ゲーム</h1>
   <div class="sub">📍 地域別学習</div>
-  <div id="regionTitle">地域を選んでください</div>
+  <div id="regionTitle">地図から地域を選んでください</div>
+  <button id="regionBack" type="button">← 地域図へ戻る</button>
 </header>
 
 <div class="regions" id="regionButtons"></div>
@@ -263,9 +294,11 @@ const status = document.getElementById("status");
 const regionTitle = document.getElementById("regionTitle");
 const buttonsWrap = document.getElementById("regionButtons");
 const root = svg.append("g");
+const overviewLayer = root.append("g");
 const mapLayer = root.append("g");
 const labelLayer = root.append("g");
 let zoom, path, features = [], currentRegion = null;
+let overviewMode=true;
 
 function getCode(props){
   return String(props.N03_007 || props.code || props.CITY_CODE || props["行政区域コード"] || "");
@@ -290,7 +323,12 @@ REGIONS.forEach((r,i)=>{
 function selectRegion(key){
   const region=REGIONS.find(r=>r.key===key);
   if(!region)return;
+  overviewMode=false;
   currentRegion=region;
+  overviewLayer.style("display","none");
+  mapLayer.style("display",null);
+  labelLayer.style("display",null);
+  document.getElementById("regionBack").style.display="inline-block";
   const active=new Set(region.codes);
 
   d3.selectAll(".municipality")
@@ -327,6 +365,50 @@ function selectRegion(key){
       d3.zoomIdentity.translate(tx,ty).scale(scale)
     );
   }
+}
+
+
+function showOverview(){
+  overviewMode=true;
+  currentRegion=null;
+  document.getElementById("regionBack").style.display="none";
+  regionTitle.textContent="地図から地域を選んでください";
+  status.textContent="地域名をタップしてください";
+  mapLayer.style("display","none");
+  labelLayer.style("display","none");
+  overviewLayer.style("display",null);
+  svg.transition().duration(250).call(zoom.transform,d3.zoomIdentity);
+}
+
+function buildOverview(topo, objectKey){
+  overviewLayer.selectAll("*").remove();
+  const geoms=(topo.objects[objectKey].geometries||[]).filter(g=>getCode(g.properties||{}).startsWith("28"));
+  const regionFeatures=[];
+
+  REGIONS.forEach(r=>{
+    const set=new Set(r.codes);
+    const rgeoms=geoms.filter(g=>set.has(getCode(g.properties||{})));
+    if(!rgeoms.length)return;
+    regionFeatures.push({
+      region:r,
+      geometry:topojson.merge(topo,rgeoms)
+    });
+  });
+
+  overviewLayer.selectAll("path.region-shape")
+    .data(regionFeatures)
+    .join("path")
+    .attr("class","region-shape")
+    .attr("d",d=>path(d.geometry))
+    .on("click",(event,d)=>selectRegion(d.region.key));
+
+  overviewLayer.selectAll("text.region-label")
+    .data(regionFeatures)
+    .join("text")
+    .attr("class","region-label")
+    .attr("x",d=>path.centroid(d.geometry)[0])
+    .attr("y",d=>path.centroid(d.geometry)[1])
+    .text(d=>d.region.name);
 }
 
 async function draw(){
@@ -395,7 +477,9 @@ async function draw(){
       svg.transition().duration(220).call(zoom.transform,d3.zoomIdentity);
     };
 
-    selectRegion("kobe");
+    document.getElementById("regionBack").onclick=showOverview;
+    buildOverview(topo,objectKey);
+    showOverview();
   }catch(e){
     console.error(e);
     status.textContent="地図データを読み込めませんでした。";
