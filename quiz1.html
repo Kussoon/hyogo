@@ -49,6 +49,16 @@ h1{margin:0;font-size:clamp(21px,5.5vw,30px)}
   line-height:1.35;
 }
 #progress{margin-top:6px;font-size:13px;color:#64748b;font-weight:700}
+#restartBtn{
+  margin-top:8px;
+  border:1px solid #aeb9c6;
+  background:#fff;
+  color:#334155;
+  border-radius:10px;
+  padding:8px 14px;
+  font-size:13px;
+  font-weight:800;
+}
 #mapWrap{
   position:relative;flex:1;min-height:66vh;overflow:hidden;touch-action:none;background:var(--sea)
 }
@@ -82,14 +92,14 @@ svg{width:100%;height:100%;display:block}
   position:absolute;
   left:50%;top:18px;transform:translateX(-50%);
   z-index:6;
-  min-width:120px;
+  min-width:120px;max-width:88vw;
   text-align:center;
   padding:9px 16px;
   border-radius:999px;
   background:rgba(255,255,255,.96);
   border:1px solid #cbd5e1;
   box-shadow:0 2px 8px rgba(0,0,0,.10);
-  font-size:18px;
+  font-size:16px;
   font-weight:900;
   opacity:0;
   pointer-events:none;
@@ -141,6 +151,7 @@ footer{
   <div class="sub">🎯 クイズ1「名前 → 場所」</div>
   <div id="question">地図を読み込んでいます…</div>
   <div id="progress"></div>
+  <button id="restartBtn" type="button">もう一度最初から</button>
 </header>
 
 <main id="mapWrap">
@@ -154,10 +165,10 @@ footer{
 
   <div id="result">
     <div class="result-card">
-      <h2>終了！</h2>
+      <h2>採点結果</h2>
       <p id="resultText"></p>
-      <button id="againBtn" class="primary">もう一回</button>
-      <button id="wrongBtn">間違えた問題だけ</button>
+      <button id="againBtn" class="primary">もう一度最初から</button>
+      <button id="wrongBtn">間違えた問題だけもう一度</button>
       <a href="index.html">トップへ</a>
     </div>
   </div>
@@ -253,7 +264,7 @@ function showQuestion(){
   progressEl.textContent=`${index+1} / ${queue.length}`;
   locked=false;
 }
-function answer(selectedFeature,event){
+function answer(event,selectedFeature){
   if(locked||!currentCode)return;
   const selectedCode=selectedFeature.__code;
   if(selectedCode===currentCode){
@@ -267,11 +278,11 @@ function answer(selectedFeature,event){
   }else{
     wrongSet.add(currentCode);
     d3.select(event.currentTarget).classed("wrong-flash",true);
-    showFeedback("違います！","ng");
+    showFeedback(`違います！ そこは${formalName(selectedFeature)}です。`,"ng");
     setTimeout(()=>{
       d3.select(event.currentTarget).classed("wrong-flash",false);
       if(!locked) hideFeedback();
-    },800);
+    },1400);
   }
 }
 function finishQuiz(){
@@ -280,7 +291,8 @@ function finishQuiz(){
   const correctFirst=queue.length-wrongCount;
   questionEl.textContent="クイズ終了";
   progressEl.textContent="";
-  resultText.innerHTML=`${queue.length}問中 <strong>${correctFirst}問</strong> を最初のタップで正解しました。<br>間違えた問題：${wrongCount}問`;
+  const score=Math.round((correctFirst/queue.length)*100);
+  resultText.innerHTML=`<strong>${score}点</strong><br>${queue.length}問中 ${correctFirst}問を最初のタップで正解しました。<br>間違えた問題：${wrongCount}問`;
   wrongBtn.style.display=wrongCount?"block":"none";
   result.style.display="flex";
 }
@@ -334,6 +346,7 @@ async function draw(){
     document.getElementById("zoomOut").onclick=()=>svg.transition().duration(180).call(zoom.scaleBy,1/1.45);
     document.getElementById("resetButton").onclick=()=>svg.transition().duration(220).call(zoom.transform,d3.zoomIdentity);
 
+    document.getElementById("restartBtn").onclick=()=>startQuiz(allCodes);
     document.getElementById("againBtn").onclick=()=>startQuiz(allCodes);
     wrongBtn.onclick=()=>{
       const retry=[...wrongSet];
