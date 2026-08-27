@@ -84,7 +84,7 @@ svg{width:100%;height:100%;display:block}
 .label{
   fill:#111827;
   font-weight:700;
-  font-size:6.6px;
+  font-size:6.0px;
   text-anchor:middle;
   dominant-baseline:middle;
   paint-order:stroke;
@@ -182,11 +182,7 @@ const MAP_LABEL_BY_CODE = {
 };
 
 const LABEL_OFFSET = {
-  // 密集部のみ最小限の微調整
-  "28105": {dx: 18, dy: -4}, // 兵庫区
-  "28106": {dx: -8, dy: 4},   // 長田区
-  "28107": {dx: -10, dy: 4},  // 須磨区
-  "28110": {dx: 8, dy: -10}   // 中央区
+  // いったん全ラベルを区域中央へ戻す
 };
 
 const svg = d3.select("#map");
