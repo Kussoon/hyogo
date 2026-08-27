@@ -74,6 +74,9 @@ svg{width:100%;height:100%;display:block}
   stroke-width:1.05;
   vector-effect:non-scaling-stroke;
 }
+.kobe-area{
+  fill:#e5e7eb;
+}
 .kobe-outline{
   fill:none;
   stroke:var(--outline);
@@ -251,7 +254,7 @@ async function draw(){
     mapLayer.selectAll("path.municipality")
       .data(features)
       .join("path")
-      .attr("class", "municipality")
+      .attr("class", d => String(d.__code).startsWith("281") ? "municipality kobe-area" : "municipality")
       .attr("id", d => d.__id)
       .attr("d", path);
 
