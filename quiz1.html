@@ -381,7 +381,7 @@ function answer(event,selectedFeature){
     setTimeout(()=>{
       index++;
       showQuestion();
-    },2000);
+    },1000);
   }else{
     wrongSet.add(currentCode);
     d3.select(event.currentTarget).classed("wrong-flash",true);
