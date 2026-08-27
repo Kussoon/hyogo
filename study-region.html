@@ -96,10 +96,22 @@ h1{margin:0;font-size:clamp(21px,5.5vw,30px)}
 svg{width:100%;height:100%;display:block}
 .region-shape{
   fill:#f8fafc;
+  stroke:none;
+  cursor:pointer;
+}
+.region-boundary{
+  fill:none;
   stroke:#9aa8b8;
   stroke-width:1.2;
   vector-effect:non-scaling-stroke;
-  cursor:pointer;
+  pointer-events:none;
+}
+.region-pref-outline{
+  fill:none;
+  stroke:var(--outline);
+  stroke-width:1.8;
+  vector-effect:non-scaling-stroke;
+  pointer-events:none;
 }
 .region-label{
   fill:#111827;
@@ -384,8 +396,10 @@ function buildOverview(topo, objectKey){
   overviewLayer.selectAll("*").remove();
   const geoms=(topo.objects[objectKey].geometries||[]).filter(g=>getCode(g.properties||{}).startsWith("28"));
   const regionFeatures=[];
+  const codeToRegion={};
 
   REGIONS.forEach(r=>{
+    r.codes.forEach(code=>{ codeToRegion[code]=r.key; });
     const set=new Set(r.codes);
     const rgeoms=geoms.filter(g=>set.has(getCode(g.properties||{})));
     if(!rgeoms.length)return;
@@ -395,6 +409,7 @@ function buildOverview(topo, objectKey){
     });
   });
 
+  // 地域ごとの面
   overviewLayer.selectAll("path.region-shape")
     .data(regionFeatures)
     .join("path")
@@ -402,6 +417,32 @@ function buildOverview(topo, objectKey){
     .attr("d",d=>path(d.geometry))
     .on("click",(event,d)=>selectRegion(d.region.key));
 
+  // 地域境界のみを抽出（同一地域内の市町境界は出さない）
+  const regionBoundaryMesh = topojson.mesh(
+    topo,
+    topo.objects[objectKey],
+    (a,b)=>{
+      if(!a || !b) return false;
+      const ca=getCode((a.properties)||{});
+      const cb=getCode((b.properties)||{});
+      if(!ca.startsWith("28") || !cb.startsWith("28")) return false;
+      if(!codeToRegion[ca] || !codeToRegion[cb]) return false;
+      return codeToRegion[ca] !== codeToRegion[cb];
+    }
+  );
+
+  overviewLayer.append("path")
+    .datum(regionBoundaryMesh)
+    .attr("class","region-boundary")
+    .attr("d",path);
+
+  // 兵庫県全体の輪郭
+  overviewLayer.append("path")
+    .datum(topojson.merge(topo,geoms))
+    .attr("class","region-pref-outline")
+    .attr("d",path);
+
+  // 地域名ラベル
   overviewLayer.selectAll("text.region-label")
     .data(regionFeatures)
     .join("text")
