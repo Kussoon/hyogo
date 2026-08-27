@@ -140,6 +140,7 @@ svg{width:100%;height:100%;display:block}
 .result-card a{border:1px solid #cbd5e1;color:#334155;background:#fff}
 
 
+
 body.range-selecting #mapWrap{
   min-height:0;
   height:auto;
@@ -152,7 +153,11 @@ body.range-selecting #startPanel{
   inset:auto;
   min-height:0;
 }
-
+body.range-selecting #map,
+body.range-selecting .controls,
+body.range-selecting #choices{
+  display:none;
+}
 #startPanel{
   position:absolute;
   inset:0;
@@ -164,43 +169,80 @@ body.range-selecting #startPanel{
   padding:12px 18px 18px;
 }
 .start-card{
-  width:min(94vw,520px);
+  width:min(94vw,560px);
   background:#fff;
   border:1px solid var(--border);
   border-radius:18px;
-  padding:20px;
+  padding:18px;
   box-shadow:0 8px 24px rgba(15,23,42,.12);
 }
 .start-card h2{
-  margin:0 0 8px;
+  margin:0 0 6px;
   text-align:center;
   font-size:23px;
 }
 .start-card p{
-  margin:0 0 14px;
+  margin:0 0 12px;
   text-align:center;
   color:#64748b;
   font-size:13px;
 }
-.range-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-}
-.range-btn{
-  min-height:48px;
-  border:1px solid #9fb1c4;
-  background:#f8fbff;
-  color:#17324d;
-  border-radius:11px;
-  font-size:15px;
-  font-weight:800;
-}
-.range-btn.all{
-  grid-column:1/-1;
+.all-challenge{
+  display:block;
+  width:100%;
+  min-height:52px;
+  margin:0 0 12px;
+  border:1px solid #315f8c;
+  border-radius:12px;
   background:#315f8c;
   color:#fff;
-  border-color:#315f8c;
+  font-size:18px;
+  font-weight:900;
+}
+.range-map-wrap{
+  width:100%;
+  border:1px solid #d7e0ea;
+  border-radius:14px;
+  background:#eef4fb;
+  overflow:hidden;
+}
+#rangeMap{
+  display:block;
+  width:100%;
+  height:auto;
+  aspect-ratio:0.82;
+}
+.range-region{
+  fill:#f8fafc;
+  stroke:none;
+  cursor:pointer;
+}
+.range-region:hover{fill:#eaf2f8}
+.range-boundary{
+  fill:none;
+  stroke:#9aa8b8;
+  stroke-width:1.1;
+  vector-effect:non-scaling-stroke;
+  pointer-events:none;
+}
+.range-outline{
+  fill:none;
+  stroke:#1f2937;
+  stroke-width:1.8;
+  vector-effect:non-scaling-stroke;
+  pointer-events:none;
+}
+.range-label{
+  fill:#111827;
+  font-weight:900;
+  font-size:14px;
+  text-anchor:middle;
+  dominant-baseline:middle;
+  paint-order:stroke;
+  stroke:#fff;
+  stroke-width:4px;
+  stroke-linejoin:round;
+  pointer-events:none;
 }
 
 footer{
@@ -228,9 +270,12 @@ footer{
   </div>
   <div id="startPanel">
     <div class="start-card">
-      <h2>出題範囲を選択</h2>
-      <p>選んだ地域の市町・区だけを出題します。</p>
-      <div class="range-grid" id="rangeButtons"></div>
+      <h2>出題範囲を地図から選ぶ</h2>
+      <p>地図上の地域名をタップしてください。</p>
+      <button id="allChallengeBtn" class="all-challenge" type="button">全域でチャレンジ</button>
+      <div class="range-map-wrap">
+        <svg id="rangeMap" viewBox="0 0 400 490" aria-label="兵庫県10地域の選択地図"></svg>
+      </div>
     </div>
   </div>
   <div id="feedback"></div>
@@ -289,7 +334,7 @@ const result=document.getElementById("result");
 const resultText=document.getElementById("resultText");
 const wrongBtn=document.getElementById("wrongBtn");
 const startPanel=document.getElementById("startPanel");
-const rangeButtons=document.getElementById("rangeButtons");
+const rangeMap=document.getElementById("rangeMap");
 const root=svg.append("g");
 const mapLayer=root.append("g");
 
@@ -319,37 +364,71 @@ function setQuizHeaderVisible(visible){
   document.getElementById("restartBtn").style.display = visible ? "inline-block" : "none";
 }
 
-function buildRangeButtons(){
-  rangeButtons.innerHTML="";
-  QUIZ_RANGES.forEach(r=>{
-    const b=document.createElement("button");
-    b.className="range-btn"+(r.key==="all"?" all":"");
-    b.textContent=r.name;
-    b.addEventListener("click",()=>{
-      currentRangeCodes = r.codes ? r.codes.filter(c=>allCodes.includes(c)) : [...allCodes];
-      document.body.classList.remove("range-selecting");
-      startPanel.style.display="none";
-      setQuizHeaderVisible(true);
-      startQuiz(currentRangeCodes);
-    });
-    rangeButtons.appendChild(b);
-  });
-}
 
+const REGION_LABEL_OFFSET={
+  "kobe":{dx:-8,dy:4},
+  "hanshin-s":{dx:12,dy:0},
+  "hanshin-n":{dx:12,dy:-2},
+  "higashi":{dx:-3,dy:0},
+  "kita":{dx:0,dy:-2},
+  "naka":{dx:0,dy:0},
+  "nishi":{dx:-5,dy:0},
+  "tajima":{dx:0,dy:0},
+  "tamba":{dx:2,dy:0},
+  "awaji":{dx:0,dy:0}
+};
+function beginRange(r){
+  currentRangeCodes = r.codes ? r.codes.filter(c=>allCodes.includes(c)) : [...allCodes];
+  document.body.classList.remove("range-selecting");
+  startPanel.style.display="none";
+  setQuizHeaderVisible(true);
+  startQuiz(currentRangeCodes);
+}
+function buildRangeMap(topo,objectKey){
+  const rsvg=d3.select("#rangeMap");
+  rsvg.selectAll("*").remove();
+  const geoms=(topo.objects[objectKey].geometries||[]).filter(g=>getCode(g.properties||{}).startsWith("28"));
+  const regionRanges=QUIZ_RANGES.filter(r=>r.key!=="all");
+  const codeToRegion={};
+  regionRanges.forEach(r=>r.codes.forEach(c=>codeToRegion[c]=r.key));
+  const regionFeatures=[];
+  regionRanges.forEach(r=>{
+    const set=new Set(r.codes);
+    const rgeoms=geoms.filter(g=>set.has(getCode(g.properties||{})));
+    if(rgeoms.length) regionFeatures.push({range:r,geometry:topojson.merge(topo,rgeoms)});
+  });
+  const projection=d3.geoMercator();
+  projection.fitExtent([[18,16],[382,474]],{type:"FeatureCollection",features:features});
+  const rpath=d3.geoPath(projection);
+  rsvg.selectAll("path.range-region")
+    .data(regionFeatures).join("path")
+    .attr("class","range-region")
+    .attr("d",d=>rpath(d.geometry))
+    .on("click",(event,d)=>beginRange(d.range));
+  const mesh=topojson.mesh(topo,topo.objects[objectKey],(a,b)=>{
+    if(!a||!b)return false;
+    const ca=getCode(a.properties||{}), cb=getCode(b.properties||{});
+    return !!codeToRegion[ca] && !!codeToRegion[cb] && codeToRegion[ca]!==codeToRegion[cb];
+  });
+  rsvg.append("path").datum(mesh).attr("class","range-boundary").attr("d",rpath);
+  rsvg.append("path").datum(topojson.merge(topo,geoms)).attr("class","range-outline").attr("d",rpath);
+  rsvg.selectAll("text.range-label")
+    .data(regionFeatures).join("text")
+    .attr("class","range-label")
+    .attr("x",d=>rpath.centroid(d.geometry)[0]+(REGION_LABEL_OFFSET[d.range.key]?.dx||0))
+    .attr("y",d=>rpath.centroid(d.geometry)[1]+(REGION_LABEL_OFFSET[d.range.key]?.dy||0))
+    .text(d=>d.range.name);
+  document.getElementById("allChallengeBtn").onclick=()=>beginRange(QUIZ_RANGES.find(r=>r.key==="all"));
+}
 function tryAutoStartFromQuery(){
   const params=new URLSearchParams(location.search);
   const key=params.get("range");
   if(!key)return false;
   const r=QUIZ_RANGES.find(x=>x.key===key);
   if(!r)return false;
-  currentRangeCodes = r.codes ? r.codes.filter(c=>allCodes.includes(c)) : [...allCodes];
-  document.body.classList.remove("range-selecting");
-  startPanel.style.display="none";
-  if(typeof setQuizHeaderVisible==="function") setQuizHeaderVisible(true);
-  startQuiz(currentRangeCodes);
+  beginRange(r);
   return true;
 }
-
 function openRangeSelect(){
   result.style.display="none";
   setQuizHeaderVisible(false);
@@ -486,13 +565,13 @@ async function draw(){
 
     document.getElementById("restartBtn").onclick=()=>startQuiz(currentRangeCodes);
     document.getElementById("againBtn").onclick=()=>startQuiz(currentRangeCodes);
-    document.getElementById("rangeBtn").onclick=()=>{ location.href="study-region.html"; };
+    document.getElementById("rangeBtn").onclick=openRangeSelect;
     wrongBtn.onclick=()=>{
       const retry=[...wrongSet];
       startQuiz(retry);
     };
 
-    buildRangeButtons();
+    buildRangeMap(topo,objectKey);
     if(!tryAutoStartFromQuery()) openRangeSelect();
   }catch(e){
     console.error(e);
