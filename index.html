@@ -173,6 +173,10 @@ footer{
 <script>
 const DATA_URL = "https://geoshape.ex.nii.ac.jp/city/topojson/20230101/28/28_city.i.topojson";
 
+const BASE_LABEL_FONT_SIZE = 6.0;
+const BASE_LABEL_STROKE_WIDTH = 3.0;
+const LABEL_GROWTH_EXPONENT = 0.28;
+
 const MAP_LABEL_BY_CODE = {
   "28101":"東灘区","28102":"灘区","28105":"兵庫区","28106":"長田区","28107":"須磨区",
   "28108":"垂水区","28109":"北区","28110":"中央区","28111":"西区",
@@ -255,13 +259,26 @@ async function draw(){
       .attr("data-code", d => d.__code)
       .attr("x", d => path.centroid(d)[0] + labelOffset(d.__code).dx)
       .attr("y", d => path.centroid(d)[1] + labelOffset(d.__code).dy)
+      .style("font-size", BASE_LABEL_FONT_SIZE + "px")
+      .style("stroke-width", BASE_LABEL_STROKE_WIDTH + "px")
       .text(d => d.__label);
 
     zoom = d3.zoom()
       .scaleExtent([1, 12])
-      .on("zoom", e => root.attr("transform", e.transform));
+      .on("zoom", e => {
+        const k = e.transform.k;
+        root.attr("transform", e.transform);
+
+        // ラベル同士の位置は地図と同じだけ離しつつ、文字サイズの増え方だけを抑える。
+        // これにより、全体表示で重なっていても拡大すると徐々に読めるようにする。
+        const fontScale = Math.pow(k, LABEL_GROWTH_EXPONENT - 1); // 実際の見た目は k^LABEL_GROWTH_EXPONENT で拡大
+        labelLayer.selectAll("text.label")
+          .style("font-size", (BASE_LABEL_FONT_SIZE * fontScale) + "px")
+          .style("stroke-width", (BASE_LABEL_STROKE_WIDTH * fontScale) + "px");
+      });
 
     svg.call(zoom);
+    svg.call(zoom.transform, d3.zoomIdentity);
 
     zoomInButton.addEventListener("click", () => {
       svg.transition().duration(180).call(zoom.scaleBy, 1.45);
