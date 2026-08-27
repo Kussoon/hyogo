@@ -186,7 +186,9 @@ const MAP_LABEL_BY_CODE = {
 };
 
 const LABEL_OFFSET = {
-  // いったん全ラベルを区域中央へ戻す
+  // 基本は区域中央。指定の2区だけ少し下へ微調整
+  "28106": {dx: 0, dy: 7.5}, // 長田区
+  "28101": {dx: 0, dy: 7.5}  // 東灘区
 };
 
 const svg = d3.select("#map");
