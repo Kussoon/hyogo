@@ -49,8 +49,14 @@ h1{margin:0;font-size:clamp(21px,5.5vw,30px)}
   line-height:1.35;
 }
 #progress{margin-top:6px;font-size:13px;color:#64748b;font-weight:700}
-#restartBtn{
+#quizActionRow{
+  display:none;
   margin-top:8px;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+#restartBtn,#headerRangeBtn{
   border:1px solid #aeb9c6;
   background:#fff;
   color:#334155;
@@ -58,6 +64,7 @@ h1{margin:0;font-size:clamp(21px,5.5vw,30px)}
   padding:8px 14px;
   font-size:13px;
   font-weight:800;
+  min-height:38px;
 }
 #mapWrap{
   position:relative;flex:1;min-height:54vh;overflow:hidden;touch-action:none;background:var(--sea)
@@ -258,7 +265,10 @@ footer{
   <div class="sub">🎯 クイズ1　名前を見て、その場所を地図で選ぶ</div>
   <div id="question" style="display:none;">地図を読み込んでいます…</div>
   <div id="progress" style="display:none;"></div>
-  <button id="restartBtn" type="button" style="display:none;">もう一度最初から</button>
+  <div id="quizActionRow">
+    <button id="restartBtn" type="button">もう一度最初から</button>
+    <button id="headerRangeBtn" type="button">出題範囲を選び直す</button>
+  </div>
 </header>
 
 <main id="mapWrap">
@@ -361,7 +371,7 @@ function formalName(feature){
 function setQuizHeaderVisible(visible){
   document.getElementById("question").style.display = visible ? "flex" : "none";
   document.getElementById("progress").style.display = visible ? "block" : "none";
-  document.getElementById("restartBtn").style.display = visible ? "inline-block" : "none";
+  document.getElementById("quizActionRow").style.display = visible ? "flex" : "none";
 }
 
 
@@ -564,6 +574,7 @@ async function draw(){
     document.getElementById("resetButton").onclick=()=>svg.transition().duration(220).call(zoom.transform,d3.zoomIdentity);
 
     document.getElementById("restartBtn").onclick=()=>startQuiz(currentRangeCodes);
+    document.getElementById("headerRangeBtn").onclick=openRangeSelect;
     document.getElementById("againBtn").onclick=()=>startQuiz(currentRangeCodes);
     document.getElementById("rangeBtn").onclick=openRangeSelect;
     wrongBtn.onclick=()=>{
