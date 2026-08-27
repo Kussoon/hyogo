@@ -200,9 +200,9 @@ footer{
 <header>
   <h1>兵庫県 市町村記憶ゲーム</h1>
   <div class="sub">🎯 クイズ1「名前 → 場所」</div>
-  <div id="question">地図を読み込んでいます…</div>
-  <div id="progress"></div>
-  <button id="restartBtn" type="button">もう一度最初から</button>
+  <div id="question" style="display:none;">地図を読み込んでいます…</div>
+  <div id="progress" style="display:none;"></div>
+  <button id="restartBtn" type="button" style="display:none;">もう一度最初から</button>
 </header>
 
 <main id="mapWrap">
@@ -298,6 +298,13 @@ function formalName(feature){
   return FORMAL_NAME_BY_CODE[feature.__code]||feature.__rawName;
 }
 
+
+function setQuizHeaderVisible(visible){
+  document.getElementById("question").style.display = visible ? "flex" : "none";
+  document.getElementById("progress").style.display = visible ? "block" : "none";
+  document.getElementById("restartBtn").style.display = visible ? "inline-block" : "none";
+}
+
 function buildRangeButtons(){
   rangeButtons.innerHTML="";
   QUIZ_RANGES.forEach(r=>{
@@ -307,6 +314,7 @@ function buildRangeButtons(){
     b.addEventListener("click",()=>{
       currentRangeCodes = r.codes ? r.codes.filter(c=>allCodes.includes(c)) : [...allCodes];
       startPanel.style.display="none";
+      setQuizHeaderVisible(true);
       startQuiz(currentRangeCodes);
     });
     rangeButtons.appendChild(b);
@@ -314,6 +322,7 @@ function buildRangeButtons(){
 }
 function openRangeSelect(){
   result.style.display="none";
+  setQuizHeaderVisible(false);
   startPanel.style.display="flex";
 }
 
