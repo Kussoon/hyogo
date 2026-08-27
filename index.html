@@ -115,6 +115,33 @@ footer{
   padding:10px 12px 12px;
 }
 .error{color:#b91c1c;font-weight:700}
+
+.controls{
+  position:absolute;
+  top:12px;
+  right:12px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  z-index:5;
+}
+.controls button{
+  width:46px;
+  height:46px;
+  border:1px solid #aeb9c6;
+  border-radius:10px;
+  background:rgba(255,255,255,.96);
+  box-shadow:0 2px 7px rgba(0,0,0,.12);
+  font-weight:700;
+  color:#1f2937;
+}
+.controls button.zoom{
+  font-size:24px;
+}
+.controls button.reset{
+  font-size:12px;
+  line-height:1.05;
+}
 </style>
 </head>
 <body>
@@ -126,13 +153,13 @@ footer{
     文字が重なる場所は地図を拡大して確認してください。地図を拡大すると市町村名ラベルも大きくなります。
   </div>
 </header>
-
-<div class="toolbar">
-  <button id="resetButton" type="button">全体表示</button>
-</div>
-
 <main id="mapWrap">
   <svg id="map" aria-label="兵庫県全域市町村地図"></svg>
+  <div class="controls">
+    <button id="zoomIn" class="zoom" type="button" aria-label="拡大">＋</button>
+    <button id="zoomOut" class="zoom" type="button" aria-label="縮小">−</button>
+    <button id="resetButton" class="reset" type="button" aria-label="全体表示">全体</button>
+  </div>
   <div id="status">49区域を表示中（40市町＋神戸市9区）</div>
 </main>
 
@@ -145,22 +172,6 @@ footer{
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 <script>
 const DATA_URL = "https://geoshape.ex.nii.ac.jp/city/topojson/20230101/28/28_city.i.topojson";
-const LABEL_SIZE = 6.6;
-
-const FORMAL_NAME_BY_CODE = {
-  "28301":"川辺郡猪名川町",
-  "28365":"多可郡多可町",
-  "28381":"加古郡稲美町",
-  "28382":"加古郡播磨町",
-  "28442":"神崎郡市川町",
-  "28443":"神崎郡福崎町",
-  "28446":"神崎郡神河町",
-  "28464":"揖保郡太子町",
-  "28481":"赤穂郡上郡町",
-  "28501":"佐用郡佐用町",
-  "28585":"美方郡香美町",
-  "28586":"美方郡新温泉町"
-};
 
 const MAP_LABEL_BY_CODE = {
   "28101":"東灘区","28102":"灘区","28105":"兵庫区","28106":"長田区","28107":"須磨区",
@@ -170,41 +181,12 @@ const MAP_LABEL_BY_CODE = {
   "28481":"上郡町","28501":"佐用町","28585":"香美町","28586":"新温泉町"
 };
 
-// 西宮市全町名図の方針に合わせ、基本は区域内へ直接配置。必要な場所だけ少し位置をずらす。
-const LABEL_OFFSET = {
-  // 神戸市9区
-  "28109": {dx: 0,  dy: 0},
-  "28111": {dx: -8, dy: -6},
-  "28107": {dx: -8, dy: 18},
-  "28108": {dx: -6, dy: 34},
-  "28105": {dx: -4, dy: 28},
-  "28110": {dx: 8,  dy: 24},
-  "28106": {dx: 10, dy: 38},
-  "28102": {dx: 12, dy: 10},
-  "28101": {dx: 16, dy: 20},
-
-  // 阪神
-  "28202": {dx: 16, dy: 2},
-  "28204": {dx: -10, dy: 2},
-  "28206": {dx: 6,  dy: 8},
-  "28207": {dx: 14, dy: -2},
-  "28214": {dx: 2,  dy: -8},
-  "28217": {dx: 16, dy: -8},
-  "28301": {dx: 16, dy: -14},
-  "28219": {dx: 0,  dy: -4},
-
-  // 東播磨〜播磨南部
-  "28203": {dx: -2,  dy: 14},
-  "28382": {dx: -18, dy: 10},
-  "28381": {dx: 0,   dy: -10},
-  "28216": {dx: -10, dy: 2},
-  "28464": {dx: 0,   dy: 5}
-};
-
 const svg = d3.select("#map");
 const mapWrap = document.getElementById("mapWrap");
 const status = document.getElementById("status");
 const resetButton = document.getElementById("resetButton");
+const zoomInButton = document.getElementById("zoomIn");
+const zoomOutButton = document.getElementById("zoomOut");
 const root = svg.append("g");
 const mapLayer = root.append("g");
 const labelLayer = root.append("g");
@@ -220,10 +202,6 @@ function displayLabel(props){
   const code = getCode(props);
   return MAP_LABEL_BY_CODE[code] || rawName(props);
 }
-function labelOffset(code){
-  return LABEL_OFFSET[code] || {dx:0, dy:0};
-}
-
 async function draw(){
   try{
     const topo = await fetch(DATA_URL, {mode:"cors"}).then(r => {
@@ -268,8 +246,8 @@ async function draw(){
       .join("text")
       .attr("class", "label")
       .attr("data-code", d => d.__code)
-      .attr("x", d => path.centroid(d)[0] + labelOffset(d.__code).dx)
-      .attr("y", d => path.centroid(d)[1] + labelOffset(d.__code).dy)
+      .attr("x", d => path.centroid(d)[0])
+      .attr("y", d => path.centroid(d)[1])
       .text(d => d.__label);
 
     zoom = d3.zoom()
@@ -277,6 +255,13 @@ async function draw(){
       .on("zoom", e => root.attr("transform", e.transform));
 
     svg.call(zoom);
+
+    zoomInButton.addEventListener("click", () => {
+      svg.transition().duration(180).call(zoom.scaleBy, 1.45);
+    });
+    zoomOutButton.addEventListener("click", () => {
+      svg.transition().duration(180).call(zoom.scaleBy, 1 / 1.45);
+    });
     resetButton.addEventListener("click", () => {
       svg.transition().duration(220).call(zoom.transform, d3.zoomIdentity);
     });
