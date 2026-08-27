@@ -90,7 +90,20 @@ svg{width:100%;height:100%;display:block}
   vector-effect:non-scaling-stroke
 }
 .municipality.kobe-base{fill:var(--kobe)}
-.municipality.target{fill:var(--target)}
+@keyframes targetBlink{
+  0%,49%{fill:var(--target)}
+  50%,100%{fill:var(--fill)}
+}
+.municipality.target{
+  animation:targetBlink 1s steps(1,end) infinite;
+}
+.municipality.kobe-base.target{
+  animation:targetBlinkKobe 1s steps(1,end) infinite;
+}
+@keyframes targetBlinkKobe{
+  0%,49%{fill:var(--target)}
+  50%,100%{fill:var(--kobe)}
+}
 .municipality.answer-correct{fill:var(--correct)}
 .pref-outline{
   fill:none;stroke:var(--outline);stroke-width:1.8;
@@ -346,13 +359,10 @@ function answerChoice(button,selectedCode){
     wrongSet.add(currentCode);
     button.classList.add("wrong-choice");
     button.disabled=true;
-    showFeedback(`違います！ 正解は${formalName(correctFeature)}です。`,"ng");
 
-    // 正解するまでは次の問題へ進まない
-    setTimeout(()=>{
-      hideFeedback();
-      locked=false;
-    },1400);
+    // 誤答時はメッセージを一切表示しない
+    hideFeedback();
+    locked=false;
   }
 }
 function finishQuiz(){
