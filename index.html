@@ -3,14 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>兵庫県 市町村記憶ゲーム｜学習モード v0.9</title>
+<title>兵庫県 全域市町村地図｜兵庫県 市町村記憶ゲーム</title>
 <style>
 :root{
   --ink:#1f2937;
-  --line:#4b5563;
-  --fill:#ffffff;
-  --sea:#eef7ff;
-  --selected:#fde68a;
+  --line:#5b6470;
+  --outline:#111827;
+  --fill:#f8fafc;
+  --sea:#eef4fb;
+  --panel:#ffffff;
 }
 *{box-sizing:border-box}
 html,body{
@@ -20,52 +21,98 @@ html,body{
 }
 body{display:flex;flex-direction:column}
 header{
-  padding:12px 14px 8px;text-align:center;background:rgba(255,255,255,.96);
-  border-bottom:1px solid #dbe4ee
+  background:var(--panel);
+  border-bottom:1px solid #dbe4ee;
+  padding:10px 14px 12px;
+  text-align:center;
 }
-h1{font-size:clamp(20px,5vw,30px);margin:0;font-weight:800}
-.sub{margin-top:5px;font-size:13px;color:#4b5563}
-#answerBox{
-  margin:8px auto 0;min-height:34px;display:flex;align-items:center;justify-content:center;
-  width:min(92vw,560px);padding:6px 10px;border:1px solid #cbd5e1;border-radius:10px;
-  background:#fff;font-size:clamp(15px,4.2vw,21px);font-weight:700;color:#0f172a
+h1{
+  margin:0;
+  font-size:clamp(22px,5.5vw,30px);
+  font-weight:800;
 }
-#mapWrap{position:relative;flex:1;min-height:68vh;overflow:hidden;touch-action:none}
+.sub{
+  margin-top:6px;
+  font-size:clamp(16px,4.4vw,22px);
+  font-weight:700;
+}
+.desc{
+  max-width:760px;
+  margin:10px auto 0;
+  font-size:13px;
+  line-height:1.7;
+  color:#4b5563;
+  text-align:left;
+}
+.toolbar{
+  text-align:center;
+  background:var(--panel);
+  padding:8px 14px 10px;
+}
+.toolbar button{
+  appearance:none;
+  border:1px solid #aeb9c6;
+  background:#fff;
+  border-radius:999px;
+  padding:10px 20px;
+  font-size:15px;
+  font-weight:700;
+  color:#1f2937;
+}
+#mapWrap{
+  position:relative;
+  flex:1;
+  min-height:68vh;
+  overflow:hidden;
+  touch-action:none;
+  background:var(--sea);
+}
 svg{width:100%;height:100%;display:block}
 .municipality{
-  fill:var(--fill);stroke:var(--line);stroke-width:1.05;
-  vector-effect:non-scaling-stroke;cursor:pointer
+  fill:var(--fill);
+  stroke:var(--line);
+  stroke-width:1.05;
+  vector-effect:non-scaling-stroke;
 }
-.municipality.selected{fill:var(--selected)}
 .pref-outline{
-  fill:none;stroke:#111827;stroke-width:2.1;
-  vector-effect:non-scaling-stroke;pointer-events:none
-}
-.label-line{
-  stroke:#7c8796;stroke-width:.72;vector-effect:non-scaling-stroke;pointer-events:none
+  fill:none;
+  stroke:var(--outline);
+  stroke-width:2.2;
+  vector-effect:non-scaling-stroke;
+  pointer-events:none;
 }
 .label{
-  font-weight:700;fill:#111827;text-anchor:middle;dominant-baseline:middle;
-  paint-order:stroke;stroke:#fff;stroke-width:3.2px;stroke-linejoin:round;
-  pointer-events:none
+  fill:#111827;
+  font-weight:700;
+  font-size:6.6px;
+  text-anchor:middle;
+  dominant-baseline:middle;
+  paint-order:stroke;
+  stroke:#ffffff;
+  stroke-width:3px;
+  stroke-linejoin:round;
+  pointer-events:none;
 }
-.controls{
-  position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:8px;z-index:4
-}
-.controls button{
-  width:44px;height:44px;border:1px solid #aeb9c6;border-radius:10px;
-  background:rgba(255,255,255,.96);font-size:23px;font-weight:700;
-  box-shadow:0 2px 7px rgba(0,0,0,.12)
-}
-.controls button:last-child{font-size:12px;line-height:1.05}
 #status{
-  position:absolute;left:10px;bottom:10px;max-width:calc(100% - 20px);
-  padding:7px 10px;border-radius:9px;background:rgba(255,255,255,.92);
-  border:1px solid #cbd5e1;font-size:11px
+  position:absolute;
+  left:12px;
+  bottom:12px;
+  max-width:min(92vw,420px);
+  padding:8px 10px;
+  border:1px solid #cbd5e1;
+  border-radius:10px;
+  background:rgba(255,255,255,.92);
+  font-size:12px;
+  line-height:1.5;
 }
 footer{
-  background:#fff;padding:7px 10px 10px;text-align:center;font-size:9px;line-height:1.45;
-  color:#667085;border-top:1px solid #dbe4ee
+  background:var(--panel);
+  border-top:1px solid #dbe4ee;
+  text-align:center;
+  font-size:10px;
+  line-height:1.5;
+  color:#667085;
+  padding:10px 12px 12px;
 }
 .error{color:#b91c1c;font-weight:700}
 </style>
@@ -73,29 +120,32 @@ footer{
 <body>
 <header>
   <h1>兵庫県 市町村記憶ゲーム</h1>
-  <div class="sub">学習モード（49区域）</div>
-  <div id="answerBox">地図の区域をタップしてください</div>
+  <div class="sub">🗺️ 兵庫県 全域市町村地図</div>
+  <div class="desc">
+    兵庫県全域の市町村名を表示しています。神戸市は9区に分けて表示しています。<br>
+    文字が重なる場所は地図を拡大して確認してください。地図を拡大すると市町村名ラベルも大きくなります。
+  </div>
 </header>
 
+<div class="toolbar">
+  <button id="resetButton" type="button">全体表示</button>
+</div>
+
 <main id="mapWrap">
-  <svg id="map" aria-label="兵庫県49区域 名前入り学習地図"></svg>
-  <div class="controls">
-    <button id="zoomIn" aria-label="拡大">＋</button>
-    <button id="zoomOut" aria-label="縮小">−</button>
-    <button id="reset" aria-label="全体表示">全体</button>
-  </div>
-  <div id="status">行政区域データを読み込んでいます…</div>
+  <svg id="map" aria-label="兵庫県全域市町村地図"></svg>
+  <div id="status">49区域を表示中（40市町＋神戸市9区）</div>
 </main>
 
 <footer>
-  出典：『歴史的行政区域データセットβ版』（CODH作成）／国土数値情報「行政区域データ」を加工<br>
-  CC BY 4.0　© KUSSOON 2026 All Rights Reserved
+  地図境界データ：『歴史的行政区域データセットβ版』（CODH作成）／国土数値情報「行政区域データ」を加工。CC BY 4.0<br>
+  © KUSSOON 2026 All Rights Reserved.
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 <script>
 const DATA_URL = "https://geoshape.ex.nii.ac.jp/city/topojson/20230101/28/28_city.i.topojson";
+const LABEL_SIZE = 6.6;
 
 const FORMAL_NAME_BY_CODE = {
   "28301":"川辺郡猪名川町",
@@ -112,18 +162,6 @@ const FORMAL_NAME_BY_CODE = {
   "28586":"美方郡新温泉町"
 };
 
-const KOBE_WARD_NAME_BY_CODE = {
-  "28101":"神戸市東灘区",
-  "28102":"神戸市灘区",
-  "28105":"神戸市兵庫区",
-  "28106":"神戸市長田区",
-  "28107":"神戸市須磨区",
-  "28108":"神戸市垂水区",
-  "28109":"神戸市北区",
-  "28110":"神戸市中央区",
-  "28111":"神戸市西区"
-};
-
 const MAP_LABEL_BY_CODE = {
   "28101":"東灘区","28102":"灘区","28105":"兵庫区","28106":"長田区","28107":"須磨区",
   "28108":"垂水区","28109":"北区","28110":"中央区","28111":"西区",
@@ -132,161 +170,121 @@ const MAP_LABEL_BY_CODE = {
   "28481":"上郡町","28501":"佐用町","28585":"香美町","28586":"新温泉町"
 };
 
-// なるべく線を使わず、必要最小限だけリーダー線を使う
-const LABEL_LAYOUT = {
-  // 神戸9区：文字をできるだけ陸地側に寄せ、必要なものだけ短い引き出し線を使う
-  "28109": {dx: 0,   dy: 0,  size: 7.0, anchor: "middle", leader: false}, // 北区
-  "28111": {dx: -8,  dy: -4, size: 7.0, anchor: "end",    leader: false}, // 西区
-  "28107": {dx: -18, dy: 22, size: 7.0, anchor: "end",    leader: true},  // 須磨区
-  "28108": {dx: -12, dy: 44, size: 7.0, anchor: "end",    leader: true},  // 垂水区
-  "28105": {dx: -2,  dy: 52, size: 7.0, anchor: "middle", leader: true},  // 兵庫区
-  "28110": {dx: 12,  dy: 42, size: 7.0, anchor: "middle", leader: true},  // 中央区
-  "28106": {dx: 18,  dy: 58, size: 7.0, anchor: "start",  leader: true},  // 長田区
-  "28102": {dx: 12,  dy: 16, size: 7.0, anchor: "start",  leader: true},  // 灘区
-  "28101": {dx: 26,  dy: 26, size: 7.0, anchor: "start",  leader: true},  // 東灘区
+// 西宮市全町名図の方針に合わせ、基本は区域内へ直接配置。必要な場所だけ少し位置をずらす。
+const LABEL_OFFSET = {
+  // 神戸市9区
+  "28109": {dx: 0,  dy: 0},
+  "28111": {dx: -8, dy: -6},
+  "28107": {dx: -8, dy: 18},
+  "28108": {dx: -6, dy: 34},
+  "28105": {dx: -4, dy: 28},
+  "28110": {dx: 8,  dy: 24},
+  "28106": {dx: 10, dy: 38},
+  "28102": {dx: 12, dy: 10},
+  "28101": {dx: 16, dy: 20},
 
   // 阪神
-  "28202": {dx: 18,  dy: 2,  size: 7.0, anchor: "start",  leader: false}, // 尼崎
-  "28204": {dx: -8,  dy: 2,  size: 7.0, anchor: "middle", leader: false}, // 西宮
-  "28206": {dx: 4,   dy: 8,  size: 7.0, anchor: "start",  leader: false}, // 芦屋
-  "28207": {dx: 12,  dy: -1, size: 7.0, anchor: "start",  leader: false}, // 伊丹
-  "28214": {dx: 1,   dy: -7, size: 7.0, anchor: "middle", leader: false}, // 宝塚
-  "28217": {dx: 15,  dy: -8, size: 7.0, anchor: "start",  leader: true},  // 川西
-  "28301": {dx: 18,  dy: -12,size: 7.0, anchor: "start",  leader: true},  // 猪名川町
-  "28219": {dx: 0,   dy: -4, size: 7.0, anchor: "middle", leader: false}, // 三田
+  "28202": {dx: 16, dy: 2},
+  "28204": {dx: -10, dy: 2},
+  "28206": {dx: 6,  dy: 8},
+  "28207": {dx: 14, dy: -2},
+  "28214": {dx: 2,  dy: -8},
+  "28217": {dx: 16, dy: -8},
+  "28301": {dx: 16, dy: -14},
+  "28219": {dx: 0,  dy: -4},
 
-  // 東播磨〜阪神南西部
-  "28203": {dx: -2,  dy: 14, size: 7.0, anchor: "middle", leader: false}, // 明石
-  "28382": {dx: -22, dy: 10, size: 7.0, anchor: "end",    leader: false}, // 播磨町
-  "28381": {dx: 0,   dy: -10,size: 7.0, anchor: "middle", leader: false}, // 稲美町
-  "28216": {dx: -10, dy: 2,  size: 7.0, anchor: "end",    leader: false}, // 高砂
-  "28464": {dx: 0,   dy: 5,  size: 7.0, anchor: "middle", leader: false}  // 太子町
+  // 東播磨〜播磨南部
+  "28203": {dx: -2,  dy: 14},
+  "28382": {dx: -18, dy: 10},
+  "28381": {dx: 0,   dy: -10},
+  "28216": {dx: -10, dy: 2},
+  "28464": {dx: 0,   dy: 5}
 };
 
 const svg = d3.select("#map");
-const wrap = document.getElementById("mapWrap");
+const mapWrap = document.getElementById("mapWrap");
 const status = document.getElementById("status");
-const answerBox = document.getElementById("answerBox");
+const resetButton = document.getElementById("resetButton");
 const root = svg.append("g");
 const mapLayer = root.append("g");
-const lineLayer = root.append("g");
 const labelLayer = root.append("g");
-
 let zoom;
-let currentSelected = null;
 
-function getCode(p){
-  return String(p.N03_007 || p.code || p.CITY_CODE || p["行政区域コード"] || "");
+function getCode(props){
+  return String(props.N03_007 || props.code || props.CITY_CODE || props["行政区域コード"] || "");
 }
-function rawName(p){
-  return p.N03_004 || p.name || p.city || p.CITY_NAME || p["市区町村名"] || "";
+function rawName(props){
+  return props.N03_004 || props.name || props.city || props.CITY_NAME || props["市区町村名"] || "";
 }
-function formalName(p){
-  const c=getCode(p);
-  return KOBE_WARD_NAME_BY_CODE[c] || FORMAL_NAME_BY_CODE[c] || rawName(p);
+function displayLabel(props){
+  const code = getCode(props);
+  return MAP_LABEL_BY_CODE[code] || rawName(props);
 }
-function mapLabel(p){
-  const c=getCode(p);
-  return MAP_LABEL_BY_CODE[c] || rawName(p);
-}
-function makeLayout(code){
-  return LABEL_LAYOUT[code] || {dx:0, dy:0, size:7.0, anchor:"middle", leader:false};
+function labelOffset(code){
+  return LABEL_OFFSET[code] || {dx:0, dy:0};
 }
 
 async function draw(){
   try{
-    const topo = await fetch(DATA_URL,{mode:"cors"}).then(r=>{
-      if(!r.ok) throw new Error("データ取得エラー: "+r.status);
+    const topo = await fetch(DATA_URL, {mode:"cors"}).then(r => {
+      if(!r.ok) throw new Error("データ取得エラー: " + r.status);
       return r.json();
     });
 
     const objectKey = Object.keys(topo.objects)[0];
-    const fc = topojson.feature(topo,topo.objects[objectKey]);
-    const features=(fc.features||[]).map((f,i)=>{
-      const p=f.properties||{};
-      f.__code=getCode(p);
-      f.__formal=formalName(p);
-      f.__label=mapLabel(p);
-      f.__id=f.__code ? "muni-"+f.__code : "muni-"+(i+1);
+    const fc = topojson.feature(topo, topo.objects[objectKey]);
+    const features = (fc.features || []).map((f, i) => {
+      const props = f.properties || {};
+      f.__code = getCode(props);
+      f.__label = displayLabel(props);
+      f.__id = f.__code ? "muni-" + f.__code : "muni-" + (i+1);
       return f;
-    }).filter(f=>String(f.__code).startsWith("28"));
+    }).filter(f => String(f.__code).startsWith("28"));
 
-    const width=Math.max(320,wrap.clientWidth);
-    const height=Math.max(500,wrap.clientHeight);
-    svg.attr("viewBox",`0 0 ${width} ${height}`);
+    const width = Math.max(320, mapWrap.clientWidth);
+    const height = Math.max(560, mapWrap.clientHeight);
+    svg.attr("viewBox", `0 0 ${width} ${height}`);
 
-    const projection=d3.geoMercator();
-    projection.fitExtent([[22,18],[width-22,height-22]],{type:"FeatureCollection",features});
-    const path=d3.geoPath(projection);
+    const projection = d3.geoMercator();
+    projection.fitExtent([[22, 18], [width - 22, height - 22]], {type:"FeatureCollection", features});
+    const path = d3.geoPath(projection);
 
     mapLayer.selectAll("path.municipality")
       .data(features)
       .join("path")
-      .attr("class","municipality")
-      .attr("id",d=>d.__id)
-      .attr("data-code",d=>d.__code)
-      .attr("data-name",d=>d.__formal)
-      .attr("d",path)
-      .on("click",(event,d)=>{
-        if(currentSelected) d3.select("#"+currentSelected).classed("selected",false);
-        currentSelected=d.__id;
-        d3.select("#"+d.__id).classed("selected",true);
-        answerBox.textContent=d.__formal;
-        event.stopPropagation();
-      });
+      .attr("class", "municipality")
+      .attr("id", d => d.__id)
+      .attr("d", path);
 
-    const geoms=(topo.objects[objectKey].geometries||[]).filter(g=>String(getCode(g.properties||{})).startsWith("28"));
-    const merged=topojson.merge(topo,geoms);
-    mapLayer.append("path").datum(merged).attr("class","pref-outline").attr("d",path);
+    const geoms = (topo.objects[objectKey].geometries || []).filter(g => String(getCode(g.properties || {})).startsWith("28"));
+    const merged = topojson.merge(topo, geoms);
+    mapLayer.append("path")
+      .datum(merged)
+      .attr("class", "pref-outline")
+      .attr("d", path);
 
-    features.forEach(f=>{
-      const code=f.__code;
-      const centroid=path.centroid(f);
-      if(!Number.isFinite(centroid[0])||!Number.isFinite(centroid[1])) return;
+    labelLayer.selectAll("text.label")
+      .data(features)
+      .join("text")
+      .attr("class", "label")
+      .attr("data-code", d => d.__code)
+      .attr("x", d => path.centroid(d)[0] + labelOffset(d.__code).dx)
+      .attr("y", d => path.centroid(d)[1] + labelOffset(d.__code).dy)
+      .text(d => d.__label);
 
-      const layout=makeLayout(code);
-      const x=centroid[0]+layout.dx;
-      const y=centroid[1]+layout.dy;
-      const anchor=layout.anchor || "middle";
+    zoom = d3.zoom()
+      .scaleExtent([1, 12])
+      .on("zoom", e => root.attr("transform", e.transform));
 
-      if(layout.leader){
-        lineLayer.append("line")
-          .attr("class","label-line")
-          .attr("x1",centroid[0]).attr("y1",centroid[1])
-          .attr("x2",x).attr("y2",y);
-      }
-
-      labelLayer.append("text")
-        .attr("class","label")
-        .attr("x",x)
-        .attr("y",y)
-        .style("font-size", (layout.size || 7.0) + "px")
-        .style("text-anchor", anchor)
-        .attr("data-code",code)
-        .text(f.__label);
-    });
-
-    zoom=d3.zoom().scaleExtent([1,12]).on("zoom",e=>root.attr("transform",e.transform));
     svg.call(zoom);
-    svg.on("click",()=>{
-      if(currentSelected) d3.select("#"+currentSelected).classed("selected",false);
-      currentSelected=null;
-      answerBox.textContent="地図の区域をタップしてください";
+    resetButton.addEventListener("click", () => {
+      svg.transition().duration(220).call(zoom.transform, d3.zoomIdentity);
     });
 
-    document.getElementById("zoomIn").onclick=()=>svg.transition().duration(180).call(zoom.scaleBy,1.45);
-    document.getElementById("zoomOut").onclick=()=>svg.transition().duration(180).call(zoom.scaleBy,1/1.45);
-    document.getElementById("reset").onclick=()=>{
-      svg.transition().duration(220).call(zoom.transform,d3.zoomIdentity);
-      if(currentSelected) d3.select("#"+currentSelected).classed("selected",false);
-      currentSelected=null;
-      answerBox.textContent="地図の区域をタップしてください";
-    };
-
-    status.textContent=`${features.length}区域を表示中（40市町＋神戸市9区）`;
-  }catch(err){
+    status.textContent = `${features.length}区域を表示中（40市町＋神戸市9区）`;
+  } catch(err){
     console.error(err);
-    status.innerHTML='<span class="error">地図データを読み込めませんでした。</span>';
+    status.innerHTML = '<span class="error">地図データを読み込めませんでした。</span>';
   }
 }
 
