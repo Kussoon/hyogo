@@ -342,19 +342,17 @@ function answerChoice(button,selectedCode){
       showQuestion();
     },2000);
   }else{
-    locked=true;
+    // 誤答は記録するが、この問題のまま正解するまで続ける
     wrongSet.add(currentCode);
     button.classList.add("wrong-choice");
-    choicesEl.querySelectorAll("button").forEach(b=>{
-      if(b.dataset.code===currentCode)b.classList.add("correct-choice");
-    });
-    d3.select("#muni-"+currentCode).classed("target",false).classed("answer-correct",true);
+    button.disabled=true;
     showFeedback(`違います！ 正解は${formalName(correctFeature)}です。`,"ng");
-    disableChoices();
+
+    // 正解するまでは次の問題へ進まない
     setTimeout(()=>{
-      index++;
-      showQuestion();
-    },2500);
+      hideFeedback();
+      locked=false;
+    },1400);
   }
 }
 function finishQuiz(){
