@@ -234,7 +234,7 @@ footer{
 <div class="topnav"><a href="index.html">← トップへ</a></div>
 <header>
   <h1>兵庫県 市町村記憶ゲーム</h1>
-  <div class="sub">🎯 クイズ2「場所 → 名前」</div>
+  <div class="sub">🎯 クイズ2　地図上の場所を見て、名前を当てる</div>
   <div id="question" style="display:none;">黄色く光っている場所はどこですか？</div>
   <div id="progress" style="display:none;"></div>
   <button id="restartBtn" type="button" style="display:none;">もう一度最初から</button>
@@ -548,7 +548,7 @@ async function draw(){
 
     document.getElementById("restartBtn").onclick=()=>startQuiz(currentRangeCodes);
     document.getElementById("againBtn").onclick=()=>startQuiz(currentRangeCodes);
-    document.getElementById("rangeBtn").onclick=openRangeSelect;
+    document.getElementById("rangeBtn").onclick=()=>{ location.href="study-region.html"; };
     wrongBtn.onclick=()=>{
       const retry=[...wrongSet];
       startQuiz(retry);
