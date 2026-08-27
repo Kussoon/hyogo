@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>地域別学習｜兵庫県 市町村記憶ゲーム</title>
+<style>
+:root{
+  --ink:#1f2937;
+  --line:#5b6470;
+  --outline:#111827;
+  --fill:#f8fafc;
+  --dim:#edf1f5;
+  --selected:#fff2b8;
+  --kobe:#e5e7eb;
+  --sea:#eef4fb;
+  --panel:#ffffff;
+  --border:#dbe4ee;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;min-height:100%;
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  color:var(--ink);background:var(--sea)
+}
+body{display:flex;flex-direction:column}
+.topnav{
+  background:#fff;
+  padding:8px 12px;
+  border-bottom:1px solid var(--border);
+}
+.topnav a{color:#334155;text-decoration:none;font-size:14px;font-weight:700}
+header{
+  background:var(--panel);
+  text-align:center;
+  padding:10px 12px 8px;
+}
+h1{margin:0;font-size:clamp(21px,5.5vw,30px)}
+.sub{margin-top:5px;font-size:16px;font-weight:700}
+#regionTitle{
+  margin:8px auto 0;
+  width:min(94vw,640px);
+  min-height:36px;
+  border:1px solid #cbd5e1;
+  border-radius:10px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:7px 10px;
+  font-size:17px;
+  font-weight:800;
+}
+.regions{
+  background:#fff;
+  padding:8px 8px 10px;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:6px;
+  border-bottom:1px solid var(--border);
+}
+.regions button{
+  min-height:42px;
+  border:1px solid #aeb9c6;
+  background:#f8fbff;
+  border-radius:9px;
+  font-size:12px;
+  font-weight:700;
+  color:#334155;
+  padding:5px 3px;
+}
+.regions button.active{
+  background:#315f8c;
+  color:#fff;
+  border-color:#315f8c;
+}
+#mapWrap{
+  position:relative;
+  flex:1;
+  min-height:62vh;
+  overflow:hidden;
+  touch-action:none;
+  background:var(--sea);
+}
+svg{width:100%;height:100%;display:block}
+.municipality{
+  fill:var(--dim);
+  stroke:var(--line);
+  stroke-width:1.05;
+  vector-effect:non-scaling-stroke;
+}
+.municipality.active-area{fill:var(--selected)}
+.municipality.kobe-base:not(.active-area){fill:#e5e7eb}
+.pref-outline{
+  fill:none;
+  stroke:var(--outline);
+  stroke-width:1.8;
+  vector-effect:non-scaling-stroke;
+  pointer-events:none;
+}
+.kobe-outline{
+  fill:none;
+  stroke:var(--outline);
+  stroke-width:1.5;
+  vector-effect:non-scaling-stroke;
+  pointer-events:none;
+}
+.label{
+  fill:#111827;
+  font-weight:700;
+  font-size:15px;
+  text-anchor:middle;
+  dominant-baseline:middle;
+  paint-order:stroke;
+  stroke:#fff;
+  stroke-width:3.2px;
+  stroke-linejoin:round;
+  pointer-events:none;
+  opacity:.18;
+}
+.label.active-label{opacity:1}
+.controls{
+  position:absolute;
+  top:12px;
+  right:12px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  z-index:5;
+}
+.controls button{
+  width:46px;height:46px;
+  border:1px solid #aeb9c6;
+  border-radius:10px;
+  background:rgba(255,255,255,.96);
+  box-shadow:0 2px 7px rgba(0,0,0,.12);
+  font-weight:700;
+  color:#1f2937;
+}
+.controls button.zoom{font-size:24px}
+.controls button.reset{font-size:12px;line-height:1.05}
+#status{
+  position:absolute;
+  left:12px;
+  bottom:12px;
+  padding:7px 10px;
+  border:1px solid #cbd5e1;
+  border-radius:9px;
+  background:rgba(255,255,255,.92);
+  font-size:11px;
+}
+footer{
+  background:#fff;
+  border-top:1px solid var(--border);
+  text-align:center;
+  font-size:9px;
+  line-height:1.45;
+  color:#667085;
+  padding:8px 10px 10px;
+}
+@media(max-width:420px){
+  .regions{grid-template-columns:repeat(5,1fr)}
+  .regions button{font-size:11px}
+}
+</style>
+</head>
+<body>
+<div class="topnav"><a href="index.html">← トップへ</a></div>
+<header>
+  <h1>兵庫県 市町村記憶ゲーム</h1>
+  <div class="sub">📍 地域別学習</div>
+  <div id="regionTitle">地域を選んでください</div>
+</header>
+
+<div class="regions" id="regionButtons"></div>
+
+<main id="mapWrap">
+  <svg id="map" aria-label="兵庫県地域別学習地図"></svg>
+  <div class="controls">
+    <button id="zoomIn" class="zoom" type="button">＋</button>
+    <button id="zoomOut" class="zoom" type="button">−</button>
+    <button id="resetButton" class="reset" type="button">全体</button>
+  </div>
+  <div id="status">地域を選択してください</div>
+</main>
+
+<footer>
+  地図境界データ：『歴史的行政区域データセットβ版』（CODH作成）／国土数値情報「行政区域データ」を加工。CC BY 4.0<br>
+  © KUSSOON 2026 All Rights Reserved.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script>
+const DATA_URL = "https://geoshape.ex.nii.ac.jp/city/topojson/20230101/28/28_city.i.topojson";
+const BASE_LABEL_FONT_SIZE = 15.0;
+const BASE_LABEL_STROKE_WIDTH = 3.2;
+const LABEL_GROWTH_EXPONENT = 0.28;
+
+const REGIONS = [
+  {key:"kobe", name:"神戸", codes:["28101","28102","28105","28106","28107","28108","28109","28110","28111"]},
+  {key:"hanshin-s", name:"阪神南", codes:["28202","28204","28206"]},
+  {key:"hanshin-n", name:"阪神北", codes:["28207","28214","28217","28219","28301"]},
+  {key:"higashi", name:"東播磨", codes:["28203","28210","28216","28381","28382"]},
+  {key:"kita", name:"北播磨", codes:["28213","28215","28218","28220","28228","28365"]},
+  {key:"naka", name:"中播磨", codes:["28201","28442","28443","28446"]},
+  {key:"nishi", name:"西播磨", codes:["28208","28212","28227","28229","28464","28481","28501"]},
+  {key:"tajima", name:"但馬", codes:["28209","28222","28225","28585","28586"]},
+  {key:"tamba", name:"丹波", codes:["28221","28223"]},
+  {key:"awaji", name:"淡路", codes:["28205","28224","28226"]}
+];
+
+const MAP_LABEL_BY_CODE = {
+  "28101":"東灘区","28102":"灘区","28105":"兵庫区","28106":"長田区","28107":"須磨区",
+  "28108":"垂水区","28109":"北区","28110":"中央区","28111":"西区",
+  "28301":"猪名川町","28365":"多可町","28381":"稲美町","28382":"播磨町",
+  "28442":"市川町","28443":"福崎町","28446":"神河町","28464":"太子町",
+  "28481":"上郡町","28501":"佐用町","28585":"香美町","28586":"新温泉町"
+};
+
+// 完成版 v1.17 の位置調整を引き継ぐ
+const LABEL_OFFSET = {
+  "28106": {dx:0, dy:3.75},
+  "28101": {dx:0, dy:0.75},
+  "28204": {dx:0, dy:2.0},
+  "28208": {dx:-3.0, dy:0},
+  "28229": {dx:3.0, dy:0},
+  "28216": {dx:1.0, dy:0},
+  "28585": {dx:-1.0, dy:0},
+  "28446": {dx:0, dy:1.0},
+  "28443": {dx:0, dy:1.5}
+};
+
+const svg = d3.select("#map");
+const mapWrap = document.getElementById("mapWrap");
+const status = document.getElementById("status");
+const regionTitle = document.getElementById("regionTitle");
+const buttonsWrap = document.getElementById("regionButtons");
+const root = svg.append("g");
+const mapLayer = root.append("g");
+const labelLayer = root.append("g");
+let zoom, path, features = [], currentRegion = null;
+
+function getCode(props){
+  return String(props.N03_007 || props.code || props.CITY_CODE || props["行政区域コード"] || "");
+}
+function rawName(props){
+  return props.N03_004 || props.name || props.city || props.CITY_NAME || props["市区町村名"] || "";
+}
+function displayLabel(props){
+  const code = getCode(props);
+  return MAP_LABEL_BY_CODE[code] || rawName(props);
+}
+function offset(code){ return LABEL_OFFSET[code] || {dx:0,dy:0}; }
+
+REGIONS.forEach((r,i)=>{
+  const b=document.createElement("button");
+  b.textContent=r.name;
+  b.dataset.key=r.key;
+  b.addEventListener("click",()=>selectRegion(r.key));
+  buttonsWrap.appendChild(b);
+});
+
+function selectRegion(key){
+  const region=REGIONS.find(r=>r.key===key);
+  if(!region)return;
+  currentRegion=region;
+  const active=new Set(region.codes);
+
+  d3.selectAll(".municipality")
+    .classed("active-area",d=>active.has(d.__code));
+
+  d3.selectAll(".label")
+    .classed("active-label",d=>active.has(d.__code));
+
+  document.querySelectorAll(".regions button").forEach(b=>{
+    b.classList.toggle("active", b.dataset.key===key);
+  });
+
+  regionTitle.textContent=`${region.name}（${region.codes.length}区域）`;
+  status.textContent=`${region.name}を表示中`;
+
+  // 選択地域に自動ズーム
+  const selected=features.filter(f=>active.has(f.__code));
+  if(selected.length){
+    const fc={type:"FeatureCollection",features:selected};
+    const bounds=path.bounds(fc);
+    const width=Math.max(320,mapWrap.clientWidth);
+    const height=Math.max(520,mapWrap.clientHeight);
+    const dx=bounds[1][0]-bounds[0][0];
+    const dy=bounds[1][1]-bounds[0][1];
+    const cx=(bounds[0][0]+bounds[1][0])/2;
+    const cy=(bounds[0][1]+bounds[1][1])/2;
+    const scale=Math.max(1,Math.min(7,0.76/Math.max(dx/width,dy/height)));
+    const tx=width/2-scale*cx;
+    const ty=height/2-scale*cy;
+    svg.transition().duration(350).call(
+      zoom.transform,
+      d3.zoomIdentity.translate(tx,ty).scale(scale)
+    );
+  }
+}
+
+async function draw(){
+  try{
+    const topo=await fetch(DATA_URL,{mode:"cors"}).then(r=>{
+      if(!r.ok)throw new Error("data");
+      return r.json();
+    });
+    const objectKey=Object.keys(topo.objects)[0];
+    const fc=topojson.feature(topo,topo.objects[objectKey]);
+    features=(fc.features||[]).map((f,i)=>{
+      const p=f.properties||{};
+      f.__code=getCode(p);
+      f.__label=displayLabel(p);
+      f.__id=f.__code?`muni-${f.__code}`:`muni-${i+1}`;
+      return f;
+    }).filter(f=>f.__code.startsWith("28"));
+
+    const width=Math.max(320,mapWrap.clientWidth);
+    const height=Math.max(520,mapWrap.clientHeight);
+    svg.attr("viewBox",`0 0 ${width} ${height}`);
+
+    const projection=d3.geoMercator();
+    projection.fitExtent([[22,18],[width-22,height-22]],{type:"FeatureCollection",features});
+    path=d3.geoPath(projection);
+
+    mapLayer.selectAll("path.municipality")
+      .data(features).join("path")
+      .attr("class",d=>d.__code.startsWith("281")?"municipality kobe-base":"municipality")
+      .attr("d",path);
+
+    const allGeoms=(topo.objects[objectKey].geometries||[]).filter(g=>getCode(g.properties||{}).startsWith("28"));
+    const kobeGeoms=allGeoms.filter(g=>getCode(g.properties||{}).startsWith("281"));
+    mapLayer.append("path")
+      .datum(topojson.merge(topo,kobeGeoms))
+      .attr("class","kobe-outline")
+      .attr("d",path);
+    mapLayer.append("path")
+      .datum(topojson.merge(topo,allGeoms))
+      .attr("class","pref-outline")
+      .attr("d",path);
+
+    labelLayer.selectAll("text.label")
+      .data(features).join("text")
+      .attr("class","label")
+      .attr("x",d=>path.centroid(d)[0]+offset(d.__code).dx)
+      .attr("y",d=>path.centroid(d)[1]+offset(d.__code).dy)
+      .style("font-size",BASE_LABEL_FONT_SIZE+"px")
+      .style("stroke-width",BASE_LABEL_STROKE_WIDTH+"px")
+      .text(d=>d.__label);
+
+    zoom=d3.zoom().scaleExtent([1,12]).on("zoom",e=>{
+      const k=e.transform.k;
+      root.attr("transform",e.transform);
+      const fontScale=Math.pow(k,LABEL_GROWTH_EXPONENT-1);
+      labelLayer.selectAll("text.label")
+        .style("font-size",(BASE_LABEL_FONT_SIZE*fontScale)+"px")
+        .style("stroke-width",(BASE_LABEL_STROKE_WIDTH*fontScale)+"px");
+    });
+    svg.call(zoom);
+    svg.call(zoom.transform,d3.zoomIdentity);
+
+    document.getElementById("zoomIn").onclick=()=>svg.transition().duration(180).call(zoom.scaleBy,1.45);
+    document.getElementById("zoomOut").onclick=()=>svg.transition().duration(180).call(zoom.scaleBy,1/1.45);
+    document.getElementById("resetButton").onclick=()=>{
+      svg.transition().duration(220).call(zoom.transform,d3.zoomIdentity);
+    };
+
+    selectRegion("kobe");
+  }catch(e){
+    console.error(e);
+    status.textContent="地図データを読み込めませんでした。";
+  }
+}
+draw();
+</script>
+</body>
+</html>
