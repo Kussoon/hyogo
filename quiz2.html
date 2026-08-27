@@ -360,8 +360,8 @@ function answerChoice(button,selectedCode){
     button.classList.add("wrong-choice");
     button.disabled=true;
 
-    // 誤答時はメッセージを一切表示しない
-    hideFeedback();
+    // 誤答時は「違います！」のみ表示し、正解名は出さない
+    showFeedback("違います！","ng");
     locked=false;
   }
 }
