@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>クイズ2 場所から名産品を当てる｜兵庫県 名産品記憶ゲーム</title>
+<style>
+:root{
+  --ink:#1f2937;
+  --sub:#64748b;
+  --line:#5b6470;
+  --outline:#111827;
+  --fill:#f8fafc;
+  --kobe:#e5e7eb;
+  --sea:#eef4fb;
+  --panel:#ffffff;
+  --border:#dbe4ee;
+  --target:#fde68a;
+  --correct:#a7f3d0;
+  --wrong:#fee2e2;
+  --accent:#315f8c;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;min-height:100%;
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  color:var(--ink);background:var(--sea)
+}
+body{display:flex;flex-direction:column}
+.topnav{background:#fff;padding:8px 12px;border-bottom:1px solid var(--border)}
+.topnav a{color:#334155;text-decoration:none;font-size:14px;font-weight:700}
+header{background:var(--panel);text-align:center;padding:10px 12px 10px}
+h1{margin:0;font-size:clamp(21px,5.5vw,30px)}
+.sub{margin-top:5px;font-size:16px;font-weight:700;line-height:1.45}
+#question{
+  margin:8px auto 0;width:min(94vw,680px);min-height:50px;
+  border:1px solid #cbd5e1;border-radius:11px;background:#fff;
+  display:flex;align-items:center;justify-content:center;padding:8px 12px;
+  font-size:clamp(17px,4.7vw,22px);font-weight:800;line-height:1.4
+}
+#scopeHint{margin-top:7px;font-size:13px;font-weight:800;color:#315f8c}
+#scopeHint span{
+  display:inline-block;padding:5px 10px;border-radius:999px;
+  background:#eaf2f8;border:1px solid #c9dae8
+}
+#progress{margin-top:6px;font-size:13px;color:var(--sub);font-weight:700}
+#quizActionRow{display:none;margin-top:8px;justify-content:center;gap:8px;flex-wrap:wrap}
+#restartBtn,#headerRangeBtn{
+  border:1px solid #aeb9c6;background:#fff;color:#334155;border-radius:10px;
+  padding:8px 14px;font-size:13px;font-weight:800;min-height:38px
+}
+#choices{
+  background:#fff;padding:9px 10px 11px;display:grid;grid-template-columns:1fr 1fr;
+  gap:8px;border-bottom:1px solid var(--border)
+}
+.choice{
+  min-height:56px;border:1px solid #9fb1c4;border-radius:11px;background:#f8fbff;color:#17324d;
+  padding:8px 7px;font:inherit;font-size:clamp(13px,3.5vw,16px);line-height:1.32;font-weight:800
+}
+.choice.correct-choice{background:var(--correct);border-color:#34d399}
+.choice.wrong-choice{background:var(--wrong);border-color:#f87171}
+.choice:disabled{opacity:1}
+#mapWrap{position:relative;flex:1;min-height:52vh;overflow:hidden;touch-action:none;background:var(--sea)}
+svg{width:100%;height:100%;display:block}
+.area{
+  fill:var(--fill);stroke:var(--line);stroke-width:1.05;
+  vector-effect:non-scaling-stroke;pointer-events:none
+}
+.area.kobe-base{fill:var(--kobe)}
+@keyframes targetBlink{
+  0%,49%{fill:var(--target)}
+  50%,100%{fill:var(--fill)}
+}
+.area.target{animation:targetBlink 1s steps(1,end) infinite}
+@keyframes targetBlinkKobe{
+  0%,49%{fill:var(--target)}
+  50%,100%{fill:var(--kobe)}
+}
+.area.kobe-base.target{animation:targetBlinkKobe 1s steps(1,end) infinite}
+.area.answer-correct{fill:var(--correct);animation:none}
+.region-target{fill:transparent;stroke:none;pointer-events:none}
+@keyframes targetBlinkRegion{
+  0%,49%{fill:rgba(253,230,138,.82);stroke:#b97900;stroke-width:1.55}
+  50%,100%{fill:rgba(253,230,138,0);stroke:transparent;stroke-width:0}
+}
+.region-target.target{animation:targetBlinkRegion 1s steps(1,end) infinite}
+.region-target.answer-correct{fill:rgba(167,243,208,.74);stroke:#23844d;stroke-width:1.55;animation:none}
+.region-boundary{
+  fill:none;stroke:#94a3b8;stroke-width:1.15;
+  vector-effect:non-scaling-stroke;pointer-events:none
+}
+.pref-outline{
+  fill:none;stroke:var(--outline);stroke-width:1.8;
+  vector-effect:non-scaling-stroke;pointer-events:none
+}
+.kobe-outline{
+  fill:none;stroke:var(--outline);stroke-width:1.45;
+  vector-effect:non-scaling-stroke;pointer-events:none
+}
+.controls{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:8px;z-index:5}
+.controls button{
+  width:46px;height:46px;border:1px solid #aeb9c6;border-radius:10px;
+  background:rgba(255,255,255,.96);box-shadow:0 2px 7px rgba(0,0,0,.12);
+  font-weight:700;color:#1f2937
+}
+.controls button.zoom{font-size:24px}
+.controls button.reset{font-size:12px;line-height:1.05}
+#feedback{
+  position:absolute;left:50%;top:18px;transform:translateX(-50%);
+  z-index:6;min-width:140px;max-width:88vw;text-align:center;
+  padding:9px 16px;border-radius:999px;background:rgba(255,255,255,.97);
+  border:1px solid #cbd5e1;box-shadow:0 2px 8px rgba(0,0,0,.10);
+  font-size:16px;font-weight:900;opacity:0;pointer-events:none;transition:opacity .12s ease
+}
+#feedback.show{opacity:1}
+#feedback.ok{color:#047857}
+#feedback.ng{color:#b91c1c}
+#result{
+  display:none;position:absolute;inset:0;z-index:10;background:rgba(238,244,251,.96);
+  align-items:flex-start;justify-content:center;padding:12px 20px 20px;overflow:auto
+}
+.result-card{
+  width:min(92vw,460px);background:#fff;border:1px solid var(--border);border-radius:18px;
+  padding:22px;text-align:center;box-shadow:0 8px 24px rgba(15,23,42,.12)
+}
+.result-card h2{margin:0 0 10px;font-size:25px}
+.result-card p{font-size:16px;line-height:1.6;margin:8px 0 18px}
+.result-card button,.result-card a{
+  display:block;width:100%;padding:12px 14px;margin-top:9px;border-radius:12px;
+  font-size:16px;font-weight:800;text-decoration:none
+}
+.result-card button{border:1px solid #9fb1c4;background:#f8fbff;color:#17324d}
+.result-card .primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.result-card a{border:1px solid #cbd5e1;color:#334155;background:#fff}
+body.range-selecting #mapWrap{min-height:0;height:auto;flex:none;overflow:visible}
+body.range-selecting #map,body.range-selecting .controls,body.range-selecting #choices,body.range-selecting #feedback{display:none}
+body.range-selecting #startPanel{position:relative;inset:auto;min-height:0}
+#startPanel{
+  display:none;position:absolute;inset:0;z-index:20;background:rgba(238,244,251,.97);
+  align-items:flex-start;justify-content:center;padding:12px 18px 18px
+}
+.start-card{
+  width:min(94vw,560px);background:#fff;border:1px solid var(--border);border-radius:18px;
+  padding:18px;box-shadow:0 8px 24px rgba(15,23,42,.12)
+}
+.start-card h2{margin:0 0 6px;text-align:center;font-size:23px}
+.start-card p{margin:0 0 12px;text-align:center;color:var(--sub);font-size:13px;line-height:1.6}
+.all-challenge{
+  display:block;width:100%;min-height:52px;margin:0 0 12px;border:1px solid var(--accent);
+  border-radius:12px;background:var(--accent);color:#fff;font-size:18px;font-weight:900
+}
+.range-map-wrap{width:100%;border:1px solid #d7e0ea;border-radius:14px;background:var(--sea);overflow:hidden}
+#rangeMap{display:block;width:100%;height:auto;aspect-ratio:.82}
+.range-region{fill:#f8fafc;stroke:none;cursor:pointer}
+.range-region:hover{fill:#eaf2f8}
+.range-boundary{
+  fill:none;stroke:#9aa8b8;stroke-width:1.1;
+  vector-effect:non-scaling-stroke;pointer-events:none
+}
+.range-outline{
+  fill:none;stroke:#1f2937;stroke-width:1.8;
+  vector-effect:non-scaling-stroke;pointer-events:none
+}
+.range-label{
+  fill:#111827;font-weight:900;font-size:14px;text-anchor:middle;dominant-baseline:middle;
+  paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round;pointer-events:none
+}
+footer{
+  background:#fff;border-top:1px solid var(--border);text-align:center;
+  font-size:9px;line-height:1.45;color:#667085;padding:8px 10px 10px
+}
+@media (max-width:440px){
+  .choice{min-height:58px}
+  #mapWrap{min-height:49vh}
+  .controls{top:10px;right:10px}
+  .controls button{width:42px;height:42px}
+}
+</style>
+</head>
+<body>
+<div class="topnav"><a href="index.html">← 名産品ゲーム トップへ</a></div>
+<header>
+  <h1>兵庫県 名産品記憶ゲーム</h1>
+  <div class="sub">🎯 クイズ2　場所を見て、ゆかりの名産品を当てる</div>
+  <div id="question" style="display:none;">黄色く光っている場所とゆかりの深い名産品はどれですか？</div>
+  <div id="scopeHint" style="display:none;"><span></span></div>
+  <div id="progress" style="display:none;"></div>
+  <div id="quizActionRow">
+    <button id="restartBtn" type="button">もう一度最初から</button>
+    <button id="headerRangeBtn" type="button">出題範囲を選び直す</button>
+  </div>
+</header>
+
+<div id="choices" style="display:none;" aria-label="名産品の選択肢"></div>
+
+<main id="mapWrap">
+  <svg id="map" aria-label="兵庫県 名産品の場所を示す地図"></svg>
+  <div class="controls" aria-label="地図の操作">
+    <button id="zoomIn" class="zoom" type="button" aria-label="拡大">＋</button>
+    <button id="zoomOut" class="zoom" type="button" aria-label="縮小">−</button>
+    <button id="resetButton" class="reset" type="button" aria-label="全体表示">全体</button>
+  </div>
+  <div id="startPanel">
+    <div class="start-card">
+      <h2>出題範囲を選ぶ</h2>
+      <p>黄色く光る場所を見て、4つの名産品から答えます。</p>
+      <button id="allChallengeBtn" class="all-challenge" type="button">全71問でチャレンジ</button>
+      <div class="range-map-wrap">
+        <svg id="rangeMap" viewBox="0 0 400 490" aria-label="兵庫県10地域の選択地図"></svg>
+      </div>
+    </div>
+  </div>
+  <div id="feedback" aria-live="polite"></div>
+  <div id="result">
+    <div class="result-card">
+      <h2>採点結果</h2>
+      <p id="resultText"></p>
+      <button id="againBtn" class="primary" type="button">もう一度最初から</button>
+      <button id="wrongBtn" type="button">間違えた問題だけもう一度</button>
+      <button id="rangeBtn" type="button">出題範囲を選び直す</button>
+      <a href="index.html">トップへ</a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  地図境界データ：『歴史的行政区域データセットβ版』（CODH作成）／国土数値情報「行政区域データ」を加工。CC BY 4.0<br>
+  名産品情報：県・市町・国・JA等の公式情報。<a href="sources.html" style="color:inherit">出典・データについて</a><br>
+  © KUSSOON 2026 All Rights Reserved.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script src="meisan-data.js"></script>
+<script>
+(() => {
+  "use strict";
+
+  const DATA_URL = "../hyogo-city.topojson";
+  const data = window.HYOGO_MEISAN_DATA;
+  if (!data) return;
+
+  const REGIONS = [
+    { id: "all", label: "全県", codes: null },
+    { id: "kobe", label: "神戸", codes: ["28101","28102","28105","28106","28107","28108","28109","28110","28111"] },
+    { id: "hanshin-s", label: "阪神南", codes: ["28202","28204","28206"] },
+    { id: "hanshin-n", label: "阪神北", codes: ["28207","28214","28217","28219","28301"] },
+    { id: "higashi", label: "東播磨", codes: ["28203","28210","28216","28381","28382"] },
+    { id: "kita", label: "北播磨", codes: ["28213","28215","28218","28220","28228","28365"] },
+    { id: "naka", label: "中播磨", codes: ["28201","28442","28443","28446"] },
+    { id: "nishi", label: "西播磨", codes: ["28208","28212","28227","28229","28464","28481","28501"] },
+    { id: "tajima", label: "但馬", codes: ["28209","28222","28225","28585","28586"] },
+    { id: "tamba", label: "丹波", codes: ["28221","28223"] },
+    { id: "awaji", label: "淡路", codes: ["28205","28224","28226"] }
+  ];
+
+  const REGION_LABEL_OFFSET = {
+    "kobe":{dx:-8,dy:4},"hanshin-s":{dx:12,dy:0},"hanshin-n":{dx:12,dy:-2},
+    "higashi":{dx:-3,dy:0},"kita":{dx:0,dy:-2},"naka":{dx:0,dy:0},
+    "nishi":{dx:-5,dy:0},"tajima":{dx:0,dy:0},"tamba":{dx:2,dy:0},"awaji":{dx:0,dy:0}
+  };
+
+  const svg = d3.select("#map");
+  const mapWrap = document.getElementById("mapWrap");
+  const questionEl = document.getElementById("question");
+  const scopeHint = document.getElementById("scopeHint");
+  const scopeHintText = scopeHint.querySelector("span");
+  const progressEl = document.getElementById("progress");
+  const choicesEl = document.getElementById("choices");
+  const feedback = document.getElementById("feedback");
+  const result = document.getElementById("result");
+  const resultText = document.getElementById("resultText");
+  const wrongBtn = document.getElementById("wrongBtn");
+  const startPanel = document.getElementById("startPanel");
+  const root = svg.append("g");
+  const areaLayer = root.append("g");
+  const regionLayer = root.append("g");
+  const boundaryLayer = root.append("g");
+  const outlineLayer = root.append("g");
+
+  let zoom;
+  let path;
+  let features = [];
+  let areaPaths;
+  let regionPaths;
+  let regionFeatures = [];
+  let queue = [];
+  let index = 0;
+  let currentQuestion = null;
+  let currentRange = null;
+  let wrongSet = new Set();
+  let locked = false;
+  let roundToken = 0;
+
+  function getCode(properties) {
+    return String(properties.N03_007 || properties.code || properties.CITY_CODE || properties["行政区域コード"] || "");
+  }
+
+  function setQuizHeaderVisible(visible) {
+    questionEl.style.display = visible ? "flex" : "none";
+    scopeHint.style.display = visible ? "block" : "none";
+    progressEl.style.display = visible ? "block" : "none";
+    choicesEl.style.display = visible ? "grid" : "none";
+    document.getElementById("quizActionRow").style.display = visible ? "flex" : "none";
+  }
+
+  function shuffle(items) {
+    const shuffled = items.slice();
+    for (let i = shuffled.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const temporary = shuffled[i];
+      shuffled[i] = shuffled[j];
+      shuffled[j] = temporary;
+    }
+    return shuffled;
+  }
+
+  function questionsForRange(regionId) {
+    return data.questions.filter(question => regionId === "all" || question.regionId === regionId);
+  }
+
+  function showFeedback(message, type) {
+    feedback.textContent = message;
+    feedback.className = "show " + type;
+  }
+
+  function hideFeedback() {
+    feedback.className = "";
+  }
+
+  function resetMapColors() {
+    if (areaPaths) areaPaths.classed("target", false).classed("answer-correct", false);
+    if (regionPaths) regionPaths.classed("target", false).classed("answer-correct", false);
+  }
+
+  function resetMapView() {
+    svg.call(zoom.transform, d3.zoomIdentity);
+  }
+
+  function isValidDistractor(current, candidate) {
+    if (candidate.id === current.id) return false;
+    if (current.answerScope === "region") return candidate.regionId !== current.regionId;
+    if (candidate.answerScope === "area" && candidate.answerId === current.answerId) return false;
+    if (candidate.answerScope === "region" && candidate.regionId === current.regionId) return false;
+    return true;
+  }
+
+  function addChoices(destination, candidates) {
+    candidates.forEach(candidate => {
+      if (destination.length >= 3) return;
+      if (!destination.some(item => item.id === candidate.id)) destination.push(candidate);
+    });
+  }
+
+  function makeChoices(question) {
+    const valid = data.questions.filter(candidate => isValidDistractor(question, candidate));
+    const sameRegionAndScope = valid.filter(candidate => candidate.regionId === question.regionId && candidate.answerScope === question.answerScope);
+    const sameScope = valid.filter(candidate => candidate.answerScope === question.answerScope);
+    const distractors = [];
+    addChoices(distractors, shuffle(sameRegionAndScope));
+    addChoices(distractors, shuffle(sameScope));
+    addChoices(distractors, shuffle(valid));
+    return shuffle([question].concat(distractors.slice(0, 3)));
+  }
+
+  function markTarget() {
+    const areaId = currentQuestion.answerScope === "area" ? currentQuestion.answerId : null;
+    const regionId = currentQuestion.answerScope === "region" ? currentQuestion.answerId : null;
+    areaPaths.classed("target", feature => feature.__code === areaId);
+    regionPaths.classed("target", region => region.id === regionId);
+  }
+
+  function markCorrectTarget() {
+    const areaId = currentQuestion.answerScope === "area" ? currentQuestion.answerId : null;
+    const regionId = currentQuestion.answerScope === "region" ? currentQuestion.answerId : null;
+    areaPaths.classed("target", false).classed("answer-correct", feature => feature.__code === areaId);
+    regionPaths.classed("target", false).classed("answer-correct", region => region.id === regionId);
+  }
+
+  function renderChoices() {
+    choicesEl.innerHTML = "";
+    makeChoices(currentQuestion).forEach(option => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "choice";
+      button.textContent = option.specialty;
+      button.setAttribute("aria-label", option.specialty + "を選ぶ");
+      button.addEventListener("click", () => answerChoice(button, option));
+      choicesEl.appendChild(button);
+    });
+  }
+
+  function disableChoices() {
+    choicesEl.querySelectorAll("button").forEach(button => { button.disabled = true; });
+  }
+
+  function startQuiz(questions) {
+    if (!questions.length) {
+      openRangeSelect();
+      return;
+    }
+    roundToken += 1;
+    queue = shuffle(questions);
+    index = 0;
+    currentQuestion = null;
+    wrongSet = new Set();
+    locked = false;
+    result.style.display = "none";
+    resetMapColors();
+    resetMapView();
+    showQuestion();
+  }
+
+  function showQuestion() {
+    hideFeedback();
+    resetMapColors();
+    if (index >= queue.length) {
+      finishQuiz();
+      return;
+    }
+    currentQuestion = queue[index];
+    locked = false;
+    questionEl.textContent = currentQuestion.answerScope === "region"
+      ? "黄色く光っている10区域とゆかりの深い名産品はどれですか？"
+      : "黄色く光っている市町・区とゆかりの深い名産品はどれですか？";
+    scopeHintText.textContent = currentQuestion.answerScope === "region" ? "表示：10区域" : "表示：市町・区";
+    progressEl.textContent = (index + 1) + " / " + queue.length;
+    renderChoices();
+    markTarget();
+    resetMapView();
+  }
+
+  function answerChoice(button, option) {
+    if (locked || !currentQuestion) return;
+    if (option.id === currentQuestion.id) {
+      locked = true;
+      button.classList.add("correct-choice");
+      markCorrectTarget();
+      showFeedback("正解です！", "ok");
+      disableChoices();
+      const token = roundToken;
+      window.setTimeout(() => {
+        if (token !== roundToken) return;
+        index += 1;
+        showQuestion();
+      }, 1500);
+      return;
+    }
+    wrongSet.add(currentQuestion.id);
+    button.classList.add("wrong-choice");
+    button.disabled = true;
+    showFeedback("違います！", "ng");
+  }
+
+  function finishQuiz() {
+    locked = true;
+    currentQuestion = null;
+    const wrongCount = wrongSet.size;
+    const correctFirst = queue.length - wrongCount;
+    const score = Math.round((correctFirst / queue.length) * 100);
+    questionEl.textContent = "クイズ終了";
+    scopeHintText.textContent = "";
+    progressEl.textContent = "";
+    choicesEl.innerHTML = "";
+    resultText.innerHTML = "<strong>" + score + "点</strong><br>" + queue.length + "問中 " + correctFirst + "問を最初の選択で正解しました。<br>間違えた問題：" + wrongCount + "問";
+    wrongBtn.style.display = wrongCount ? "block" : "none";
+    result.style.display = "flex";
+  }
+
+  function beginRange(region) {
+    currentRange = region;
+    document.body.classList.remove("range-selecting");
+    startPanel.style.display = "none";
+    setQuizHeaderVisible(true);
+    startQuiz(questionsForRange(region.id));
+  }
+
+  function openRangeSelect() {
+    roundToken += 1;
+    locked = true;
+    currentQuestion = null;
+    result.style.display = "none";
+    setQuizHeaderVisible(false);
+    hideFeedback();
+    document.body.classList.add("range-selecting");
+    startPanel.style.display = "flex";
+  }
+
+  function buildRangeMap(topo, objectKey) {
+    const rangeSvg = d3.select("#rangeMap");
+    rangeSvg.selectAll("*").remove();
+    const projection = d3.geoMercator();
+    projection.fitExtent([[18,16],[382,474]], { type: "FeatureCollection", features: features });
+    const rangePath = d3.geoPath(projection);
+    rangeSvg.selectAll("path.range-region")
+      .data(regionFeatures)
+      .join("path")
+      .attr("class", "range-region")
+      .attr("d", item => rangePath(item.geometry))
+      .attr("tabindex", 0)
+      .attr("role", "button")
+      .attr("aria-label", item => item.label + "を選ぶ")
+      .on("click", (event, item) => beginRange(item))
+      .on("keydown", (event, item) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          beginRange(item);
+        }
+      });
+
+    const codeToRegion = {};
+    REGIONS.filter(region => region.id !== "all").forEach(region => {
+      region.codes.forEach(code => { codeToRegion[code] = region.id; });
+    });
+    const mesh = topojson.mesh(topo, topo.objects[objectKey], (first, second) => {
+      if (!first || !second) return false;
+      const firstCode = getCode(first.properties || {});
+      const secondCode = getCode(second.properties || {});
+      return !!codeToRegion[firstCode] && !!codeToRegion[secondCode] && codeToRegion[firstCode] !== codeToRegion[secondCode];
+    });
+    const allGeometries = (topo.objects[objectKey].geometries || []).filter(geometry => getCode(geometry.properties || {}).startsWith("28"));
+    rangeSvg.append("path").datum(mesh).attr("class", "range-boundary").attr("d", rangePath);
+    rangeSvg.append("path").datum(topojson.merge(topo, allGeometries)).attr("class", "range-outline").attr("d", rangePath);
+    rangeSvg.selectAll("text.range-label")
+      .data(regionFeatures)
+      .join("text")
+      .attr("class", "range-label")
+      .attr("x", item => rangePath.centroid(item.geometry)[0] + (REGION_LABEL_OFFSET[item.id] || { dx: 0 }).dx)
+      .attr("y", item => rangePath.centroid(item.geometry)[1] + (REGION_LABEL_OFFSET[item.id] || { dy: 0 }).dy)
+      .text(item => item.label);
+    document.getElementById("allChallengeBtn").textContent = "全" + data.questions.length + "問でチャレンジ";
+    document.getElementById("allChallengeBtn").onclick = () => beginRange(REGIONS[0]);
+  }
+
+  function tryAutoStartFromQuery() {
+    const rangeId = new URLSearchParams(location.search).get("range");
+    const region = REGIONS.find(item => item.id === rangeId);
+    if (!region) return false;
+    beginRange(region);
+    return true;
+  }
+
+  async function draw() {
+    try {
+      const response = await fetch(DATA_URL);
+      if (!response.ok) throw new Error("data");
+      const topo = await response.json();
+      const objectKey = Object.keys(topo.objects)[0];
+      const featureCollection = topojson.feature(topo, topo.objects[objectKey]);
+      features = (featureCollection.features || []).map((feature, number) => {
+        feature.__code = getCode(feature.properties || {});
+        feature.__id = feature.__code ? "area-" + feature.__code : "area-" + (number + 1);
+        return feature;
+      }).filter(feature => feature.__code.startsWith("28"));
+
+      const width = Math.max(320, mapWrap.clientWidth);
+      const height = Math.max(500, mapWrap.clientHeight);
+      svg.attr("viewBox", "0 0 " + width + " " + height);
+      const projection = d3.geoMercator();
+      projection.fitExtent([[22,18],[width - 22,height - 22]], { type: "FeatureCollection", features: features });
+      path = d3.geoPath(projection);
+
+      const allGeometries = (topo.objects[objectKey].geometries || []).filter(geometry => getCode(geometry.properties || {}).startsWith("28"));
+      const geometryByCode = new Map(allGeometries.map(geometry => [getCode(geometry.properties || {}), geometry]));
+      regionFeatures = REGIONS.filter(region => region.id !== "all").map(region => {
+        const geometries = region.codes.map(code => geometryByCode.get(code)).filter(Boolean);
+        return { id: region.id, label: region.label, codes: region.codes, geometry: topojson.merge(topo, geometries) };
+      });
+
+      areaPaths = areaLayer.selectAll("path.area")
+        .data(features)
+        .join("path")
+        .attr("class", feature => feature.__code.startsWith("281") ? "area kobe-base" : "area")
+        .attr("id", feature => feature.__id)
+        .attr("d", path);
+
+      regionPaths = regionLayer.selectAll("path.region-target")
+        .data(regionFeatures)
+        .join("path")
+        .attr("class", "region-target")
+        .attr("d", item => path(item.geometry));
+
+      const codeToRegion = {};
+      regionFeatures.forEach(region => region.codes.forEach(code => { codeToRegion[code] = region.id; }));
+      const regionMesh = topojson.mesh(topo, topo.objects[objectKey], (first, second) => {
+        if (!first || !second) return false;
+        const firstCode = getCode(first.properties || {});
+        const secondCode = getCode(second.properties || {});
+        return !!codeToRegion[firstCode] && !!codeToRegion[secondCode] && codeToRegion[firstCode] !== codeToRegion[secondCode];
+      });
+      boundaryLayer.append("path").datum(regionMesh).attr("class", "region-boundary").attr("d", path);
+      const kobeGeometries = allGeometries.filter(geometry => getCode(geometry.properties || {}).startsWith("281"));
+      outlineLayer.append("path").datum(topojson.merge(topo, kobeGeometries)).attr("class", "kobe-outline").attr("d", path);
+      outlineLayer.append("path").datum(topojson.merge(topo, allGeometries)).attr("class", "pref-outline").attr("d", path);
+
+      zoom = d3.zoom().scaleExtent([1,12]).on("zoom", event => root.attr("transform", event.transform));
+      svg.call(zoom).on("dblclick.zoom", null);
+      document.getElementById("zoomIn").onclick = () => svg.transition().duration(180).call(zoom.scaleBy, 1.45);
+      document.getElementById("zoomOut").onclick = () => svg.transition().duration(180).call(zoom.scaleBy, 1 / 1.45);
+      document.getElementById("resetButton").onclick = () => svg.transition().duration(220).call(zoom.transform, d3.zoomIdentity);
+      document.getElementById("restartBtn").onclick = () => startQuiz(questionsForRange(currentRange.id));
+      document.getElementById("headerRangeBtn").onclick = openRangeSelect;
+      document.getElementById("againBtn").onclick = () => startQuiz(questionsForRange(currentRange.id));
+      document.getElementById("rangeBtn").onclick = openRangeSelect;
+      wrongBtn.onclick = () => {
+        const retry = queue.filter(question => wrongSet.has(question.id));
+        startQuiz(retry);
+      };
+
+      buildRangeMap(topo, objectKey);
+      if (!tryAutoStartFromQuery()) openRangeSelect();
+    } catch (error) {
+      setQuizHeaderVisible(true);
+      questionEl.textContent = "地図データを読み込めませんでした。";
+      scopeHintText.textContent = "";
+      progressEl.textContent = "通信状況を確認してから、もう一度開いてください。";
+    }
+  }
+
+  draw();
+})();
+</script>
+</body>
+</html>
