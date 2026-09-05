@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>出典・データについて｜兵庫県 名産品記憶ゲーム</title>
+<style>
+:root{
+  --bg:#eef4fb;
+  --panel:#ffffff;
+  --ink:#1f2937;
+  --sub:#64748b;
+  --border:#d7e0ea;
+  --accent:#315f8c;
+  --accent-soft:#eaf2f8;
+  --notice:#fff8e8;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;color:var(--ink);background:var(--bg)}
+body{padding-bottom:28px}
+header{background:var(--panel);border-bottom:1px solid var(--border);padding:18px 16px 17px;text-align:center}
+.topnav{width:min(92vw,760px);margin:0 auto 14px;text-align:left}
+.topnav a{color:#334155;text-decoration:none;font-size:14px;font-weight:700}
+h1{margin:0;font-size:clamp(24px,7vw,34px);line-height:1.3}
+.lead{max-width:680px;margin:9px auto 0;color:#475569;font-size:14px;line-height:1.7}
+main{width:min(92vw,760px);margin:20px auto 0}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:18px;margin-bottom:15px;box-shadow:0 4px 16px rgba(15,23,42,.06)}
+h2{font-size:19px;margin:0 0 10px}
+h3{font-size:16px;margin:22px 0 9px}
+p{margin:0;color:#475569;font-size:14px;line-height:1.75}
+.notice{background:var(--notice);border:1px solid #f4d58d;border-radius:13px;padding:13px 14px;color:#6d4c00;font-size:14px;line-height:1.65}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:13px}
+.stat{border:1px solid var(--border);border-radius:13px;background:#f8fbff;padding:13px;text-align:center}
+.stat strong{display:block;color:var(--accent);font-size:24px;line-height:1.15}
+.stat span{display:block;margin-top:4px;color:var(--sub);font-size:12px}
+.source-group{margin-top:17px}
+.source-group:first-child{margin-top:0}
+.source-group h3{margin-top:0}
+.source-list{display:grid;gap:9px}
+.source{border:1px solid var(--border);border-radius:13px;padding:12px 13px;background:#fff}
+.source-head{display:flex;align-items:flex-start;gap:9px}
+.source-id{flex:0 0 auto;min-width:38px;padding:3px 6px;border-radius:7px;background:var(--accent-soft);color:#214d76;text-align:center;font-size:12px;font-weight:800;line-height:1.4}
+.source-title{margin:0;color:var(--ink);font-size:14px;font-weight:800;line-height:1.5}
+.source-meta{margin:3px 0 0;color:var(--sub);font-size:12px;line-height:1.5}
+.source-link{display:inline-block;margin:8px 0 0 47px;color:#245d94;font-size:13px;line-height:1.45;word-break:break-word}
+.question-details summary{cursor:pointer;color:#244d77;font-size:15px;font-weight:800}
+.question-note{margin:10px 0 0;color:var(--sub);font-size:12px}
+.table-wrap{overflow-x:auto;margin-top:12px;border:1px solid var(--border);border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:620px;background:#fff;font-size:13px}
+th,td{padding:9px 10px;text-align:left;vertical-align:top;border-bottom:1px solid var(--border);line-height:1.5}
+th{position:sticky;top:0;background:#f4f8fc;color:#334155;font-size:12px;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+.scope{display:inline-block;padding:2px 6px;border-radius:7px;background:#edf7f0;color:#24613a;font-size:11px;font-weight:800;white-space:nowrap}
+.scope.region{background:#f2effe;color:#5b3c9a}
+footer{width:min(92vw,760px);margin:24px auto 0;text-align:center;color:var(--sub);font-size:10px;line-height:1.55}
+@media (max-width:430px){
+  header{padding-top:16px}
+  .card{padding:16px}
+  .stats{gap:8px}
+  .stat{padding:11px 8px}
+  .source-link{margin-left:0}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="topnav"><a href="../index.html">← 兵庫県 市町村記憶ゲームへ</a></div>
+  <h1>出典・データについて</h1>
+  <div class="lead">兵庫県 名産品記憶ゲームで使う問題と、確認に用いた情報源です。</div>
+</header>
+
+<main>
+  <section class="card">
+    <h2>出題の考え方</h2>
+    <p>兵庫県内の名産品・地場産業・郷土の名物を、場所と結び付けて覚えるためのゲームです。市町・神戸市の区と、既存ゲームの10地域を同じ問題プールに入れます。</p>
+    <div class="notice" id="sourcePolicy"></div>
+    <div class="stats">
+      <div class="stat"><strong id="questionCount">—</strong><span>収録問題</span></div>
+      <div class="stat"><strong id="sourceCount">—</strong><span>確認した情報源</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>正答の扱い</h2>
+    <p>「産地」「主産地」「特産」は、資料で地域との結び付きが確認できるものです。複数の市町にまたがる品目は、問題文を「代表地」「中心地」「発祥地」「地区所在地」に限定し、一つの場所だけが唯一の産地であるようには扱いません。</p>
+    <p style="margin-top:10px">ゲーム画面では答えやすさを優先し、出典記号は表示しません。確認したい場合は、このページの出題一覧から各問題の出典をたどれます。</p>
+  </section>
+
+  <section class="card">
+    <h2>情報源一覧</h2>
+    <div id="sourceGroups"></div>
+  </section>
+
+  <section class="card">
+    <h2>出題一覧</h2>
+    <details class="question-details">
+      <summary id="questionSummary">問題を表示</summary>
+      <p class="question-note">市町・区の問題と10区域の問題を混在させます。</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>名産品</th><th>正答</th><th>答える単位</th><th>扱い</th><th>出典</th></tr>
+          </thead>
+          <tbody id="questionRows"></tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+</main>
+
+<footer>
+  兵庫県 名産品記憶ゲーム データ Ver.<span id="version">—</span>（最終確認日：<span id="updatedAt">—</span>）<br>
+  © KUSSOON 2026 All Rights Reserved.
+</footer>
+
+<script src="meisan-data.js"></script>
+<script>
+(() => {
+  const data = window.HYOGO_MEISAN_DATA;
+  if (!data) return;
+
+  const sourceById = new Map(data.sources.map(source => [source.id, source]));
+  const usesById = new Map(data.sources.map(source => [source.id, 0]));
+  data.questions.forEach(question => question.sourceIds.forEach(id => usesById.set(id, (usesById.get(id) || 0) + 1)));
+
+  document.getElementById("sourcePolicy").textContent = data.sourcePolicy;
+  document.getElementById("questionCount").textContent = data.questions.length;
+  document.getElementById("sourceCount").textContent = data.sources.length;
+  document.getElementById("questionSummary").textContent = `全${data.questions.length}問を表示`;
+  document.getElementById("version").textContent = data.version;
+  document.getElementById("updatedAt").textContent = data.updatedAt;
+
+  const groups = [...new Set(data.sources.map(source => source.group))];
+  const groupsEl = document.getElementById("sourceGroups");
+  groups.forEach(group => {
+    const section = document.createElement("section");
+    section.className = "source-group";
+    const heading = document.createElement("h3");
+    heading.textContent = group;
+    const list = document.createElement("div");
+    list.className = "source-list";
+    data.sources.filter(source => source.group === group).forEach(source => {
+      const item = document.createElement("article");
+      item.className = "source";
+      const usage = usesById.get(source.id) || 0;
+      item.innerHTML = `
+        <div class="source-head">
+          <span class="source-id">${source.id}</span>
+          <div>
+            <p class="source-title">${source.title}</p>
+            <p class="source-meta">${source.publisher}　${usage ? `使用問題：${usage}問` : "参考資料"}</p>
+          </div>
+        </div>
+        <a class="source-link" href="${source.url}" target="_blank" rel="noopener noreferrer">資料を開く</a>`;
+      list.appendChild(item);
+    });
+    section.append(heading, list);
+    groupsEl.appendChild(section);
+  });
+
+  const questionRows = document.getElementById("questionRows");
+  data.questions.forEach(question => {
+    const row = document.createElement("tr");
+    const scopeLabel = question.answerScope === "region" ? "10区域" : "市町・区";
+    const sourceLinks = question.sourceIds.map(id => {
+      const source = sourceById.get(id);
+      return source ? `<a href="${source.url}" target="_blank" rel="noopener noreferrer">${id}</a>` : id;
+    }).join("、");
+    row.innerHTML = `
+      <td>${question.id}</td>
+      <td>${question.specialty}</td>
+      <td>${question.answerLabel}</td>
+      <td><span class="scope ${question.answerScope === "region" ? "region" : ""}">${scopeLabel}</span></td>
+      <td>${question.evidenceType}</td>
+      <td>${sourceLinks}</td>`;
+    questionRows.appendChild(row);
+  });
+})();
+</script>
+</body>
+</html>
