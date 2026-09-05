@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>地図で覚える｜兵庫県 名産品記憶ゲーム</title>
+<style>
+:root{
+  --bg:#eef4fb;
+  --panel:#ffffff;
+  --ink:#1f2937;
+  --sub:#64748b;
+  --border:#d7e0ea;
+  --accent:#315f8c;
+  --accent-soft:#eaf2f8;
+  --green:#3f9a65;
+  --green-soft:#dff4e6;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;color:var(--ink);background:var(--bg)}
+body{padding-bottom:28px}
+header{background:var(--panel);border-bottom:1px solid var(--border);padding:18px 16px 17px;text-align:center}
+.topnav{width:min(94vw,760px);margin:0 auto 14px;text-align:left}
+.topnav a{color:#334155;text-decoration:none;font-size:14px;font-weight:700}
+h1{margin:0;font-size:clamp(24px,7vw,34px);line-height:1.3}
+.lead{max-width:680px;margin:9px auto 0;color:#475569;font-size:14px;line-height:1.7}
+main{width:min(94vw,760px);margin:20px auto 0}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:17px;margin-bottom:15px;box-shadow:0 4px 16px rgba(15,23,42,.06)}
+h2{margin:0;font-size:19px}
+.section-note{margin:7px 0 0;color:#64748b;font-size:13px;line-height:1.6}
+.region-buttons{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-top:13px}
+.region-btn{min-height:41px;padding:8px 5px;border:1px solid #b8c8d8;border-radius:10px;background:#f9fbfd;color:#29445e;font:inherit;font-size:13px;font-weight:800;line-height:1.25;cursor:pointer}
+.region-btn.all{grid-column:span 2;background:#f2f6fa}
+.region-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.map-card{padding:0;overflow:hidden}
+.map-head{padding:16px 17px 11px}
+#selectedInfo{min-height:42px;margin-top:8px;padding:9px 11px;border-radius:11px;background:#f7fafc;color:#475569;font-size:13px;line-height:1.45}
+#selectedInfo.has-selection{background:var(--green-soft);color:#195e36;font-weight:700}
+#mapWrap{position:relative;margin:0;border-top:1px solid var(--border);background:#fbfdff;overflow:hidden}
+#map{display:block;width:100%;height:auto;touch-action:none}
+.map-region{stroke:#96aabd;stroke-width:1.2;cursor:pointer}
+.map-area{stroke:#d5e0e9;stroke-width:.72;pointer-events:none}
+.map-outline{fill:none;stroke:#5e768c;stroke-width:1.55;pointer-events:none}
+.zoom-controls{position:absolute;right:10px;top:10px;display:flex;gap:6px;z-index:3}
+.zoom-controls button{width:38px;height:36px;border:1px solid #aab9c8;border-radius:10px;background:rgba(255,255,255,.96);color:#203a54;font:inherit;font-size:18px;font-weight:800;box-shadow:0 1px 4px rgba(15,23,42,.12);cursor:pointer}
+.zoom-controls button:last-child{width:auto;padding:0 10px;font-size:13px}
+.map-foot{padding:10px 16px 14px;color:#64748b;font-size:12px;line-height:1.5}
+.list-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+#itemCount{color:var(--sub);font-size:12px;white-space:nowrap}
+.item-list{display:grid;gap:8px;margin-top:13px}
+.meisan-item{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:12px 13px;border:1px solid var(--border);border-radius:13px;background:#fff;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.meisan-item:hover{border-color:#8fa8be;background:#fbfdff}
+.meisan-item.active{border-color:var(--green);background:#f3fbf5;box-shadow:inset 0 0 0 1px var(--green)}
+.item-name{font-size:15px;font-weight:800;line-height:1.4}
+.item-answer{color:#49657e;font-size:13px;font-weight:700;line-height:1.45;text-align:right}
+.item-basis{display:block;margin-top:2px;color:#718096;font-size:11px;font-weight:500}
+.empty{margin:13px 0 0;padding:16px;border:1px dashed #c5d2de;border-radius:12px;color:#64748b;font-size:14px;text-align:center}
+.data-link{margin-top:14px;text-align:center;font-size:13px}
+.data-link a{color:#245d94}
+footer{width:min(94vw,760px);margin:24px auto 0;text-align:center;color:var(--sub);font-size:10px;line-height:1.55}
+@media (max-width:520px){
+  .region-buttons{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .region-btn.all{grid-column:span 2}
+  .card{padding:15px}
+  .map-head{padding:15px 15px 10px}
+  .map-foot{padding-left:15px;padding-right:15px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="topnav"><a href="index.html">← 名産品ゲーム トップへ</a></div>
+  <h1>地図で覚える</h1>
+  <div class="lead">地域を選び、名産品を押すと、ゆかりの場所を地図で確認できます。</div>
+</header>
+
+<main>
+  <section class="card">
+    <h2>地域を選ぶ</h2>
+    <p class="section-note">地図上の地域を押して選ぶこともできます。</p>
+    <div class="region-buttons" id="regionButtons"></div>
+  </section>
+
+  <section class="card map-card">
+    <div class="map-head">
+      <h2 id="mapTitle">兵庫県 全域</h2>
+      <div id="selectedInfo">名産品を選ぶと、地図上の場所を色で示します。</div>
+    </div>
+    <div id="mapWrap">
+      <div class="zoom-controls" aria-label="地図の操作">
+        <button type="button" id="zoomIn" aria-label="拡大">＋</button>
+        <button type="button" id="zoomOut" aria-label="縮小">−</button>
+        <button type="button" id="zoomReset">全体</button>
+      </div>
+      <svg id="map" viewBox="0 0 820 650" role="img" aria-label="兵庫県の地図"></svg>
+    </div>
+    <div class="map-foot">緑は選んだ名産品の場所です。青は選択中の地域です。</div>
+  </section>
+
+  <section class="card">
+    <div class="list-head">
+      <h2 id="listTitle">全県の名産品</h2>
+      <div id="itemCount"></div>
+    </div>
+    <div class="item-list" id="itemList"></div>
+    <div class="data-link"><a href="sources.html">出典・データについて</a></div>
+  </section>
+</main>
+
+<footer>
+  地図境界データ：『歴史的行政区域データセットβ版』（CODH作成）／国土数値情報「行政区域データ」を加工。CC BY 4.0<br>
+  名産品情報：県・市町・国・JA等の公式情報。<a href="sources.html" style="color:inherit">出典・データについて</a><br>
+  © KUSSOON 2026 All Rights Reserved.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script src="meisan-data.js"></script>
+<script>
+(() => {
+  "use strict";
+
+  const MAP_WIDTH = 820;
+  const MAP_HEIGHT = 650;
+  const DATA_URL = "../hyogo-city.topojson";
+  const data = window.HYOGO_MEISAN_DATA;
+  if (!data) return;
+
+  const REGIONS = [
+    { id: "all", label: "全県", codes: null },
+    { id: "kobe", label: "神戸", codes: ["28101","28102","28105","28106","28107","28108","28109","28110","28111"] },
+    { id: "hanshin-s", label: "阪神南", codes: ["28202","28204","28206"] },
+    { id: "hanshin-n", label: "阪神北", codes: ["28207","28214","28217","28219","28301"] },
+    { id: "higashi", label: "東播磨", codes: ["28203","28210","28216","28381","28382"] },
+    { id: "kita", label: "北播磨", codes: ["28213","28215","28218","28220","28228","28365"] },
+    { id: "naka", label: "中播磨", codes: ["28201","28442","28443","28446"] },
+    { id: "nishi", label: "西播磨", codes: ["28208","28212","28227","28229","28464","28481","28501"] },
+    { id: "tajima", label: "但馬", codes: ["28209","28222","28225","28585","28586"] },
+    { id: "tamba", label: "丹波", codes: ["28221","28223"] },
+    { id: "awaji", label: "淡路", codes: ["28205","28224","28226"] }
+  ];
+
+  const svg = d3.select("#map");
+  const root = svg.append("g");
+  const regionLayer = root.append("g");
+  const areaLayer = root.append("g");
+  const outlineLayer = root.append("g");
+  const regionButtons = document.getElementById("regionButtons");
+  const itemList = document.getElementById("itemList");
+  const listTitle = document.getElementById("listTitle");
+  const itemCount = document.getElementById("itemCount");
+  const mapTitle = document.getElementById("mapTitle");
+  const selectedInfo = document.getElementById("selectedInfo");
+
+  let activeRegionId = "all";
+  let selectedQuestion = null;
+  let mapReady = false;
+  let path;
+  let zoom;
+  let areaPaths;
+  let regionPaths;
+  let featureByCode = new Map();
+  let regionFeatureById = new Map();
+
+  const regionById = new Map(REGIONS.map(region => [region.id, region]));
+
+  function updateLabels() {
+    const region = regionById.get(activeRegionId);
+    const isAll = activeRegionId === "all";
+    mapTitle.textContent = isAll ? "兵庫県 全域" : `兵庫県 ${region.label}`;
+    listTitle.textContent = isAll ? "全県の名産品" : `${region.label}の名産品`;
+  }
+
+  function renderRegionButtons() {
+    regionButtons.innerHTML = "";
+    REGIONS.forEach(region => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `region-btn${region.id === "all" ? " all" : ""}${region.id === activeRegionId ? " active" : ""}`;
+      button.textContent = region.label;
+      button.addEventListener("click", () => selectRegion(region.id));
+      regionButtons.appendChild(button);
+    });
+  }
+
+  function renderItemList() {
+    const questions = data.questions.filter(question => activeRegionId === "all" || question.regionId === activeRegionId);
+    itemCount.textContent = `${questions.length}問`;
+    itemList.innerHTML = "";
+    if (!questions.length) {
+      itemList.innerHTML = '<div class="empty">この地域の問題は準備中です。</div>';
+      return;
+    }
+    questions.forEach(question => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `meisan-item${selectedQuestion && selectedQuestion.id === question.id ? " active" : ""}`;
+      button.innerHTML = `<span class="item-name">${question.specialty}</span><span class="item-answer">${question.answerLabel}<span class="item-basis">${question.evidenceType}</span></span>`;
+      button.addEventListener("click", () => selectQuestion(question));
+      itemList.appendChild(button);
+    });
+  }
+
+  function renderMapState() {
+    if (!mapReady) return;
+    const selectedArea = selectedQuestion && selectedQuestion.answerScope === "area" ? selectedQuestion.answerId : null;
+    const selectedRegion = selectedQuestion && selectedQuestion.answerScope === "region" ? selectedQuestion.answerId : null;
+
+    regionPaths
+      .attr("fill", region => {
+        if (region.id === selectedRegion) return "#76c893";
+        if (region.id === activeRegionId) return "#d9ebf8";
+        return "#f8fbff";
+      })
+      .attr("stroke", region => region.id === activeRegionId ? "#4d7597" : "#96aabd")
+      .attr("stroke-width", region => region.id === activeRegionId ? 1.7 : 1.15);
+
+    areaPaths.attr("fill", feature => String(feature.properties.N03_007) === selectedArea ? "#58ad72" : "transparent");
+  }
+
+  function updateSelectedInfo() {
+    if (!selectedQuestion) {
+      selectedInfo.className = "";
+      selectedInfo.textContent = "名産品を選ぶと、地図上の場所を色で示します。";
+      return;
+    }
+    const scope = selectedQuestion.answerScope === "region" ? "10区域" : "市町・区";
+    selectedInfo.className = "has-selection";
+    selectedInfo.textContent = `${selectedQuestion.specialty} → ${selectedQuestion.answerLabel}（${scope}・${selectedQuestion.evidenceType}）`;
+  }
+
+  function selectRegion(regionId) {
+    activeRegionId = regionId;
+    selectedQuestion = null;
+    updateLabels();
+    renderRegionButtons();
+    renderItemList();
+    updateSelectedInfo();
+    renderMapState();
+    if (!mapReady) return;
+    if (regionId === "all") {
+      resetMap();
+    } else {
+      focusGeometry(regionFeatureById.get(regionId).geometry);
+    }
+  }
+
+  function selectQuestion(question) {
+    selectedQuestion = question;
+    renderItemList();
+    updateSelectedInfo();
+    renderMapState();
+    if (!mapReady) return;
+    const geometry = question.answerScope === "region"
+      ? regionFeatureById.get(question.answerId).geometry
+      : featureByCode.get(question.answerId).geometry;
+    focusGeometry(geometry);
+  }
+
+  function resetMap() {
+    svg.transition().duration(260).call(zoom.transform, d3.zoomIdentity);
+  }
+
+  function focusGeometry(geometry) {
+    const [[x0, y0], [x1, y1]] = path.bounds(geometry);
+    const dx = Math.max(1, x1 - x0);
+    const dy = Math.max(1, y1 - y0);
+    const scale = Math.max(1, Math.min(8, 0.78 / Math.max(dx / MAP_WIDTH, dy / MAP_HEIGHT)));
+    const tx = MAP_WIDTH / 2 - scale * (x0 + x1) / 2;
+    const ty = MAP_HEIGHT / 2 - scale * (y0 + y1) / 2;
+    svg.transition().duration(280).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+  }
+
+  async function loadMap() {
+    try {
+      const topo = await fetch(DATA_URL).then(response => {
+        if (!response.ok) throw new Error("地図データを読み込めませんでした。");
+        return response.json();
+      });
+      const objectKey = Object.keys(topo.objects)[0];
+      const featureCollection = topojson.feature(topo, topo.objects[objectKey]);
+      const features = featureCollection.features.filter(feature => feature.properties && feature.properties.N03_007);
+      features.forEach(feature => featureByCode.set(String(feature.properties.N03_007), feature));
+
+      const projection = d3.geoMercator().fitSize([MAP_WIDTH, MAP_HEIGHT], { type: "FeatureCollection", features });
+      path = d3.geoPath(projection);
+      const allCodes = new Set(features.map(feature => String(feature.properties.N03_007)));
+      const regionFeatures = REGIONS.filter(region => region.id !== "all").map(region => {
+        const geometries = region.codes.map(code => topo.objects[objectKey].geometries.find(geometry => String(geometry.properties.N03_007) === code)).filter(Boolean);
+        return { ...region, geometry: topojson.merge(topo, geometries) };
+      });
+      regionFeatures.forEach(region => regionFeatureById.set(region.id, region));
+
+      regionPaths = regionLayer.selectAll("path.map-region")
+        .data(regionFeatures)
+        .join("path")
+        .attr("class", "map-region")
+        .attr("d", region => path(region.geometry))
+        .on("click", (event, region) => selectRegion(region.id));
+
+      areaPaths = areaLayer.selectAll("path.map-area")
+        .data(features)
+        .join("path")
+        .attr("class", "map-area")
+        .attr("d", path);
+
+      const outline = topojson.merge(topo, topo.objects[objectKey].geometries.filter(geometry => allCodes.has(String(geometry.properties.N03_007))));
+      outlineLayer.append("path").datum(outline).attr("class", "map-outline").attr("d", path);
+
+      zoom = d3.zoom().scaleExtent([1, 10]).on("zoom", event => root.attr("transform", event.transform));
+      svg.call(zoom);
+      document.getElementById("zoomIn").addEventListener("click", () => svg.transition().duration(180).call(zoom.scaleBy, 1.55));
+      document.getElementById("zoomOut").addEventListener("click", () => svg.transition().duration(180).call(zoom.scaleBy, 1 / 1.55));
+      document.getElementById("zoomReset").addEventListener("click", resetMap);
+
+      mapReady = true;
+      renderMapState();
+    } catch (error) {
+      selectedInfo.textContent = "地図を読み込めませんでした。通信状況を確認してから、もう一度開いてください。";
+    }
+  }
+
+  updateLabels();
+  renderRegionButtons();
+  renderItemList();
+  updateSelectedInfo();
+  loadMap();
+})();
+</script>
+</body>
+</html>
