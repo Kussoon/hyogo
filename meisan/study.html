@@ -82,7 +82,7 @@ footer{width:min(94vw,760px);margin:24px auto 0;text-align:center;color:var(--su
     <div class="region-buttons" id="regionButtons"></div>
   </section>
 
-  <section class="card map-card">
+  <section class="card map-card" id="mapCard">
     <div class="map-head">
       <h2 id="mapTitle">兵庫県 全域</h2>
       <div id="selectedInfo">名産品を選ぶと、地図上の場所を色で示します。</div>
@@ -154,6 +154,7 @@ footer{width:min(94vw,760px);margin:24px auto 0;text-align:center;color:var(--su
   const mapTitle = document.getElementById("mapTitle");
   const selectedInfo = document.getElementById("selectedInfo");
   const infoLink = document.getElementById("infoLink");
+  const mapCard = document.getElementById("mapCard");
   const sourceById = new Map(data.sources.map(source => [source.id, source]));
 
   let activeRegionId = "all";
@@ -267,6 +268,8 @@ footer{width:min(94vw,760px);margin:24px auto 0;text-align:center;color:var(--su
     renderItemList();
     updateSelectedInfo();
     renderMapState();
+    // 長い名産品リストの下から選んでも、品目名と地図を続けて確認できるようにする。
+    mapCard.scrollIntoView({ behavior: "smooth", block: "start" });
     if (!mapReady) return;
     if (question.answerIds && question.answerIds.length > 1) {
       resetMap();
