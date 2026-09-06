@@ -1,10 +1,10 @@
-/* 兵庫県 名産品記憶ゲーム / 出題・出典データ Ver.0.1.0 */
+/* 兵庫県 名産品記憶ゲーム / 出題・出典データ Ver.1.2 */
 (function () {
   "use strict";
 
   const HYOGO_MEISAN_DATA = {
-    version: "0.1.0",
-    updatedAt: "2026-09-05",
+    version: "1.2",
+    updatedAt: "2026-09-06",
     sourcePolicy: "主産地が複数にまたがる品目は、代表地・中心地・発祥地・地区所在地として問題文を限定しています。",
     regions: [
       { id: "kobe", label: "神戸" },
@@ -27,12 +27,12 @@
       { id: "D03", group: "市町・関係機関の公式情報", publisher: "たつの市", title: "特産品", url: "https://www.city.tatsuno.lg.jp/soshiki/1023/gyomu/2/5/1678.html" },
       { id: "D04", group: "市町・関係機関の公式情報", publisher: "兵庫県", title: "有馬の人形筆", url: "https://web.pref.hyogo.lg.jp/sr09/ie07_000000026.html" },
       { id: "D05", group: "市町・関係機関の公式情報", publisher: "兵庫県", title: "有馬籠", url: "https://web.pref.hyogo.lg.jp/sr09/ie07_000000027.html" },
-      { id: "D06", group: "市町・関係機関の公式情報", publisher: "神戸市", title: "ケミカルシューズ", url: "https://faq.city.kobe.lg.jp/category/show/70?site_domain=default" },
-      { id: "D07", group: "市町・関係機関の公式情報", publisher: "神戸市", title: "神戸ワイン", url: "https://www.city.kobe.lg.jp/a67688/wine.html" },
+      { id: "D06", group: "市町・関係機関の公式情報", publisher: "神戸市", title: "ケミカルシューズ", url: "https://www.city.kobe.lg.jp/a93457/kanko/fashion/kobechemicalshoes/index.html?_gl=1*kjxmxu*_ga*MTM4MTMwMDMxNS4xNzg4NjcyMTI0*_ga_6PVWK3MVF5*czE3ODg2NzIxMjMkbzEkZzEkdDE3ODg2NzIxNDckajM2JGwwJGgw" },
+      { id: "D07", group: "市町・関係機関の公式情報", publisher: "Wikipedia", title: "神戸ワイン", url: "https://ja.wikipedia.org/wiki/%E7%A5%9E%E6%88%B8%E3%83%AF%E3%82%A4%E3%83%B3" },
       { id: "D08", group: "市町・関係機関の公式情報", publisher: "伊丹市観光物産協会", title: "伊丹酒", url: "https://itami-kankou.com/itami" },
       { id: "D09", group: "市町・関係機関の公式情報", publisher: "兵庫県", title: "名塩紙", url: "https://web.pref.hyogo.lg.jp/sr09/ie07_000000035.html" },
-      { id: "D10", group: "市町・関係機関の公式情報", publisher: "川西市", title: "特産品", url: "https://www.city.kawanishi.hyogo.jp/shiseijoho/shokai/kankouannai/top_page/tokusanhin.html" },
-      { id: "D11", group: "市町・関係機関の公式情報", publisher: "三田市", title: "三田青磁", url: "https://www.city.sanda.lg.jp/soshiki/15/gyomu/1/5/3404.html" },
+      { id: "D10", group: "市町・関係機関の公式情報", publisher: "川西市", title: "川西いちじく", url: "https://www.city.kawanishi.hyogo.jp/shiseijoho/shokai/kankouannai/ichijiku.html" },
+      { id: "D11", group: "市町・関係機関の公式情報", publisher: "兵庫県", title: "三田青磁", url: "https://web.pref.hyogo.lg.jp/sr09/jibasan/kougeihin/sandaseiji.html" },
       { id: "D12", group: "市町・関係機関の公式情報", publisher: "明石市", title: "明石のたからもの", url: "https://www.city.akashi.lg.jp/shise/koho/citysales/taneakashi-enjoy.html" },
       { id: "D13", group: "市町・関係機関の公式情報", publisher: "明石観光協会", title: "明石焼き", url: "https://www.akashi-mercato.jp/shop/category/23/?pageno=1" },
       { id: "D14", group: "市町・関係機関の公式情報", publisher: "加古川市", title: "かつめし", url: "https://www.city.kakogawa.lg.jp/material/files/group/1/shichoteireiR080521-3.pdf" },
@@ -66,22 +66,26 @@
       { id: "D42", group: "市町・関係機関の公式情報", publisher: "南あわじ市", title: "淡路島3年とらふぐ", url: "https://www.city.minamiawaji.hyogo.jp/soshiki/suisan/torafugu.html" },
       { id: "D43", group: "市町・関係機関の公式情報", publisher: "兵庫県公式観光サイト", title: "但馬牛", url: "https://www.hyogo-tourism.jp/experience/detail_5273.html" },
       { id: "D44", group: "市町・関係機関の公式情報", publisher: "南あわじ市", title: "淡路島サクラマス", url: "https://www.city.minamiawaji.hyogo.jp/site/awajishima-sakuramasu/" },
-      { id: "D45", group: "市町・関係機関の公式情報", publisher: "丹波篠山市公式観光サイト", title: "立杭陶の郷", url: "https://tourism.sasayama.jp/suenosato/" }
-      ,{ id: "D46", group: "市町・関係機関の公式情報", publisher: "灘五郷酒造組合", title: "灘五郷", url: "https://www.nadagogo.ne.jp/" }
+      { id: "D45", group: "市町・関係機関の公式情報", publisher: "丹波篠山市公式観光サイト", title: "立杭陶の郷", url: "https://tourism.sasayama.jp/suenosato/" },
+      { id: "D46", group: "市町・関係機関の公式情報", publisher: "灘五郷酒造組合", title: "灘五郷", url: "https://www.nadagogo.ne.jp/" },
+      { id: "D47", group: "市町・関係機関の公式情報", publisher: "兵庫県", title: "神戸家具", url: "https://web.pref.hyogo.lg.jp/sr09/jibasan/20.html" },
+      { id: "D48", group: "市町・関係機関の公式情報", publisher: "兵庫県", title: "神戸アパレル", url: "https://web.pref.hyogo.lg.jp/sr09/jibasan/13.html" },
+      { id: "D49", group: "市町・関係機関の公式情報", publisher: "兵庫県", title: "真珠加工", url: "https://web.pref.hyogo.lg.jp/sr09/jibasan/27.html" },
+      { id: "D50", group: "市町・関係機関の公式情報", publisher: "兵庫県", title: "三田鈴鹿竹器", url: "https://web.pref.hyogo.lg.jp/sr09/ie07_000000045.html" }
     ],
     questions: [
       { id: "HMG-001", specialty: "有馬の人形筆", prompt: "有馬の人形筆の産地はどこですか？", answerId: "28109", answerLabel: "神戸市北区", answerScope: "area", regionId: "kobe", evidenceType: "産地", sourceIds: ["D04"] },
       { id: "HMG-002", specialty: "有馬籠", prompt: "有馬籠の産地はどこですか？", answerId: "28109", answerLabel: "神戸市北区", answerScope: "area", regionId: "kobe", evidenceType: "産地", sourceIds: ["D05"] },
       { id: "HMG-003", specialty: "ケミカルシューズ", prompt: "ケミカルシューズ発祥の地として知られる区はどこですか？", answerId: "28106", answerLabel: "神戸市長田区", answerScope: "area", regionId: "kobe", evidenceType: "発祥地", sourceIds: ["D06"] },
       { id: "HMG-004", specialty: "神戸ワイン", prompt: "神戸ワインの産地を、ゲームの10区域で答えてください。", answerId: "kobe", answerLabel: "神戸", answerScope: "region", regionId: "kobe", evidenceType: "産地（市域内）", sourceIds: ["D07"] },
-      { id: "HMG-005", specialty: "神戸家具", prompt: "神戸家具の主産地を、ゲームの10区域で答えてください。", answerId: "kobe", answerLabel: "神戸", answerScope: "region", regionId: "kobe", evidenceType: "主産地", sourceIds: ["A"] },
-      { id: "HMG-006", specialty: "神戸アパレル", prompt: "神戸アパレルの主産地を、ゲームの10区域で答えてください。", answerId: "kobe", answerLabel: "神戸", answerScope: "region", regionId: "kobe", evidenceType: "主産地", sourceIds: ["A"] },
-      { id: "HMG-007", specialty: "真珠加工", prompt: "真珠加工の主産地を、ゲームの10区域で答えてください。", answerId: "kobe", answerLabel: "神戸", answerScope: "region", regionId: "kobe", evidenceType: "主産地", sourceIds: ["A"] },
+      { id: "HMG-005", specialty: "神戸家具", prompt: "神戸家具の主産地を、ゲームの10区域で答えてください。", answerId: "kobe", answerLabel: "神戸", answerScope: "region", regionId: "kobe", evidenceType: "主産地", sourceIds: ["D47"] },
+      { id: "HMG-006", specialty: "神戸アパレル", prompt: "神戸アパレルの主産地を、ゲームの10区域で答えてください。", answerId: "kobe", answerLabel: "神戸", answerScope: "region", regionId: "kobe", evidenceType: "主産地", sourceIds: ["D48"] },
+      { id: "HMG-007", specialty: "真珠加工", prompt: "真珠加工の主産地を、ゲームの10区域で答えてください。", answerId: "kobe", answerLabel: "神戸", answerScope: "region", regionId: "kobe", evidenceType: "主産地", sourceIds: ["D49"] },
       { id: "HMG-008", specialty: "伊丹酒", prompt: "清酒「伊丹酒」発祥の地として知られる市はどこですか？", answerId: "28207", answerLabel: "伊丹市", answerScope: "area", regionId: "hanshin-n", evidenceType: "発祥地", sourceIds: ["D08"] },
       { id: "HMG-009", specialty: "名塩紙", prompt: "名塩紙の産地はどこですか？", answerId: "28204", answerLabel: "西宮市", answerScope: "area", regionId: "hanshin-s", evidenceType: "産地", sourceIds: ["D09"] },
       { id: "HMG-010", specialty: "川西いちじく", prompt: "川西いちじくの産地はどこですか？", answerId: "28217", answerLabel: "川西市", answerScope: "area", regionId: "hanshin-n", evidenceType: "特産", sourceIds: ["D10"] },
       { id: "HMG-011", specialty: "三田青磁", prompt: "三田青磁の産地はどこですか？", answerId: "28219", answerLabel: "三田市", answerScope: "area", regionId: "hanshin-n", evidenceType: "産地", sourceIds: ["D11"] },
-      { id: "HMG-012", specialty: "三田鈴鹿竹器", prompt: "三田鈴鹿竹器の産地はどこですか？", answerId: "28219", answerLabel: "三田市", answerScope: "area", regionId: "hanshin-n", evidenceType: "産地", sourceIds: ["B"] },
+      { id: "HMG-012", specialty: "三田鈴鹿竹器", prompt: "三田鈴鹿竹器の産地はどこですか？", answerId: "28219", answerLabel: "三田市", answerScope: "area", regionId: "hanshin-n", evidenceType: "産地", sourceIds: ["D50"] },
       { id: "HMG-013", specialty: "明石だこ", prompt: "明石だこの産地はどこですか？", answerId: "28203", answerLabel: "明石市", answerScope: "area", regionId: "higashi", evidenceType: "特産", sourceIds: ["D12"] },
       { id: "HMG-014", specialty: "明石焼き", prompt: "明石焼きの名物のまちはどこですか？", answerId: "28203", answerLabel: "明石市", answerScope: "area", regionId: "higashi", evidenceType: "名物", sourceIds: ["D13"] },
       { id: "HMG-015", specialty: "かつめし", prompt: "かつめしのご当地グルメのまちはどこですか？", answerId: "28210", answerLabel: "加古川市", answerScope: "area", regionId: "higashi", evidenceType: "名物", sourceIds: ["D14"] },
