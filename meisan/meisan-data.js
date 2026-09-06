@@ -1,9 +1,9 @@
-/* 兵庫県 名産品記憶ゲーム / 出題・出典データ Ver.1.5 */
+/* 兵庫県 名産品記憶ゲーム / 出題・出典データ Ver.1.6 */
 (function () {
   "use strict";
 
   const HYOGO_MEISAN_DATA = {
-    version: "1.5",
+    version: "1.6",
     updatedAt: "2026-09-06",
     sourcePolicy: "主産地が複数にまたがる品目は、代表地・中心地・発祥地・地区所在地として問題文を限定しています。",
     regions: [
@@ -177,6 +177,14 @@
   // 学習画面の「参考サイトを見る」で開くページ。
   // 出典一覧（sourceIds）は産地・主産地の確認根拠として別に保持する。
   const REFERENCE_LINKS = {
+    "ケミカルシューズ": "https://www.city.kobe.lg.jp/a93457/kanko/fashion/kobechemicalshoes/index.html?_gl=1*kjxmxu*_ga*MTM4MTMwMDMxNS4xNzg4NjcyMTI0*_ga_6PVWK3MVF5*czE3ODg2NzIxMjMkbzEkZzEkdDE3ODg2NzIxNDckajM2JGwwJGgw",
+    "神戸ワイン": "https://ja.wikipedia.org/wiki/%E7%A5%9E%E6%88%B8%E3%83%AF%E3%82%A4%E3%83%B3",
+    "神戸家具": "https://web.pref.hyogo.lg.jp/sr09/jibasan/20.html",
+    "神戸アパレル": "https://web.pref.hyogo.lg.jp/sr09/jibasan/13.html",
+    "真珠加工": "https://web.pref.hyogo.lg.jp/sr09/jibasan/27.html",
+    "川西いちじく": "https://www.city.kawanishi.hyogo.jp/shiseijoho/shokai/kankouannai/ichijiku.html",
+    "三田青磁": "https://web.pref.hyogo.lg.jp/sr09/jibasan/kougeihin/sandaseiji.html",
+    "三田鈴鹿竹器": "https://web.pref.hyogo.lg.jp/sr09/ie07_000000045.html",
     "明石だこ": "https://ja.wikipedia.org/wiki/%E6%98%8E%E7%9F%B3%E3%83%80%E3%82%B3",
     "明石焼き": "https://www.maff.go.jp/j/keikaku/syokubunka/k_ryouri/search_menu/menu/40_2_hyogo.html",
     "かつめし": "https://www.maff.go.jp/j/keikaku/syokubunka/k_ryouri/search_menu/menu/40_4_hyogo.html",
