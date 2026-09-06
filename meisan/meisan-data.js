@@ -1,9 +1,9 @@
-/* 兵庫県 名産品記憶ゲーム / 出題・出典データ Ver.1.2 */
+/* 兵庫県 名産品記憶ゲーム / 出題・出典データ Ver.1.3 */
 (function () {
   "use strict";
 
   const HYOGO_MEISAN_DATA = {
-    version: "1.2",
+    version: "1.3",
     updatedAt: "2026-09-06",
     sourcePolicy: "主産地が複数にまたがる品目は、代表地・中心地・発祥地・地区所在地として問題文を限定しています。",
     regions: [
@@ -174,9 +174,37 @@
     "香住ガニ":"かすみガニ","但馬牛":"たじまうし","丹波黒大豆":"たんばくろだいず","淡路瓦":"あわじがわら",
     "播州そろばん":"ばんしゅうそろばん","姫路おでん":"ひめじおでん","鎖":"くさり"
   });
+  // 学習画面の「参考サイトを見る」で開くページ。
+  // 出典一覧（sourceIds）は産地・主産地の確認根拠として別に保持する。
+  const REFERENCE_LINKS = {
+    "明石だこ": "https://ja.wikipedia.org/wiki/%E6%98%8E%E7%9F%B3%E3%83%80%E3%82%B3",
+    "明石焼き": "https://www.maff.go.jp/j/keikaku/syokubunka/k_ryouri/search_menu/menu/40_2_hyogo.html",
+    "かつめし": "https://www.maff.go.jp/j/keikaku/syokubunka/k_ryouri/search_menu/menu/40_4_hyogo.html",
+    "杉原紙": "https://web.pref.hyogo.lg.jp/sr09/ie07_000000029.html",
+    "播州そろばん": "https://web.pref.hyogo.lg.jp/sr09/jibasan/21.html",
+    "播州鎌": "https://web.pref.hyogo.lg.jp/sr09/ie07_000000046.html",
+    "神河ゆず": "https://note.com/shirasagiknit_tm/n/n8c7d7393b589",
+    "室津かき": "https://www.segoshikaisan.com/history",
+    "上郡モロヘイヤ": "https://mololab.com/special/oomae.html",
+    "豊岡鞄": "https://web.pref.hyogo.lg.jp/sr09/jibasan/24.html",
+    "豊岡杞柳細工": "https://genbudo-museum.jp/kiryu/",
+    "出石焼": "https://web.pref.hyogo.lg.jp/sr09/jibasan/28.html",
+    "城崎麦わら細工": "https://web.pref.hyogo.lg.jp/sr09/ie07_000000033.html",
+    "出石そば": "https://toyooka-tourism.com/recommend/food/izushi_soba/",
+    "津居山かに": "https://toyooka-tourism.com/recommend/food/tsuiyama_kani/",
+    "香住ガニ": "https://www.kami-tourism.com/feature/kani#",
+    "但馬牛": "https://ja.wikipedia.org/wiki/%E4%BD%86%E9%A6%AC%E7%89%9B",
+    "丹波大納言小豆": "https://www.ja-tanbasasayama.or.jp/brand/%E4%B8%B9%E6%B3%A2%E7%AF%A0%E5%B1%B1%E5%A4%A7%E7%B4%8D%E8%A8%80%E5%B0%8F%E8%B1%86",
+    "丹波栗": "https://tamba-yanagawa.co.jp/%E4%B8%B9%E6%B3%A2%E3%81%AE%E7%89%B9%E7%94%A3%E5%93%81/%E4%B8%B9%E6%B3%A2%E6%A0%97",
+    "丹波篠山黒枝豆": "https://www.ja-tanbasasayama.or.jp/brand/kuroedamame",
+    "淡路瓦": "https://ja.wikipedia.org/wiki/%E6%B7%A1%E8%B7%AF%E7%93%A6",
+    "淡路島3年とらふぐ": "https://www.awajishima-kanko.jp/awaji/torafugu/",
+    "灘五郷の日本酒": "https://ja.wikipedia.org/wiki/%E7%81%98%E4%BA%94%E9%83%B7"
+  };
   HYOGO_MEISAN_DATA.questions.forEach(question => {
     question.reading = READINGS[question.specialty] || "";
     question.displaySpecialty = question.reading ? question.specialty + "（" + question.reading + "）" : question.specialty;
+    question.infoUrl = REFERENCE_LINKS[question.specialty] || "";
   });
   window.HYOGO_MEISAN_DATA = HYOGO_MEISAN_DATA;
 })();
