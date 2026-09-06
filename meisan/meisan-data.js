@@ -1,9 +1,9 @@
-/* 兵庫県 名産品記憶ゲーム / 出題・出典データ Ver.1.4 */
+/* 兵庫県 名産品記憶ゲーム / 出題・出典データ Ver.1.5 */
 (function () {
   "use strict";
 
   const HYOGO_MEISAN_DATA = {
-    version: "1.4",
+    version: "1.5",
     updatedAt: "2026-09-06",
     sourcePolicy: "主産地が複数にまたがる品目は、代表地・中心地・発祥地・地区所在地として問題文を限定しています。",
     regions: [
