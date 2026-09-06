@@ -36,6 +36,7 @@ h2{margin:0;font-size:19px}
 .map-head{padding:16px 17px 11px}
 #selectedInfo{min-height:42px;margin-top:8px;padding:9px 11px;border-radius:11px;background:#f7fafc;color:#475569;font-size:13px;line-height:1.45}
 #selectedInfo.has-selection{background:var(--green-soft);color:#195e36;font-weight:700}
+#infoLink{display:none;margin-top:8px;padding:8px 11px;border:1px solid #b8c8d8;border-radius:10px;background:#fff;color:#245d94;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
 #mapWrap{position:relative;margin:0;border-top:1px solid var(--border);background:#fbfdff;overflow:hidden}
 #map{display:block;width:100%;height:auto;touch-action:none}
 .map-region{stroke:#96aabd;stroke-width:1.2;cursor:pointer}
@@ -85,6 +86,7 @@ footer{width:min(94vw,760px);margin:24px auto 0;text-align:center;color:var(--su
     <div class="map-head">
       <h2 id="mapTitle">兵庫県 全域</h2>
       <div id="selectedInfo">名産品を選ぶと、地図上の場所を色で示します。</div>
+      <button id="infoLink" type="button">Wikipediaで説明を見る</button>
     </div>
     <div id="mapWrap">
       <div class="zoom-controls" aria-label="地図の操作">
@@ -151,6 +153,8 @@ footer{width:min(94vw,760px);margin:24px auto 0;text-align:center;color:var(--su
   const itemCount = document.getElementById("itemCount");
   const mapTitle = document.getElementById("mapTitle");
   const selectedInfo = document.getElementById("selectedInfo");
+  const infoLink = document.getElementById("infoLink");
+  const sourceById = new Map(data.sources.map(source => [source.id, source]));
 
   let activeRegionId = "all";
   let selectedQuestion = null;
@@ -203,7 +207,7 @@ footer{width:min(94vw,760px);margin:24px auto 0;text-align:center;color:var(--su
 
   function renderMapState() {
     if (!mapReady) return;
-    const selectedArea = selectedQuestion && selectedQuestion.answerScope === "area" ? selectedQuestion.answerId : null;
+    const selectedAreas = selectedQuestion && selectedQuestion.answerScope === "area" ? (selectedQuestion.answerIds || [selectedQuestion.answerId]) : [];
     const selectedRegion = selectedQuestion && selectedQuestion.answerScope === "region" ? selectedQuestion.answerId : null;
 
     regionPaths
@@ -215,7 +219,7 @@ footer{width:min(94vw,760px);margin:24px auto 0;text-align:center;color:var(--su
       .attr("stroke", region => region.id === activeRegionId ? "#4d7597" : "#96aabd")
       .attr("stroke-width", region => region.id === activeRegionId ? 1.7 : 1.15);
 
-    areaPaths.attr("fill", feature => String(feature.properties.N03_007) === selectedArea ? "#58ad72" : "transparent");
+    areaPaths.attr("fill", feature => selectedAreas.includes(String(feature.properties.N03_007)) ? "#58ad72" : "transparent");
   }
 
   function updateSelectedInfo() {
@@ -227,6 +231,18 @@ footer{width:min(94vw,760px);margin:24px auto 0;text-align:center;color:var(--su
     const scope = selectedQuestion.answerScope === "region" ? "10区域" : "市町・区";
     selectedInfo.className = "has-selection";
     selectedInfo.textContent = `${selectedQuestion.displaySpecialty} → ${selectedQuestion.answerLabel}（${scope}・${selectedQuestion.evidenceType}）`;
+  }
+
+  function openExplanation() {
+    if (!selectedQuestion) return;
+    const title = selectedQuestion.specialty;
+    const fallback = sourceById.get(selectedQuestion.sourceIds[0]).url;
+    const tab = window.open("about:blank", "_blank");
+    const wikiApi = "https://ja.wikipedia.org/w/api.php?action=query&origin=*&format=json&titles=" + encodeURIComponent(title);
+    fetch(wikiApi).then(response => response.json()).then(result => {
+      const page = Object.values(result.query.pages)[0];
+      if (tab) tab.location.href = page && !page.missing ? "https://ja.wikipedia.org/wiki/" + encodeURIComponent(title) : fallback;
+    }).catch(() => { if (tab) tab.location.href = fallback; });
   }
 
   function selectRegion(regionId) {
@@ -247,6 +263,7 @@ footer{width:min(94vw,760px);margin:24px auto 0;text-align:center;color:var(--su
 
   function selectQuestion(question) {
     selectedQuestion = question;
+    infoLink.style.display = "inline-block";
     renderItemList();
     updateSelectedInfo();
     renderMapState();
@@ -324,6 +341,7 @@ footer{width:min(94vw,760px);margin:24px auto 0;text-align:center;color:var(--su
   renderRegionButtons();
   renderItemList();
   updateSelectedInfo();
+  infoLink.addEventListener("click", openExplanation);
   loadMap();
 })();
 </script>

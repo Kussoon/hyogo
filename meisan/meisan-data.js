@@ -67,6 +67,7 @@
       { id: "D43", group: "市町・関係機関の公式情報", publisher: "兵庫県公式観光サイト", title: "但馬牛", url: "https://www.hyogo-tourism.jp/experience/detail_5273.html" },
       { id: "D44", group: "市町・関係機関の公式情報", publisher: "南あわじ市", title: "淡路島サクラマス", url: "https://www.city.minamiawaji.hyogo.jp/site/awajishima-sakuramasu/" },
       { id: "D45", group: "市町・関係機関の公式情報", publisher: "丹波篠山市公式観光サイト", title: "立杭陶の郷", url: "https://tourism.sasayama.jp/suenosato/" }
+      ,{ id: "D46", group: "市町・関係機関の公式情報", publisher: "灘五郷酒造組合", title: "灘五郷", url: "https://www.nadagogo.ne.jp/" }
     ],
     questions: [
       { id: "HMG-001", specialty: "有馬の人形筆", prompt: "有馬の人形筆の産地はどこですか？", answerId: "28109", answerLabel: "神戸市北区", answerScope: "area", regionId: "kobe", evidenceType: "産地", sourceIds: ["D04"] },
@@ -140,6 +141,7 @@
       { id: "HMG-069", specialty: "淡路島サクラマス", prompt: "淡路島サクラマスの産地はどこですか？", answerId: "28224", answerLabel: "南あわじ市", answerScope: "area", regionId: "awaji", evidenceType: "特産", sourceIds: ["D44"] },
       { id: "HMG-070", specialty: "真珠核", prompt: "真珠核の主産地はどこですか？", answerId: "28205", answerLabel: "洲本市", answerScope: "area", regionId: "awaji", evidenceType: "主産地", sourceIds: ["A"] },
       { id: "HMG-071", specialty: "しらさぎ染", prompt: "しらさぎ染の産地はどこですか？", answerId: "28201", answerLabel: "姫路市", answerScope: "area", regionId: "naka", evidenceType: "産地", sourceIds: ["B"] }
+      ,{ id: "HMG-072", specialty: "灘五郷の日本酒", prompt: "灘五郷の日本酒の産地はどこですか？", answerId: "28102", answerIds: ["28102","28101","28204"], answerLabel: "神戸市灘区・東灘区・西宮市", answerScope: "area", regionId: "kobe", evidenceType: "複数の主産地", sourceIds: ["D46"] }
     ]
   };
 
@@ -151,8 +153,22 @@
     "豊岡鞄":"とよおかかばん","豊岡杞柳細工":"とよおかきりゅうざいく","出石焼":"いずしやき","城崎麦わら細工":"きのさきむぎわらざいく",
     "津居山かに":"ついやまがに","朝倉山椒":"あさくらさんしょう","八鹿豚":"ようかぶた","岩津ねぎ":"いわつねぎ",
     "香住ガニ":"かすみがに","丹波布":"たんばふ","丹波大納言小豆":"たんばだいなごんあずき","丹波黒大豆":"たんばくろだいず",
-    "丹波立杭焼":"たんばたちくいやき","淡路瓦":"あわじがわら","真珠核":"しんじゅかく"
+    "丹波立杭焼":"たんばたちくいやき","淡路瓦":"あわじがわら","真珠核":"しんじゅかく","灘五郷の日本酒":"なだごごうのにほんしゅ"
   };
+  Object.assign(READINGS, {
+    "有馬の人形筆":"ありまのにんぎょうふで","神戸ワイン":"こうべワイン","神戸家具":"こうべかぐ","神戸アパレル":"こうべアパレル","真珠加工":"しんじゅかこう",
+    "伊丹酒":"いたみしゅ","川西いちじく":"かわにしいちじく","明石だこ":"あかしだこ","明石焼き":"あかしやき","宝殿石（竜山石）":"ほうでんせき（たつやまいし）",
+    "小野金物（家庭刃物）":"おのかなもの（かていはもの）","三木金物":"みきかなもの","ゴルフ用具":"ゴルフようぐ","姫路の菓子":"ひめじのかし",
+    "福崎もち麦":"ふくさきもちむぎ","神河ゆず":"かみかわゆず","室津かき":"むろつかき","相生かき":"あいおいかき","赤穂の塩":"あこうのしお",
+    "太子いちじく":"たいしいちじく","上郡モロヘイヤ":"かみごおりモロヘイヤ","佐用ホルモン焼きうどん":"さようホルモンやきうどん","宍粟自然薯":"しそうじねんじょ",
+    "城崎麦わら細工":"きのさきむぎわらざいく","淡路島たまねぎ":"あわじしまたまねぎ","淡路島の線香":"あわじしまのせんこう",
+    "淡路島手延べそうめん":"あわじしまてのべそうめん","淡路島3年とらふぐ":"あわじしまさんねんとらふぐ","淡路島サクラマス":"あわじしまサクラマス",
+    "丹波栗":"たんばぐり","丹波篠山黒枝豆":"たんばささやまくろえだまめ","丹波篠山山の芋":"たんばささやまやまのいも","しらさぎ染":"しらさぎぞめ",
+    "龍野醤油":"たつのしょうゆ","豊岡鞄":"とよおかかばん","出石焼":"いずしやき","真珠核":"しんじゅかく","揖保乃糸":"いぼのいと",
+    "室津かき":"むろつかき","赤穂の塩":"あこうのしお","宍粟自然薯":"しそうじねんじょ","豊岡杞柳細工":"とよおかきりゅうざいく",
+    "出石そば":"いずしそば","津居山かに":"ついやまがに","朝倉山椒":"あさくらさんしょう","八鹿豚":"ようかぶた","岩津ねぎ":"いわつねぎ",
+    "香住ガニ":"かすみガニ","但馬牛":"たじまうし","丹波黒大豆":"たんばくろだいず","淡路瓦":"あわじがわら"
+  });
   HYOGO_MEISAN_DATA.questions.forEach(question => {
     question.reading = READINGS[question.specialty] || "";
     question.displaySpecialty = question.reading ? question.specialty + "（" + question.reading + "）" : question.specialty;

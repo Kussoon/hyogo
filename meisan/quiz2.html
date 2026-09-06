@@ -364,16 +364,16 @@ footer{
   }
 
   function markTarget() {
-    const areaId = currentQuestion.answerScope === "area" ? currentQuestion.answerId : null;
+    const areaIds = currentQuestion.answerScope === "area" ? (currentQuestion.answerIds || [currentQuestion.answerId]) : [];
     const regionId = currentQuestion.answerScope === "region" ? currentQuestion.answerId : null;
-    areaPaths.classed("target", feature => feature.__code === areaId);
+    areaPaths.classed("target", feature => areaIds.includes(feature.__code));
     regionPaths.classed("target", region => region.id === regionId);
   }
 
   function markCorrectTarget() {
-    const areaId = currentQuestion.answerScope === "area" ? currentQuestion.answerId : null;
+    const areaIds = currentQuestion.answerScope === "area" ? (currentQuestion.answerIds || [currentQuestion.answerId]) : [];
     const regionId = currentQuestion.answerScope === "region" ? currentQuestion.answerId : null;
-    areaPaths.classed("target", false).classed("answer-correct", feature => feature.__code === areaId);
+    areaPaths.classed("target", false).classed("answer-correct", feature => areaIds.includes(feature.__code));
     regionPaths.classed("target", false).classed("answer-correct", region => region.id === regionId);
   }
 
