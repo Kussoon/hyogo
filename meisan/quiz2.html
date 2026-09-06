@@ -340,7 +340,8 @@ footer{
   function isValidDistractor(current, candidate) {
     if (candidate.id === current.id) return false;
     if (current.answerScope === "region") return candidate.regionId !== current.regionId;
-    if (candidate.answerScope === "area" && candidate.answerId === current.answerId) return false;
+    const currentAreaIds = current.answerIds || [current.answerId];
+    if (candidate.answerScope === "area" && currentAreaIds.includes(candidate.answerId)) return false;
     if (candidate.answerScope === "region" && candidate.regionId === current.regionId) return false;
     return true;
   }
