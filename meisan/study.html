@@ -195,7 +195,7 @@ footer{width:min(94vw,760px);margin:24px auto 0;text-align:center;color:var(--su
       const button = document.createElement("button");
       button.type = "button";
       button.className = `meisan-item${selectedQuestion && selectedQuestion.id === question.id ? " active" : ""}`;
-      button.innerHTML = `<span class="item-name">${question.specialty}</span><span class="item-answer">${question.answerLabel}<span class="item-basis">${question.evidenceType}</span></span>`;
+      button.innerHTML = `<span class="item-name">${question.displaySpecialty}</span><span class="item-answer">${question.answerLabel}<span class="item-basis">${question.evidenceType}</span></span>`;
       button.addEventListener("click", () => selectQuestion(question));
       itemList.appendChild(button);
     });
@@ -226,7 +226,7 @@ footer{width:min(94vw,760px);margin:24px auto 0;text-align:center;color:var(--su
     }
     const scope = selectedQuestion.answerScope === "region" ? "10区域" : "市町・区";
     selectedInfo.className = "has-selection";
-    selectedInfo.textContent = `${selectedQuestion.specialty} → ${selectedQuestion.answerLabel}（${scope}・${selectedQuestion.evidenceType}）`;
+    selectedInfo.textContent = `${selectedQuestion.displaySpecialty} → ${selectedQuestion.answerLabel}（${scope}・${selectedQuestion.evidenceType}）`;
   }
 
   function selectRegion(regionId) {

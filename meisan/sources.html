@@ -168,7 +168,7 @@ footer{width:min(92vw,760px);margin:24px auto 0;text-align:center;color:var(--su
     }).join("、");
     row.innerHTML = `
       <td>${question.id}</td>
-      <td>${question.specialty}</td>
+      <td>${question.displaySpecialty}</td>
       <td>${question.answerLabel}</td>
       <td><span class="scope ${question.answerScope === "region" ? "region" : ""}">${scopeLabel}</span></td>
       <td>${question.evidenceType}</td>

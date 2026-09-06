@@ -383,8 +383,8 @@ footer{
       const button = document.createElement("button");
       button.type = "button";
       button.className = "choice";
-      button.textContent = option.specialty;
-      button.setAttribute("aria-label", option.specialty + "を選ぶ");
+      button.textContent = option.displaySpecialty;
+      button.setAttribute("aria-label", option.displaySpecialty + "を選ぶ");
       button.addEventListener("click", () => answerChoice(button, option));
       choicesEl.appendChild(button);
     });

@@ -372,7 +372,7 @@ footer{
     }
     currentQuestion = queue[index];
     locked = false;
-    questionEl.textContent = currentQuestion.prompt;
+    questionEl.textContent = currentQuestion.prompt + (currentQuestion.reading ? "（" + currentQuestion.specialty + "：" + currentQuestion.reading + "）" : "");
     scopeHintText.textContent = currentQuestion.answerScope === "region"
       ? "答え方：10区域を選ぶ"
       : "答え方：市町・区を選ぶ";
@@ -395,7 +395,7 @@ footer{
     if (selectedId === currentQuestion.answerId) {
       locked = true;
       selectedElement.classed("correct", true);
-      showFeedback("正解です！ " + currentQuestion.specialty + " → " + currentQuestion.answerLabel, "ok");
+      showFeedback("正解です！ " + currentQuestion.displaySpecialty + " → " + currentQuestion.answerLabel, "ok");
       const token = roundToken;
       window.setTimeout(() => {
         if (token !== roundToken) return;
