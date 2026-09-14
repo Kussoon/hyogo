@@ -16,6 +16,7 @@
   --border:#dbe4ee;
   --correct:#a7f3d0;
   --wrong:#fee2e2;
+  --range:#dbeafe;
 }
 *{box-sizing:border-box}
 html,body{
@@ -75,6 +76,7 @@ svg{width:100%;height:100%;display:block}
   vector-effect:non-scaling-stroke;cursor:pointer
 }
 .municipality.kobe-base{fill:var(--kobe)}
+.municipality.range-selected{fill:var(--range)}
 .municipality.correct{fill:var(--correct)}
 .municipality.wrong-flash{fill:var(--wrong)}
 .pref-outline{
@@ -356,6 +358,7 @@ let currentCode=null;
 let wrongSet=new Set();
 let locked=false;
 let currentRangeCodes=[];
+let highlightRangeCodes=null;
 
 function getCode(p){
   return String(p.N03_007||p.code||p.CITY_CODE||p["行政区域コード"]||"");
@@ -389,6 +392,7 @@ const REGION_LABEL_OFFSET={
 };
 function beginRange(r){
   currentRangeCodes = r.codes ? r.codes.filter(c=>allCodes.includes(c)) : [...allCodes];
+  highlightRangeCodes = r.codes ? new Set(currentRangeCodes) : null;
   document.body.classList.remove("range-selecting");
   startPanel.style.display="none";
   setQuizHeaderVisible(true);
@@ -466,6 +470,10 @@ function resetMapColors(){
     .classed("correct",false)
     .classed("wrong-flash",false);
 }
+function applyRangeHighlight(){
+  mapLayer.selectAll(".municipality")
+    .classed("range-selected",d=>highlightRangeCodes?.has(d.__code) || false);
+}
 function startQuiz(codes){
   currentRangeCodes=[...codes];
   queue=shuffle(codes);
@@ -475,6 +483,7 @@ function startQuiz(codes){
   locked=false;
   result.style.display="none";
   resetMapColors();
+  applyRangeHighlight();
   svg.call(zoom.transform,d3.zoomIdentity);
   showQuestion();
 }
