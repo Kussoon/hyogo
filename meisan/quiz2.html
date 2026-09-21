@@ -204,7 +204,7 @@ footer{
     <div class="start-card">
       <h2>出題範囲を選ぶ</h2>
       <p>黄色く光る場所を見て、4つの名産品から答えます。</p>
-      <button id="allChallengeBtn" class="all-challenge" type="button">全71問でチャレンジ</button>
+      <button id="allChallengeBtn" class="all-challenge" type="button">全74問でチャレンジ</button>
       <div class="range-map-wrap">
         <svg id="rangeMap" viewBox="0 0 400 490" aria-label="兵庫県10地域の選択地図"></svg>
       </div>
@@ -365,16 +365,18 @@ footer{
   }
 
   function markTarget() {
+    const prefectureTarget = currentQuestion.answerScope === "prefecture";
     const areaIds = currentQuestion.answerScope === "area" ? (currentQuestion.answerIds || [currentQuestion.answerId]) : [];
     const regionId = currentQuestion.answerScope === "region" ? currentQuestion.answerId : null;
-    areaPaths.classed("target", feature => areaIds.includes(feature.__code));
+    areaPaths.classed("target", feature => prefectureTarget || areaIds.includes(feature.__code));
     regionPaths.classed("target", region => region.id === regionId);
   }
 
   function markCorrectTarget() {
+    const prefectureTarget = currentQuestion.answerScope === "prefecture";
     const areaIds = currentQuestion.answerScope === "area" ? (currentQuestion.answerIds || [currentQuestion.answerId]) : [];
     const regionId = currentQuestion.answerScope === "region" ? currentQuestion.answerId : null;
-    areaPaths.classed("target", false).classed("answer-correct", feature => areaIds.includes(feature.__code));
+    areaPaths.classed("target", false).classed("answer-correct", feature => prefectureTarget || areaIds.includes(feature.__code));
     regionPaths.classed("target", false).classed("answer-correct", region => region.id === regionId);
   }
 
@@ -421,10 +423,12 @@ footer{
     }
     currentQuestion = queue[index];
     locked = false;
-    questionEl.textContent = currentQuestion.answerScope === "region"
-      ? "黄色く光っている10区域とゆかりの深い名産品はどれですか？"
-      : "黄色く光っている市町・区とゆかりの深い名産品はどれですか？";
-    scopeHintText.textContent = currentQuestion.answerScope === "region" ? "表示：10区域" : "表示：市町・区";
+    questionEl.textContent = currentQuestion.answerScope === "prefecture"
+      ? "黄色く光っている兵庫県全域とゆかりの深い名産品はどれですか？"
+      : currentQuestion.answerScope === "region"
+        ? "黄色く光っている10区域とゆかりの深い名産品はどれですか？"
+        : "黄色く光っている市町・区とゆかりの深い名産品はどれですか？";
+    scopeHintText.textContent = currentQuestion.answerScope === "prefecture" ? "表示：兵庫県全域" : currentQuestion.answerScope === "region" ? "表示：10区域" : "表示：市町・区";
     progressEl.textContent = (index + 1) + " / " + queue.length;
     renderChoices();
     markTarget();

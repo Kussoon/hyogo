@@ -1,10 +1,10 @@
-/* 兵庫県 名産品記憶ゲーム / 出題・出典データ Ver.1.7 */
+/* 兵庫県 名産品記憶ゲーム / 出題・出典データ Ver.2.1 */
 (function () {
   "use strict";
 
   const HYOGO_MEISAN_DATA = {
-    version: "1.7",
-    updatedAt: "2026-09-06",
+    version: "2.1",
+    updatedAt: "2026-09-21",
     sourcePolicy: "主産地が複数にまたがる品目は、代表地・中心地・発祥地・地区所在地として問題文を限定しています。",
     regions: [
       { id: "kobe", label: "神戸" },
@@ -71,7 +71,9 @@
       { id: "D47", group: "市町・関係機関の公式情報", publisher: "兵庫県", title: "神戸家具", url: "https://web.pref.hyogo.lg.jp/sr09/jibasan/20.html" },
       { id: "D48", group: "市町・関係機関の公式情報", publisher: "兵庫県", title: "神戸アパレル", url: "https://web.pref.hyogo.lg.jp/sr09/jibasan/13.html" },
       { id: "D49", group: "市町・関係機関の公式情報", publisher: "兵庫県", title: "真珠加工", url: "https://web.pref.hyogo.lg.jp/sr09/jibasan/27.html" },
-      { id: "D50", group: "市町・関係機関の公式情報", publisher: "兵庫県", title: "三田鈴鹿竹器", url: "https://web.pref.hyogo.lg.jp/sr09/ie07_000000045.html" }
+      { id: "D50", group: "市町・関係機関の公式情報", publisher: "兵庫県", title: "三田鈴鹿竹器", url: "https://web.pref.hyogo.lg.jp/sr09/ie07_000000045.html" },
+      { id: "D51", group: "市町・関係機関の公式情報", publisher: "神戸肉流通推進協議会", title: "神戸ビーフ", url: "https://kobe-niku.jp/" },
+      { id: "D52", group: "市町・関係機関の公式情報", publisher: "佐用町", title: "佐用もち大豆", url: "https://www.town.sayo.lg.jp/cms-sypher/www/info/detail.jsp?id=3462" }
     ],
     questions: [
       { id: "HMG-001", specialty: "有馬の人形筆", prompt: "有馬の人形筆の産地はどこですか？", answerId: "28109", answerLabel: "神戸市北区", answerScope: "area", regionId: "kobe", evidenceType: "産地", sourceIds: ["D04"] },
@@ -145,7 +147,9 @@
       { id: "HMG-069", specialty: "淡路島サクラマス", prompt: "淡路島サクラマスの産地はどこですか？", answerId: "28224", answerLabel: "南あわじ市", answerScope: "area", regionId: "awaji", evidenceType: "特産", sourceIds: ["D44"] },
       { id: "HMG-070", specialty: "真珠核", prompt: "真珠核の主産地はどこですか？", answerId: "28205", answerLabel: "洲本市", answerScope: "area", regionId: "awaji", evidenceType: "主産地", sourceIds: ["A"] },
       { id: "HMG-071", specialty: "しらさぎ染", prompt: "しらさぎ染の産地はどこですか？", answerId: "28201", answerLabel: "姫路市", answerScope: "area", regionId: "naka", evidenceType: "産地", sourceIds: ["B"] }
-      ,{ id: "HMG-072", specialty: "灘五郷の日本酒", prompt: "灘五郷の日本酒の産地はどこですか？", answerId: "28102", answerIds: ["28102","28101","28204"], answerLabel: "神戸市灘区・東灘区・西宮市", answerScope: "area", regionId: "kobe", evidenceType: "複数の主産地", sourceIds: ["D46"] }
+      ,{ id: "HMG-072", specialty: "灘五郷の日本酒", prompt: "灘五郷の日本酒の産地はどこですか？", answerId: "28102", answerIds: ["28102","28101","28204"], answerLabel: "神戸市灘区・東灘区・西宮市", answerScope: "area", regionId: "kobe", evidenceType: "複数の主産地", sourceIds: ["D46"] },
+      { id: "HMG-073", specialty: "神戸ビーフ", prompt: "神戸ビーフの対象地域を、兵庫県全域で答えてください。", answerId: "all", answerLabel: "兵庫県全域", answerScope: "prefecture", regionId: "all", evidenceType: "県域ブランド", sourceIds: ["D51"] },
+      { id: "HMG-074", specialty: "佐用もち大豆", prompt: "佐用もち大豆の産地はどこですか？", answerId: "28501", answerLabel: "佐用町", answerScope: "area", regionId: "nishi", evidenceType: "産地", sourceIds: ["D52"] }
     ]
   };
 
@@ -172,7 +176,8 @@
     "室津かき":"むろつかき","赤穂の塩":"あこうのしお","宍粟自然薯":"しそうじねんじょ","豊岡杞柳細工":"とよおかきりゅうざいく",
     "出石そば":"いずしそば","津居山かに":"ついやまがに","朝倉山椒":"あさくらさんしょう","八鹿豚":"ようかぶた","岩津ねぎ":"いわつねぎ",
     "香住ガニ":"かすみガニ","但馬牛":"たじまうし","丹波黒大豆":"たんばくろだいず","淡路瓦":"あわじがわら",
-    "播州そろばん":"ばんしゅうそろばん","姫路おでん":"ひめじおでん","鎖":"くさり"
+    "播州そろばん":"ばんしゅうそろばん","姫路おでん":"ひめじおでん","鎖":"くさり",
+    "神戸ビーフ":"こうべビーフ","佐用もち大豆":"さようもちだいず"
   });
   // 学習画面の「参考サイトを見る」で開くページ。
   // 出典一覧（sourceIds）は産地・主産地の確認根拠として別に保持する。
@@ -248,7 +253,9 @@
     "淡路島サクラマス": "https://www.city.minamiawaji.hyogo.jp/soshiki/shoku/sakuramasu.html",
     "真珠核": "https://web.pref.hyogo.lg.jp/sr09/jibasan/sinzyukaku.html",
     "しらさぎ染": "https://web.pref.hyogo.lg.jp/sr09/ie07_000000038.html",
-    "灘五郷の日本酒": "https://ja.wikipedia.org/wiki/%E7%81%98%E4%BA%94%E9%83%B7"
+    "灘五郷の日本酒": "https://ja.wikipedia.org/wiki/%E7%81%98%E4%BA%94%E9%83%B7",
+    "神戸ビーフ": "https://kobe-niku.jp/",
+    "佐用もち大豆": "https://www.town.sayo.lg.jp/cms-sypher/www/info/detail.jsp?id=3462"
   };
   HYOGO_MEISAN_DATA.questions.forEach(question => {
     question.reading = READINGS[question.specialty] || "";

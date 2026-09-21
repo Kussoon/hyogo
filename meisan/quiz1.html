@@ -63,6 +63,11 @@ svg{width:100%;height:100%;display:block}
 .region-hit.can-answer:hover{fill:rgba(49,95,140,.12)}
 .region-hit.correct{fill:rgba(63,154,101,.52);stroke:#23844d;stroke-width:1.55}
 .region-hit.wrong{fill:rgba(239,113,113,.37);stroke:#d24c4c;stroke-width:1.55}
+.prefecture-hit{fill:transparent;stroke:none;pointer-events:none;cursor:default}
+.prefecture-hit.can-answer{fill:rgba(49,95,140,.035);pointer-events:all;cursor:pointer}
+.prefecture-hit.can-answer:hover{fill:rgba(49,95,140,.12)}
+.prefecture-hit.correct{fill:rgba(63,154,101,.42);stroke:#23844d;stroke-width:1.8}
+.prefecture-hit.wrong{fill:rgba(239,113,113,.30);stroke:#d24c4c;stroke-width:1.8}
 .region-boundary{
   fill:none;stroke:#94a3b8;stroke-width:1.15;
   vector-effect:non-scaling-stroke;pointer-events:none
@@ -179,7 +184,7 @@ footer{
     <div class="start-card">
       <h2>出題範囲を選ぶ</h2>
       <p>問題ごとに、市町・区または10区域を選んで答えます。</p>
-      <button id="allChallengeBtn" class="all-challenge" type="button">全71問でチャレンジ</button>
+      <button id="allChallengeBtn" class="all-challenge" type="button">全74問でチャレンジ</button>
       <div class="range-map-wrap">
         <svg id="rangeMap" viewBox="0 0 400 490" aria-label="兵庫県10地域の選択地図"></svg>
       </div>
@@ -257,6 +262,7 @@ footer{
   const root = svg.append("g");
   const areaLayer = root.append("g");
   const regionLayer = root.append("g");
+  const prefectureLayer = root.append("g");
   const boundaryLayer = root.append("g");
   const outlineLayer = root.append("g");
 
@@ -265,6 +271,7 @@ footer{
   let features = [];
   let areaPaths;
   let regionPaths;
+  let prefecturePath;
   let regionFeatures = [];
   let queue = [];
   let index = 0;
@@ -325,6 +332,7 @@ footer{
   function clearAnswerState() {
     if (areaPaths) areaPaths.classed("correct", false).classed("wrong", false);
     if (regionPaths) regionPaths.classed("correct", false).classed("wrong", false);
+    if (prefecturePath) prefecturePath.classed("correct", false).classed("wrong", false);
   }
 
   function resetMap() {
@@ -334,16 +342,24 @@ footer{
   function updateMapMode() {
     if (!currentQuestion || !areaPaths || !regionPaths) return;
     const regionAnswer = currentQuestion.answerScope === "region";
+    const prefectureAnswer = currentQuestion.answerScope === "prefecture";
     areaPaths
-      .classed("can-answer", !regionAnswer)
-      .style("pointer-events", regionAnswer ? "none" : "all")
-      .attr("tabindex", regionAnswer ? -1 : 0)
-      .attr("aria-hidden", regionAnswer ? "true" : null);
+      .classed("can-answer", !regionAnswer && !prefectureAnswer)
+      .style("pointer-events", regionAnswer || prefectureAnswer ? "none" : "all")
+      .attr("tabindex", regionAnswer || prefectureAnswer ? -1 : 0)
+      .attr("aria-hidden", regionAnswer || prefectureAnswer ? "true" : null);
     regionPaths
       .classed("can-answer", regionAnswer)
       .style("pointer-events", regionAnswer ? "all" : "none")
       .attr("tabindex", regionAnswer ? 0 : -1)
       .attr("aria-hidden", regionAnswer ? null : "true");
+    if (prefecturePath) {
+      prefecturePath
+        .classed("can-answer", prefectureAnswer)
+        .style("pointer-events", prefectureAnswer ? "all" : "none")
+        .attr("tabindex", prefectureAnswer ? 0 : -1)
+        .attr("aria-hidden", prefectureAnswer ? null : "true");
+    }
   }
 
   function startQuiz(questions) {
@@ -373,9 +389,11 @@ footer{
     currentQuestion = queue[index];
     locked = false;
     questionEl.textContent = currentQuestion.prompt + (currentQuestion.reading ? "（" + currentQuestion.specialty + "：" + currentQuestion.reading + "）" : "");
-    scopeHintText.textContent = currentQuestion.answerScope === "region"
-      ? "答え方：10区域を選ぶ"
-      : "答え方：市町・区を選ぶ";
+    scopeHintText.textContent = currentQuestion.answerScope === "prefecture"
+      ? "答え方：兵庫県全域を選ぶ"
+      : currentQuestion.answerScope === "region"
+        ? "答え方：10区域を選ぶ"
+        : "答え方：市町・区を選ぶ";
     progressEl.textContent = (index + 1) + " / " + queue.length;
     updateMapMode();
     resetMap();
@@ -387,6 +405,10 @@ footer{
 
   function answerRegion(event, region) {
     answerSelection(event, region.id, region.label, "region");
+  }
+
+  function answerPrefecture(event) {
+    answerSelection(event, "all", "兵庫県全域", "prefecture");
   }
 
   function answerSelection(event, selectedId, selectedLabel, selectedScope) {
@@ -558,6 +580,21 @@ footer{
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
             answerRegion(event, item);
+          }
+        });
+
+      prefecturePath = prefectureLayer.append("path")
+        .datum(topojson.merge(topo, allGeometries))
+        .attr("class", "prefecture-hit")
+        .attr("d", path)
+        .attr("role", "button")
+        .attr("aria-label", "兵庫県全域を選ぶ")
+        .attr("tabindex", -1)
+        .on("click", answerPrefecture)
+        .on("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            answerPrefecture(event);
           }
         });
 
