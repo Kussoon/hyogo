@@ -271,14 +271,18 @@ footer{width:min(94vw,760px);margin:24px auto 0;text-align:center;color:var(--su
   function selectQuestion(question) {
     selectedQuestion = question;
     infoLink.style.display = "inline-block";
-    mapTitle.textContent = "兵庫県 全域";
+    const focusRegionId = question.answerScope === "region" ? question.answerId : question.regionId;
+    const focusRegion = regionById.get(focusRegionId);
+    mapTitle.textContent = focusRegion ? `兵庫県 ${focusRegion.label}` : "兵庫県 全域";
     renderItemList();
     updateSelectedInfo();
     renderMapState();
     // 長い名産品リストの下から選んでも、品目名と地図を続けて確認できるようにする。
     mapCard.scrollIntoView({ behavior: "smooth", block: "start" });
     if (!mapReady) return;
-    resetMap();
+    const focusRegionFeature = regionFeatureById.get(focusRegionId);
+    if (focusRegionFeature) focusGeometry(focusRegionFeature.geometry);
+    else resetMap();
   }
 
   function resetMap() {
@@ -339,6 +343,11 @@ footer{width:min(94vw,760px);margin:24px auto 0;text-align:center;color:var(--su
 
       mapReady = true;
       renderMapState();
+      if (selectedQuestion) {
+        const focusRegionId = selectedQuestion.answerScope === "region" ? selectedQuestion.answerId : selectedQuestion.regionId;
+        const focusRegion = regionFeatureById.get(focusRegionId);
+        if (focusRegion) focusGeometry(focusRegion.geometry);
+      }
     } catch (error) {
       selectedInfo.textContent = "地図を読み込めませんでした。通信状況を確認してから、もう一度開いてください。";
     }
