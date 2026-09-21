@@ -365,7 +365,7 @@ function selectRegion(key){
     .classed("active-area",d=>active.has(d.__code));
 
   d3.selectAll(".label")
-    .classed("active-label",d=>active.has(d.__code));
+    .classed("active-label",d=>active.has(d.feature.__code));
 
   document.querySelectorAll(".regions button").forEach(b=>{
     b.classList.toggle("active", b.dataset.key===key);
