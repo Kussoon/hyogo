@@ -39,15 +39,52 @@ h1{
   line-height:1.75;
   color:#475569;
 }
-.guide-character{
+.prefecture-profile{
+  width:min(100%,520px);
+  margin:14px auto 0;
+  padding:13px;
+  display:grid;
+  grid-template-columns:126px minmax(0,1fr);
+  gap:13px;
+  align-items:center;
+  text-align:left;
+  border:1px solid #d1dfeb;
+  border-radius:16px;
+  background:#f8fbff;
+}
+.prefecture-outline{
+  min-height:130px;
+  padding:7px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:13px;
+  background:#eaf2f8;
+}
+#prefectureMap{display:block;width:100%;height:116px}
+.prefecture-shape{fill:#7fa6c7;stroke:#315f8c;stroke-width:1.5;vector-effect:non-scaling-stroke}
+.prefecture-facts{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 9px}
+.prefecture-facts div{min-width:0}
+.prefecture-facts dt{font-size:11px;font-weight:800;color:#64748b}
+.prefecture-facts dd{margin:2px 0 0;font-size:14px;font-weight:800;color:#1f3d59;line-height:1.35}
+.official-link{
+  grid-column:1 / -1;
   display:block;
-  width:112px;
-  height:112px;
-  object-fit:cover;
-  margin:12px auto 0;
-  border-radius:50%;
-  border:3px solid #fff;
-  box-shadow:0 2px 10px rgba(15,23,42,.14);
+  padding-top:8px;
+  border-top:1px solid #d7e0ea;
+  text-align:center;
+  color:#245d94;
+  font-size:12px;
+  font-weight:800;
+  text-decoration:none;
+}
+.official-link:hover{text-decoration:underline}
+@media (max-width:390px){
+  .prefecture-profile{grid-template-columns:108px minmax(0,1fr);gap:10px;padding:11px}
+  #prefectureMap{height:104px}
+  .prefecture-outline{min-height:116px}
+  .prefecture-facts{gap:6px}
+  .prefecture-facts dd{font-size:13px}
 }
 main{
   width:min(92vw,660px);
@@ -132,7 +169,18 @@ footer{
   <div class="lead">
     兵庫県の40市町＋神戸市9区、49区域を覚える学習ゲームです。
   </div>
-  <img class="guide-character" src="images/guide-character.png" alt="如月先生">
+  <section class="prefecture-profile" aria-label="兵庫県の基本情報">
+    <div class="prefecture-outline">
+      <svg id="prefectureMap" viewBox="0 0 120 120" role="img" aria-label="兵庫県の形"></svg>
+    </div>
+    <dl class="prefecture-facts">
+      <div><dt>県庁所在地</dt><dd>神戸市</dd></div>
+      <div><dt>県の木</dt><dd>クスノキ</dd></div>
+      <div><dt>県の花</dt><dd>ノジギク</dd></div>
+      <div><dt>県の鳥</dt><dd>コウノトリ</dd></div>
+    </dl>
+    <a class="official-link" href="https://web.pref.hyogo.lg.jp/" target="_blank" rel="noopener noreferrer">兵庫県公式サイトへ ↗</a>
+  </section>
 </header>
 
 <main>
@@ -168,10 +216,34 @@ footer{
 
 </main>
 
-<div class="version">兵庫県 市町村記憶ゲーム Ver. 3.0.10</div>
+<div class="version">兵庫県 市町村記憶ゲーム Ver. 3.0.11</div>
 <footer>
   地図境界データ：『歴史的行政区域データセットβ版』（CODH作成）／国土数値情報「行政区域データ」を加工。CC BY 4.0<br>
   © KUSSOON 2026 All Rights Reserved.
 </footer>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script>
+(() => {
+  const svg = d3.select("#prefectureMap");
+  fetch("hyogo-city.topojson")
+    .then(response => {
+      if (!response.ok) throw new Error("map data");
+      return response.json();
+    })
+    .then(topo => {
+      const objectKey = Object.keys(topo.objects)[0];
+      const geometries = (topo.objects[objectKey].geometries || []).filter(geometry =>
+        String(geometry.properties && geometry.properties.N03_007 || "").startsWith("28")
+      );
+      const outline = topojson.merge(topo, geometries);
+      const projection = d3.geoMercator().fitExtent([[8, 6], [112, 114]], { type:"Feature", geometry:outline });
+      svg.append("path").datum(outline).attr("class", "prefecture-shape").attr("d", d3.geoPath(projection));
+    })
+    .catch(() => {
+      svg.append("text").attr("x", 60).attr("y", 60).attr("text-anchor", "middle").attr("fill", "#64748b").attr("font-size", "11").text("兵庫県");
+    });
+})();
+</script>
 </body>
 </html>
