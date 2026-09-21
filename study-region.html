@@ -510,29 +510,35 @@ async function draw(){
       .attr("class","pref-outline")
       .attr("d",path);
 
-    labelLayer.selectAll("text.label")
-      .data(features).join("text")
+    const labelLines=features.flatMap(feature=>{
+      const lines=feature.__label.split("\n");
+      return lines.map((text,lineIndex)=>({
+        feature,text,
+        lineOffset:lines.length===2 ? (lineIndex===0 ? -0.55 : 0.55) : 0,
+        indent:lines.length===2 && lineIndex===1 ? 2.5 : 0
+      }));
+    });
+    const labels=labelLayer.selectAll("text.label")
+      .data(labelLines).join("text")
       .attr("class","label")
-      .attr("x",d=>path.centroid(d)[0]+offset(d.__code).dx)
-      .attr("y",d=>path.centroid(d)[1]+offset(d.__code).dy)
       .style("font-size",BASE_LABEL_FONT_SIZE+"px")
       .style("stroke-width",BASE_LABEL_STROKE_WIDTH+"px")
-      .each(function(d){
-        const text=d3.select(this);
-        const lines=d.__label.split("\n");
-        if(lines.length===1){ text.text(lines[0]); return; }
-        const x=path.centroid(d)[0]+offset(d.__code).dx;
-        text.append("tspan").attr("x",x).attr("dy","-0.55em").text(lines[0]);
-        text.append("tspan").attr("x",x+2.5).attr("dy","1.16em").text(lines[1]);
-      });
+      .text(d=>d.text);
+    function positionLabels(fontScale=1){
+      labels
+        .attr("x",d=>path.centroid(d.feature)[0]+offset(d.feature.__code).dx+d.indent*fontScale)
+        .attr("y",d=>path.centroid(d.feature)[1]+offset(d.feature.__code).dy+d.lineOffset*BASE_LABEL_FONT_SIZE*fontScale);
+    }
+    positionLabels();
 
     zoom=d3.zoom().scaleExtent([1,12]).on("zoom",e=>{
       const k=e.transform.k;
       root.attr("transform",e.transform);
       const fontScale=Math.pow(k,LABEL_GROWTH_EXPONENT-1);
-      labelLayer.selectAll("text.label")
+      labels
         .style("font-size",(BASE_LABEL_FONT_SIZE*fontScale)+"px")
         .style("stroke-width",(BASE_LABEL_STROKE_WIDTH*fontScale)+"px");
+      positionLabels(fontScale);
     });
     svg.call(zoom);
     svg.call(zoom.transform,d3.zoomIdentity);
