@@ -315,11 +315,13 @@ async function draw(){
     positionLabels();
 
     // 9区のまとまりであることを、北区などの区名とは別にひと目で分かるようにする。
-    const kobeBounds = path.bounds(kobeMerged);
+    // 神戸市名は、9区名と重ならない北区・西区・須磨区の間の空き位置に固定する。
+    // 将来の政令市でも、このように市名ラベルごとの座標を指定できる。
+    const kobeCityPosition = projection([135.14, 34.70]);
     const kobeCityLabel = labelLayer.append("text")
       .attr("class", "kobe-city-label")
-      .attr("x", (kobeBounds[0][0] + kobeBounds[1][0]) / 2 + 32)
-      .attr("y", (kobeBounds[0][1] + kobeBounds[1][1]) / 2 + 60)
+      .attr("x", kobeCityPosition[0])
+      .attr("y", kobeCityPosition[1])
       .style("font-size", "19px")
       .style("stroke-width", "4.2px")
       .text("神戸市");
