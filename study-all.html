@@ -319,7 +319,7 @@ async function draw(){
     const kobeCityLabel = labelLayer.append("text")
       .attr("class", "kobe-city-label")
       .attr("x", (kobeBounds[0][0] + kobeBounds[1][0]) / 2)
-      .attr("y", kobeBounds[0][1] + (kobeBounds[1][1] - kobeBounds[0][1]) * 0.23)
+      .attr("y", (kobeBounds[0][1] + kobeBounds[1][1]) / 2)
       .style("font-size", "22px")
       .style("stroke-width", "4.8px")
       .text("神戸市");
