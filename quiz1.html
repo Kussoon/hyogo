@@ -496,6 +496,7 @@ function startQuiz(codes){
   wrongSet=new Set();
   locked=false;
   result.style.display="none";
+  document.getElementById("quizActionRow").style.display="flex";
   resetMapColors();
   applyRangeHighlight();
   svg.call(zoom.transform,d3.zoomIdentity);
@@ -544,6 +545,7 @@ function finishQuiz(){
   const score=Math.round((correctFirst/queue.length)*100);
   resultText.innerHTML=`<strong>${score}点</strong><br>${queue.length}問中 ${correctFirst}問を最初のタップで正解しました。<br>間違えた問題：${wrongCount}問`;
   wrongBtn.style.display=wrongCount?"block":"none";
+  document.getElementById("quizActionRow").style.display="none";
   result.style.display="flex";
 }
 async function draw(){
