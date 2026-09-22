@@ -319,9 +319,9 @@ async function draw(){
     const kobeCityLabel = labelLayer.append("text")
       .attr("class", "kobe-city-label")
       .attr("x", (kobeBounds[0][0] + kobeBounds[1][0]) / 2 + 32)
-      .attr("y", (kobeBounds[0][1] + kobeBounds[1][1]) / 2 + 80)
-      .style("font-size", "17px")
-      .style("stroke-width", "3.8px")
+      .attr("y", (kobeBounds[0][1] + kobeBounds[1][1]) / 2 + 60)
+      .style("font-size", "19px")
+      .style("stroke-width", "4.2px")
       .text("神戸市");
 
     zoom = d3.zoom()
@@ -337,8 +337,8 @@ async function draw(){
           .style("font-size", (BASE_LABEL_FONT_SIZE * fontScale) + "px")
           .style("stroke-width", (BASE_LABEL_STROKE_WIDTH * fontScale) + "px");
         kobeCityLabel
-          .style("font-size", (17 * fontScale) + "px")
-          .style("stroke-width", (3.8 * fontScale) + "px");
+          .style("font-size", (19 * fontScale) + "px")
+          .style("stroke-width", (4.2 * fontScale) + "px");
         positionLabels(fontScale);
       });
 
