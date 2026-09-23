@@ -1,0 +1,13 @@
+.kussoon-site-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 14px;
+  margin: 10px 0 6px;
+}
+
+footer .kussoon-site-links a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

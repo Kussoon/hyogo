@@ -1,10 +1,10 @@
 # 兵庫県 市町村記憶ゲーム
 
-Ver.3.0.5
+Ver.3.0.21
 
 兵庫県の40市町＋神戸市9区、49区域を覚える学習ゲームです。
 
-公開URL：<https://kussoon.github.io/hyogo/>
+公開URL：<https://kussoon.com/hyogo/>
 
 ## 構成
 
