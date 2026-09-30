@@ -165,10 +165,16 @@ footer{
   color:#64748b;
 }
 </style>
+<style id="kussoon-category-nav-style">
+.kussoon-category-nav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 12px;margin:0 0 16px;padding:4px 0;font-size:13px;line-height:1.5}
+.kussoon-category-nav a{display:inline-block;padding:7px 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#334155;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
+.kussoon-category-nav a:focus-visible{outline:3px solid #2563eb;outline-offset:3px}
+</style>
 </head>
 <body>
 <header>
-  <h1>兵庫県の市町村を地図で覚える</h1>
+  <nav class="kussoon-category-nav" aria-label="Kussoonのカテゴリ案内"><a href="/">← Kussoonトップへ</a><a href="/games/">学ぶ・遊ぶ</a></nav>
+<h1>兵庫県の市町村を地図で覚える</h1>
   <div class="lead">
     兵庫県の40市町＋神戸市9区、49区域を地図で見て、クイズで覚えられます。
   </div>
@@ -219,7 +225,7 @@ footer{
 
 </main>
 
-<div class="version">兵庫県の市町村を地図で覚える Ver. 3.0.23</div>
+<div class="version">兵庫県の市町村を地図で覚える Ver. 3.0.24</div>
 <footer>
   地図境界データ：『歴史的行政区域データセットβ版』（CODH作成）／国土数値情報「行政区域データ」を加工。CC BY 4.0（<a href="/sources/">詳細</a>）<br>
   <nav class="kussoon-site-links" aria-label="サイト情報"><a href="/about/">このサイトについて</a><a href="/privacy/">プライバシーポリシー</a><a href="/sources/">データ出典</a><a href="/terms/">利用上の注意</a></nav>
