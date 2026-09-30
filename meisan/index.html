@@ -34,11 +34,17 @@ main{width:min(92vw,660px);margin:22px auto 0}
 .version{text-align:center;margin:18px auto 6px;font-size:12px;font-weight:700;color:#64748b}
 footer{margin:24px auto 0;width:min(92vw,660px);text-align:center;font-size:10px;line-height:1.55;color:#64748b}
 </style>
+<style id="kussoon-category-nav-style">
+.kussoon-category-nav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 12px;margin:0 0 16px;padding:4px 0;font-size:13px;line-height:1.5}
+.kussoon-category-nav a{display:inline-block;padding:7px 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#334155;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
+.kussoon-category-nav a:focus-visible{outline:3px solid #2563eb;outline-offset:3px}
+</style>
 </head>
 <body>
 <header>
   <div class="topnav"><a href="../index.html">← 兵庫県の市町村を地図で覚える</a></div>
-  <h1>兵庫県の名産品を地図で覚える</h1>
+  <nav class="kussoon-category-nav" aria-label="Kussoonのカテゴリ案内"><a href="/">← Kussoonトップへ</a><a href="/games/">学ぶ・遊ぶ</a></nav>
+<h1>兵庫県の名産品を地図で覚える</h1>
   <div class="lead">兵庫県の名産品・郷土の名物・地場産業を、ゆかりの場所と一緒に地図で見て、クイズで覚えられます。</div>
 </header>
 
@@ -68,7 +74,7 @@ footer{margin:24px auto 0;width:min(92vw,660px);text-align:center;font-size:10px
   </section>
 </main>
 
-<div class="version">兵庫県の名産品を地図で覚える Ver. 2.2</div>
+<div class="version">兵庫県の名産品を地図で覚える Ver. 2.2.1</div>
 <footer>
   地図境界データ：『歴史的行政区域データセットβ版』（CODH作成）／国土数値情報「行政区域データ」を加工。CC BY 4.0<br>
   名産品情報：県・市町・国・JA等の公式情報。<a href="sources.html" style="color:inherit">出典・データについて</a><br>
