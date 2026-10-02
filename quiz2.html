@@ -305,14 +305,14 @@ footer{
   text-align:center;font-size:9px;line-height:1.45;color:#667085;padding:8px 10px 10px
 }
 </style>
-</head>
-<body>
+<meta name="color-scheme" content="only light"><link rel="stylesheet" href="learning-common.css?v=3.0.25"><script src="learning-common.js?v=3.0.25"></script></head>
+<body data-mode="quiz2">
 <div class="topnav"><a href="index.html">← トップへ</a></div>
 <header>
   <h1>兵庫県の市町村を地図で覚える</h1>
-  <div class="sub">🎯 クイズ2　地図上の場所を見て、名前を当てる</div>
+  <div class="sub">クイズ2　場所 → 名前</div>
   <div id="rangeName" style="display:none;"></div>
-  <div id="question" style="display:none;">黄色く光っている場所はどこですか？</div>
+  <div id="question" style="display:none;">黄色の場所の名前は？</div>
   <div id="progress" style="display:none;"></div>
   <div id="quizActionRow">
     <button id="restartBtn" type="button">もう一度最初から</button>
@@ -343,7 +343,7 @@ footer{
 
   <div id="result">
     <div class="result-card">
-      <h2>採点結果</h2>
+      <h2>学習結果</h2>
       <p id="resultText"></p>
       <button id="againBtn" class="primary">もう一度最初から</button>
       <button id="wrongBtn">間違えた問題だけもう一度</button>
@@ -353,7 +353,7 @@ footer{
   </div>
 </main>
 
-<footer>
+<p class="learning-version">Version 3.0.25</p><footer>
   地図境界データ：『歴史的行政区域データセットβ版』（CODH作成）／国土数値情報「行政区域データ」を加工。CC BY 4.0（<a href="/sources/">詳細</a>）<br>
   <nav class="kussoon-site-links" aria-label="サイト情報"><a href="/about/">このサイトについて</a><a href="/privacy/">プライバシーポリシー</a><a href="/sources/">データ出典</a><a href="/terms/">利用上の注意</a></nav>
   © KUSSOON 2026 All Rights Reserved.
@@ -420,6 +420,7 @@ let queue=[];
 let index=0;
 let currentCode=null;
 let wrongSet=new Set();
+let wrongAttempts=0;
 let locked=false;
 let currentRangeCodes=[];
 let highlightRangeCodes=null;
@@ -515,6 +516,7 @@ function tryAutoStartFromQuery(){
   return true;
 }
 function openRangeSelect(){
+  progressController.cancel();
   result.style.display="none";
   setQuizHeaderVisible(false);
   document.body.classList.add("range-selecting");
@@ -549,13 +551,25 @@ function makeChoices(code){
 function resetMap(){
   mapLayer.selectAll(".municipality")
     .classed("target",false)
-    .classed("answer-correct",false);
+    .classed("answer-correct",false)
+    .classed("wrong-flash",false);
 }
 function applyRangeHighlight(){
   mapLayer.selectAll(".municipality")
     .classed("range-selected",d=>highlightRangeCodes?.has(d.__code) || false);
 }
+const progressController=createLearningProgress(()=>{index++;showQuestion()},()=>locked && result.style.display!=="flex" && startPanel.style.display==="none");
+function fitQuizRange(){
+ if(!highlightRangeCodes){svg.call(zoom.transform,d3.zoomIdentity);return;}
+ const nodes=mapLayer.selectAll(".municipality").filter(d=>highlightRangeCodes.has(d.__code)).nodes();
+ if(!nodes.length)return;
+ const boxes=nodes.map(n=>n.getBBox());const x0=Math.min(...boxes.map(b=>b.x)),y0=Math.min(...boxes.map(b=>b.y)),x1=Math.max(...boxes.map(b=>b.x+b.width)),y1=Math.max(...boxes.map(b=>b.y+b.height));
+ const vb=svg.node().viewBox.baseVal;const w=vb.width,h=vb.height;const k=Math.max(1,Math.min(12,(w-80)/Math.max(1,x1-x0),(h-100)/Math.max(1,y1-y0)));
+ svg.interrupt().call(zoom.transform,d3.zoomIdentity.translate(w/2-k*(x0+x1)/2,h/2+30-k*(y0+y1)/2).scale(k));
+}
+
 function startQuiz(codes){
+  progressController.cancel();wrongAttempts=0;
   currentRangeCodes=[...codes];
   queue=shuffle(codes);
   index=0;
@@ -565,10 +579,11 @@ function startQuiz(codes){
   result.style.display="none";
   document.getElementById("quizActionRow").style.display="flex";
   applyRangeHighlight();
-  svg.call(zoom.transform,d3.zoomIdentity);
+  fitQuizRange();
   showQuestion();
 }
 function showQuestion(){
+  progressController.cancel();
   hideFeedback();
   resetMap();
   if(index>=queue.length){
@@ -603,16 +618,14 @@ function answerChoice(button,selectedCode){
     locked=true;
     button.classList.add("correct-choice");
     d3.select("#muni-"+currentCode).classed("target",false).classed("answer-correct",true);
-    showFeedback("正解です！","ok");
+    showFeedback(`正解！ ここは${formalName(correctFeature)}です。`,"ok");
     disableChoices();
-    setTimeout(()=>{
-      index++;
-      showQuestion();
-    },1500);
+    progressController.start();
   }else{
     // 誤答は記録するが、この問題のまま正解するまで続ける
-    wrongSet.add(currentCode);
+    wrongAttempts++;wrongSet.add(currentCode);
     button.classList.add("wrong-choice");
+    d3.select("#muni-"+selectedCode).classed("wrong-flash",true);
     button.disabled=true;
 
     // 誤答時は「違います！」のみ表示し、正解名は出さない
@@ -621,13 +634,11 @@ function answerChoice(button,selectedCode){
   }
 }
 function finishQuiz(){
-  locked=true;
-  const wrongCount=wrongSet.size;
-  const correctFirst=queue.length-wrongCount;
-  const score=Math.round((correctFirst/queue.length)*100);
+  progressController.cancel();locked=true;
+  const wrongCount=wrongSet.size,correctFirst=queue.length-wrongCount;
   progressEl.textContent="";
   choicesEl.innerHTML="";
-  resultText.innerHTML=`<strong>${score}点</strong><br>${queue.length}問中 ${correctFirst}問正解しました。<br>間違えた問題：${wrongCount}問`;
+  resultText.innerHTML=`<strong>${correctFirst} / ${queue.length} 問</strong><br>最初の回答で正解した問題：${correctFirst}問<br>誤答回数：${wrongAttempts}回`;
   wrongBtn.style.display=wrongCount?"block":"none";
   document.getElementById("quizActionRow").style.display="none";
   result.style.display="flex";
@@ -679,7 +690,8 @@ async function draw(){
 
     document.getElementById("zoomIn").onclick=()=>svg.transition().duration(180).call(zoom.scaleBy,1.45);
     document.getElementById("zoomOut").onclick=()=>svg.transition().duration(180).call(zoom.scaleBy,1/1.45);
-    document.getElementById("resetButton").onclick=()=>svg.transition().duration(220).call(zoom.transform,d3.zoomIdentity);
+    document.getElementById("resetButton").onclick=fitQuizRange;
+    document.getElementById("resetButton").setAttribute("aria-label","出題範囲全体を表示");
 
     document.getElementById("restartBtn").onclick=()=>startQuiz(currentRangeCodes);
     document.getElementById("headerRangeBtn").onclick=openRangeSelect;

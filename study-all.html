@@ -166,7 +166,7 @@ footer{
   line-height:1.05;
 }
 </style>
-</head>
+<meta name="color-scheme" content="only light"><link rel="stylesheet" href="learning-common.css?v=3.0.25"><script src="learning-common.js?v=3.0.25"></script></head>
 <body>
 <div style="background:#fff;padding:8px 12px;border-bottom:1px solid #dbe4ee;">
   <a href="index.html" style="color:#334155;text-decoration:none;font-size:14px;font-weight:700;">← トップへ</a>
@@ -188,7 +188,7 @@ footer{
   <div id="status">40市町＋神戸市9区</div>
 </main>
 
-<footer>
+<p class="learning-version">Version 3.0.25</p><footer>
   地図境界データ：『歴史的行政区域データセットβ版』（CODH作成）／国土数値情報「行政区域データ」を加工。CC BY 4.0（<a href="/sources/">詳細</a>）<br>
   <nav class="kussoon-site-links" aria-label="サイト情報"><a href="/about/">このサイトについて</a><a href="/privacy/">プライバシーポリシー</a><a href="/sources/">データ出典</a><a href="/terms/">利用上の注意</a></nav>
   © KUSSOON 2026 All Rights Reserved.
@@ -338,12 +338,12 @@ async function draw(){
 
         // ラベル同士の位置は地図と同じだけ離しつつ、文字サイズの増え方だけを抑える。
         // これにより、全体表示で重なっていても拡大すると徐々に読めるようにする。
-        const fontScale = Math.pow(k, LABEL_GROWTH_EXPONENT - 1); // 実際の見た目は k^LABEL_GROWTH_EXPONENT で拡大
+        const fontScale=Math.min(18 / BASE_LABEL_FONT_SIZE, Math.pow(k, Math.log2(1.6))) / k; // 実際の見た目は k^LABEL_GROWTH_EXPONENT で拡大
         labels
           .style("font-size", (BASE_LABEL_FONT_SIZE * fontScale) + "px")
           .style("stroke-width", (BASE_LABEL_STROKE_WIDTH * fontScale) + "px");
         kobeCityLabel
-          .style("font-size", (19 * fontScale) + "px")
+          .style("font-size", (Math.min(26,19*Math.pow(k,Math.log2(1.6))) / k) + "px")
           .style("stroke-width", (4.2 * fontScale) + "px");
         positionLabels(fontScale);
       });
