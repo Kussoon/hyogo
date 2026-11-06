@@ -122,7 +122,7 @@ body.map-screen-mode #mapFullscreen,#mapFrame:fullscreen #mapFullscreen{right:ma
 .hyogo-trial-links{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 14px}.hyogo-trial-links a{display:inline-flex;align-items:center;min-height:40px;border:1px solid #a6c5d7;background:white;padding:7px 11px;border-radius:8px;color:#195574;font-size:14px;font-weight:700;text-decoration:none}
 </style><link rel="stylesheet" href="/v2/progressive-preview/prefecture-colors.css?v=289"></head><body class="colored-national two-tone-selection"><main>
 <h1>兵庫県 市区町村マップ V2試作</h1>
-<p class="intro">兵庫県40市町と神戸市9区の計49区域を、2026年版の全国共通地図エンジンで表示します。ラベルサイズは従来の兵庫県版で確定した拡大制御方式を適用しています。</p>
+<p class="intro">兵庫県40市町と神戸市9区の計49区域を、2026年版の全国共通地図エンジンで表示します。従来版と比較するための試作です。</p>
 <nav class="hyogo-trial-links" aria-label="兵庫県の既存学習ページ"><a href="study-all.html">従来の全域地図</a><a href="study-region.html">10地域の学習</a><a href="quiz1.html">クイズ1（名前→場所）</a><a href="quiz2.html">クイズ2（場所→名前）</a><a href="./">兵庫県トップ</a></nav>
 <ul class="map-guide"><li>市区町村の位置を押すと吹き出しが出ます。</li><li>吹き出しは上下に移動でき、×で閉じられます。</li><li>区域の点滅は、もう一度押すと止まります。</li><li>地図内のボタンでよみがなが出せます。</li></ul>
 <p class="note"><strong>読み込みに時間がかかることがあります。</strong></p>
@@ -332,36 +332,7 @@ function syncChoicePickers(){
 }
 
 syncChoicePickers();
-// This trial imports the ACTUAL label size behavior from hyogo/study-all.html
-// and hyogo/study-region.html, not a new 12-20px sizing algorithm.
-// Original D3 formula: min(18/15, k^log2(1.6)) / k.
-// V2 zoom changes the SVG viewBox instead of scaling the D3 <g>, so convert
-// the same 15px-to-18px on-screen size back to SVG units for each viewport.
-const HYOGO_BASE_LABEL_PX=15;
-const HYOGO_LABEL_CAP_PX=18;
-function updateHyogoLabelScale(){
- const map=$('map'),layer=map.querySelector('[data-v2-labels]');
- if(!layer||!current)return;
- const rect=map.getBoundingClientRect(),v=map.viewBox.baseVal;
- if(!rect.width||!rect.height||!v.width||!v.height)return;
- const pixelsPerSvgUnit=Math.min(rect.width/v.width,rect.height/v.height);
- if(!Number.isFinite(pixelsPerSvgUnit)||pixelsPerSvgUnit<=0)return;
- const k=Math.max(1,W/v.width);
- const oldFontScale=Math.min(HYOGO_LABEL_CAP_PX/HYOGO_BASE_LABEL_PX,Math.pow(k,Math.log2(1.6)))/k;
- // In the old D3 implementation the group is enlarged k times, so its
- // physical on-screen font is 15 * oldFontScale * k pixels.
- const desiredPx=HYOGO_BASE_LABEL_PX*oldFontScale*k;
- for(const group of layer.children){
-  const text=group.querySelector('text:not([data-reading])');
-  if(!text)continue;
-  const base=group.querySelector('text')?.getAttribute('font-size')==='18'?18:14;
-  const scale=(desiredPx*(base/14))/(base*pixelsPerSvgUnit);
-  const translate=group.dataset.originalTranslate||group.getAttribute('transform');
-  if(!group.dataset.originalTranslate)group.dataset.originalTranslate=translate;
-  group.setAttribute('transform',translate+' scale('+scale.toFixed(6)+')');
- }
-}
-const viewport=KussoonV2MapViewport.init({svg:$('map'),width:W,height:H,onZoomChange:z=>{$('zoomLevel').textContent=z.toFixed(1)+'倍';updateHyogoLabelScale();if(progressive)nationalLabels?.schedule();}});
+const viewport=KussoonV2MapViewport.init({svg:$('map'),width:W,height:H,onZoomChange:z=>{$('zoomLevel').textContent=z.toFixed(1)+'倍';if(progressive)nationalLabels?.schedule();}});
 const progressiveStore=progressive?KussoonV2NationalProgressive.createStore({load:fetchPrefEntry,byteCapacity:12*1048576,pinned:()=>nationalView?'':$('pref').value,onEvict:key=>nationalLabels?.releaseGeometry(key)}):null;
 const number=(n)=>n.toLocaleString('ja-JP');
 function project(b){
@@ -417,7 +388,6 @@ function drawLabels(){
   console.warn('従来V2ラベル計算を適用できず、簡易表示に切り替えます',error);
  }
  KussoonV2PlaceLabels.show({svg:$('map'),regions:displayRegions,project:activeProjection,selected,all,readings,positions});
- updateHyogoLabelScale();
 }
 function paint({refocus=true}={}){
  if(!overview)return;
