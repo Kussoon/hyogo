@@ -14,7 +14,7 @@ button:disabled{opacity:.45}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:
 #start:not(:disabled):active{background:#cce5f6}
 /* Quiz feedback floats inside the map, outside normal document flow.
    Unlike the old reserved 4.8em + 62px rows, this cannot push the map down. */
-.question[hidden],#answerArea[hidden],#answerArea #next[hidden],#replayArea[hidden]{display:none}
+.question[hidden],#answerArea[hidden],#answerArea #next[hidden],#replayArea[hidden],#quit[hidden]{display:none}
 #answerArea{flex:1 1 auto;min-width:0;display:flex;flex-direction:row;align-items:center;gap:7px;pointer-events:none}
 #feedback{display:flex;align-items:center;justify-content:center;text-align:center;flex:1 1 0;min-width:0;margin:0;padding:2px 3px;background:transparent;border:0;border-radius:0;box-shadow:none;color:#133a52;text-shadow:0 1px 2px #fff,0 -1px 2px #fff,1px 0 2px #fff,-1px 0 2px #fff;-webkit-text-stroke:.35px #fff;font-size:clamp(18px,4.8vw,24px);line-height:1.4;white-space:pre-line;max-height:6em;overflow:auto;overflow-wrap:anywhere;font-weight:900;pointer-events:none}
 #feedback:empty{display:none}
@@ -22,6 +22,9 @@ button:disabled{opacity:.45}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:
 .question{font-size:clamp(22px,5vw,30px);font-weight:900;background:#e5f1f9;padding:13px;text-align:center;border-radius:12px}
 .question ruby{ruby-position:over}
 .question rt{font-size:.48em;font-weight:700;letter-spacing:.02em}
+#replayArea{display:flex;gap:8px;flex-wrap:nowrap}
+#replayArea button{flex:1 1 0;min-width:0;padding:9px 3px;font-size:clamp(13px,3.5vw,18px)}
+#quit{position:absolute;left:10px;bottom:12px;z-index:2;min-height:44px;background:#fffffff0;box-shadow:0 2px 8px #1b455a22;pointer-events:auto}
 #map{display:block;width:100%;height:clamp(430px,70svh,740px);border:1px solid #bdd1dd;border-radius:12px;background:#eaf3f9;touch-action:none;user-select:none}
 .map-frame{position:relative}
 #mapTopBar{position:absolute;z-index:3;top:10px;left:10px;right:10px;display:flex;align-items:center;gap:8px;pointer-events:none}
@@ -42,8 +45,9 @@ button:disabled{opacity:.45}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:
 <div id="mapTopBar"><div class="map-area-name" aria-label="学習対象地域"><span>兵庫県</span><strong id="mapRegionName"></strong></div>
 <div id="answerArea" hidden><p id="feedback" aria-live="polite"></p>
 <button id="next" type="button" hidden>次の問題</button></div></div>
+<button id="quit" type="button" hidden>ここでやめる</button>
 <div class="map-controls"><button id="plus" type="button" aria-label="拡大">＋</button><button id="minus" type="button" aria-label="縮小">－</button><button id="reset" type="button">全体</button></div></div>
-<div id="replayArea" class="actions" hidden><button id="replay" type="button">もう一度挑戦</button></div>
+<div id="replayArea" class="actions" hidden><button id="replay" type="button">もう一度挑戦</button><button id="returnRegions" type="button">地域選択に戻る</button></div>
 <p id="status" class="note">地図を読み込んでいます。</p></section>
 <a href="/hyogo/quiz1.html">従来のクイズ1</a> ／ <a href="/hyogo/">兵庫県トップ</a>
 </main>
@@ -156,21 +160,36 @@ function render(){
  if(session){for(const code of session.wrongCodes)svg.querySelector('path.land[data-code="'+code+'"]')?.classList.add('wrong');if(session.answered)svg.querySelector('path.land[data-code="'+session.answer+'"]')?.classList.add('correct');}
 }
 function focus(){const region=regions.find(x=>x.key===selectedRange);byId('mapRegionName').textContent=region.name;current=all.filter(r=>region.codes.includes(r.code));if(!current.length)return;projection=project(bounds(current));viewport.reset();render();status.textContent='';status.hidden=true;}
-function setRange(key){if(!regions.some(r=>r.key===key))return;selectedRange=key;updateRangeButtons();session=null;byId('question').style.minHeight='';byId('question').textContent='';byId('question').hidden=true;byId('feedback').textContent='';byId('answerArea').hidden=true;byId('next').hidden=true;byId('start').disabled=!all.length;byId('start').hidden=false;byId('replayArea').hidden=true;if(all.length)focus();
+function setRange(key){if(!regions.some(r=>r.key===key))return;selectedRange=key;updateRangeButtons();session=null;byId('question').style.minHeight='';byId('question').textContent='';byId('question').hidden=true;byId('feedback').textContent='';byId('answerArea').hidden=true;byId('next').hidden=true;byId('start').disabled=!all.length;byId('start').hidden=false;byId('replayArea').hidden=true;byId('quit').hidden=true;if(all.length)focus();
  // Before the first quiz, keep the start button available. Later region taps start a new regional quiz.
  if(startedOnce&&all.length){start();}else{
   requestAnimationFrame(()=>byId('quizStartAnchor').scrollIntoView({behavior:'smooth',block:'start'}));
  }}
 function shuffle(items){let a=items.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function finishQuiz(){
+ if(!session)return;
+ const question=byId('question');
+ question.style.minHeight=question.getBoundingClientRect().height+'px';
+ question.hidden=false;
+ question.textContent='終了：'+session.correct+' / '+session.order.length+'問正解';
+ byId('feedback').textContent='';
+ byId('next').hidden=true;
+ byId('answerArea').hidden=true;
+ byId('start').hidden=true;
+ byId('quit').hidden=true;
+ byId('replayArea').hidden=false;
+ session=null;
+ render();
+}
 function show(){
  if(!session)return;
- if(session.index>=session.order.length){const question=byId('question');question.style.minHeight=question.getBoundingClientRect().height+'px';question.hidden=false;question.textContent='終了：'+session.correct+' / '+session.order.length+'問正解';byId('feedback').textContent='もう一度挑戦できます。';byId('next').hidden=true;byId('answerArea').hidden=true;byId('start').hidden=true;byId('replayArea').hidden=false;session=null;render();return;}
+ if(session.index>=session.order.length){finishQuiz();return;}
  const item=session.order[session.index];session.answer=item.code;session.answered=false;session.wrongCodes=new Set();
  byId('question').hidden=false;byId('question').innerHTML=(session.index+1)+' / '+session.order.length+'問：'+formatQuestionName(item)+'はどこ？';
  byId('answerArea').hidden=false;
  byId('feedback').textContent='';byId('next').hidden=true;render();
 }
-function start(){const order=shuffle(current);if(!order.length)return;byId('question').style.minHeight='';byId('replayArea').hidden=true;startedOnce=true;session={order,index:0,correct:0,answer:'',answered:false,wrongCodes:new Set()};byId('start').hidden=true;show();scrollToQuestion();}
+function start(){const order=shuffle(current);if(!order.length)return;byId('question').style.minHeight='';byId('replayArea').hidden=true;startedOnce=true;session={order,index:0,correct:0,answer:'',answered:false,wrongCodes:new Set()};byId('start').hidden=true;byId('quit').hidden=false;show();scrollToQuestion();}
 function answer(code){
  if(!session||session.answered)return;
  const tapped=current.find(r=>r.code===code);
@@ -189,7 +208,23 @@ function answer(code){
  byId('next').hidden=false;render();
 }
 svg.addEventListener('click',e=>{const node=e.target.closest('path.land');if(node)answer(node.dataset.code);});
-byId('start').onclick=start;byId('replay').onclick=start;byId('next').onclick=()=>{if(!session)return;session.index++;show();};
+function returnToRegions(){
+ session=null;
+ const question=byId('question');
+ question.style.minHeight='';
+ question.textContent='';
+ question.hidden=true;
+ byId('feedback').textContent='';
+ byId('answerArea').hidden=true;
+ byId('next').hidden=true;
+ byId('quit').hidden=true;
+ byId('replayArea').hidden=true;
+ byId('start').hidden=false;
+ byId('start').disabled=!all.length;
+ render();
+ window.scrollTo(0,0);
+}
+byId('start').onclick=start;byId('replay').onclick=start;byId('quit').onclick=finishQuiz;byId('returnRegions').onclick=returnToRegions;byId('next').onclick=()=>{if(!session)return;session.index++;show();};
 
 byId('plus').onclick=()=>viewport.zoomIn();byId('minus').onclick=()=>viewport.zoomOut();byId('reset').onclick=()=>viewport.reset();
 try{
