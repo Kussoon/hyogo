@@ -72,6 +72,7 @@ const kobeAll=[...kobeRegion,ash,square('西宮市',3.2,3),square('遠方',20,20
 const kobeQuiz=topology(x=>x.slice(),bounds,kobeAll,kobeRegion);
 const kobeNeighbors=new Map(kobeAll.map(item=>[item.code,new Set()]));
 kobeNeighbors.get('神戸市東灘区').add('神戸市灘区');
+kobeNeighbors.get('神戸市東灘区').add('神戸市北区');
 kobeNeighbors.get('神戸市東灘区').add('芦屋市');
 kobeQuiz.setNeighbors(kobeNeighbors);kobeQuiz.cache();
 const higashinadaChoices=kobeQuiz.makeOptions(kobeRegion[0]).map(x=>x.code);
