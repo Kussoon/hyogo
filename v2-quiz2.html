@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>兵庫県V2・クイズ2試作（光っている場所は？）｜Kussoon</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;color:#193a51;background:#eff6fb}*{box-sizing:border-box}
+body{margin:0}main{max-width:900px;margin:0 auto;padding:14px 12px}h1{font-size:clamp(23px,5vw,30px)}.panel{background:#fff;border:1px solid #bed3df;border-radius:14px;padding:14px;margin:12px 0}
+button,select{font:inherit;min-height:44px;border:1px solid #9bb7cb;border-radius:9px;background:#fff;color:#163a55;padding:9px;font-weight:700}
+button:disabled{opacity:.45}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}a{color:#255677}
+#rangeChoices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0 15px}
+#rangeChoices button{min-width:0;min-height:39px;padding:5px 3px;font-size:clamp(11px,3.1vw,14px);line-height:1.25;overflow-wrap:anywhere}
+#rangeChoices button[aria-pressed="true"]{background:#dcecf9;border-color:#326e91;box-shadow:inset 0 0 0 1px #326e91}
+#quizStartAnchor{scroll-margin-top:8px}
+#start{width:100%;background:#e2f0f9;border-color:#94b8d0;color:#173f59;font-size:clamp(17px,4.5vw,22px);padding:15px 12px}
+#start:not(:disabled):active{background:#cce5f6}
+/* Quiz feedback floats inside the map, outside normal document flow.
+   Unlike the old reserved 4.8em + 62px rows, this cannot push the map down. */
+.question[hidden],#answerArea[hidden],#answerArea #next[hidden],#replayArea[hidden],#quit[hidden],#retryMissed[hidden]{display:none}
+#answerArea{flex:1 1 auto;min-width:0;display:flex;flex-direction:row;align-items:center;gap:7px;pointer-events:none}
+#feedback{display:flex;align-items:center;justify-content:center;text-align:center;flex:1 1 0;min-width:0;margin:0;padding:2px 3px;background:transparent;border:0;border-radius:0;box-shadow:none;color:#133a52;text-shadow:0 1px 2px #fff,0 -1px 2px #fff,1px 0 2px #fff,-1px 0 2px #fff;-webkit-text-stroke:.35px #fff;font-size:clamp(18px,4.8vw,24px);line-height:1.4;white-space:pre-line;max-height:6em;overflow:auto;overflow-wrap:anywhere;font-weight:900;pointer-events:none}
+#feedback:empty{display:none}
+#next{flex:1 1 0;min-width:0;width:auto;min-height:44px;max-width:none;margin:0;background:#e2f0f9;border-color:#94b8d0;color:#173f59;font-size:clamp(15px,3.9vw,19px);padding:10px 7px;box-shadow:0 2px 9px #173c5526;pointer-events:auto}
+.question{font-size:clamp(22px,5vw,30px);font-weight:900;background:#e5f1f9;padding:13px;text-align:center;border-radius:12px}
+.question ruby{ruby-position:over}
+.question rt{font-size:.48em;font-weight:700;letter-spacing:.02em}
+#choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0 10px}
+#choices[hidden]{display:none}
+#choices button{min-width:0;min-height:58px;padding:8px 4px;font-size:clamp(13px,3.5vw,18px);line-height:1.4;background:#f4faff;overflow-wrap:anywhere}
+#choices button rt{font-size:.6em;font-weight:700}
+#choices button.wrong-choice{background:#f9d6d1;border-color:#cf887c}
+#choices button.correct-choice{background:#b8ead0;border-color:#3b9966}
+#choices button:disabled{opacity:1}
+@keyframes hyogoQuiz2Pulse{0%,49%{fill:#ffcd52}50%,100%{fill:#d9dea5}}
+.land.target{animation:hyogoQuiz2Pulse 1s steps(1,end) infinite}
+@media(prefers-reduced-motion:reduce){.land.target{animation-duration:2s}}
+#replayArea{display:flex;gap:8px;flex-wrap:nowrap;align-items:stretch}
+#replayArea button{display:flex;flex:1 1 0;flex-direction:column;align-items:center;justify-content:center;min-width:0;min-height:68px;padding:9px 2px;font-size:clamp(10px,3.3vw,18px);line-height:1.25;text-align:center}
+#retryMissed{font-size:clamp(10px,3vw,16px)!important}
+#retryMissed span,#replay span,#returnRegions{white-space:nowrap}
+#quit{position:absolute;left:10px;bottom:12px;z-index:2;min-height:44px;background:#fffffff0;box-shadow:0 2px 8px #1b455a22;pointer-events:auto}
+#map{display:block;width:100%;height:clamp(430px,70svh,740px);border:1px solid #bdd1dd;border-radius:12px;background:#eaf3f9;touch-action:none;user-select:none}
+.map-frame{position:relative}
+#mapTopBar{position:absolute;z-index:3;top:10px;left:10px;right:10px;display:flex;align-items:center;gap:8px;pointer-events:none}
+.map-area-name{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:8px 12px;border:1px solid #bed3df;border-radius:11px;background:#fffffff0;color:#193a51;box-shadow:0 2px 9px #173c5526;font-weight:850;line-height:1.35;pointer-events:none}
+.map-area-name span:first-child{font-size:clamp(12px,3.1vw,15px)}
+.map-area-name strong{font-size:clamp(17px,4.3vw,21px)}
+.map-controls{position:absolute;top:auto;bottom:12px;right:9px;display:grid;gap:6px;z-index:2}
+.map-controls button{width:50px;min-width:50px;box-shadow:0 2px 8px #1b455a22}
+.map-controls .fit-button{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15;gap:2px;padding:7px 2px;font-size:clamp(12px,3.1vw,16px)}
+.map-controls .fit-button span{display:block;white-space:nowrap}
+.land{fill:#d9dea5;stroke:none;cursor:pointer}.land.outside{fill:#cbd7db;cursor:default}.land.correct{fill:#8ed6a7}.land.wrong{fill:#f0aaa0}.borders{fill:none;stroke:white;stroke-width:1.2;vector-effect:non-scaling-stroke;pointer-events:none}
+.note{font-size:13px;color:#486679;line-height:1.7}
+</style></head><body>
+<main><a href="/hyogo/v2-study-region.html">← 兵庫県10地域へ戻る</a><h1>クイズ2：光っている場所は？（V2試作）</h1>
+<section class="panel"><div id="rangeHeading"><strong>出題地域を選んでください</strong></div><div id="rangeChoices" role="group" aria-label="出題地域"></div>
+<div id="quizStartAnchor"></div>
+<div class="actions"><button id="start" type="button" disabled>クイズを開始</button></div>
+<div id="question" class="question" aria-live="polite" hidden></div>
+<div id="choices" role="group" aria-label="光っている市区町村の名前を選ぶ" hidden></div>
+<div class="map-frame"><svg id="map" viewBox="0 0 850 700" role="img" aria-label="点滅する市区町村の名前を当てる地図"></svg>
+<div id="mapTopBar"><div class="map-area-name" aria-label="学習対象地域"><span>兵庫県</span><strong id="mapRegionName"></strong></div>
+<div id="answerArea" hidden><p id="feedback" aria-live="polite"></p>
+<button id="next" type="button" hidden>次の問題</button></div></div>
+<button id="quit" type="button" hidden>ここでやめる</button>
+<div class="map-controls"><button id="plus" type="button" aria-label="拡大">＋</button><button id="minus" type="button" aria-label="縮小">－</button><button id="reset" class="fit-button" type="button" aria-label="地域全体"><span>地域</span><span>全体</span></button><button id="prefReset" class="fit-button" type="button" aria-label="兵庫県全体"><span>県の</span><span>全体</span></button></div></div>
+<div id="replayArea" class="actions" hidden><button id="retryMissed" type="button" hidden><span>間違えた問題を</span><span>もう一度</span></button><button id="replay" type="button"><span>最初から</span><span>もう一度</span></button><button id="returnRegions" type="button">地域選択に戻る</button></div>
+<p id="status" class="note">地図を読み込んでいます。</p></section>
+<a href="/hyogo/v2-quiz1.html">V2クイズ1</a> ／ <a href="/hyogo/quiz2.html">従来のクイズ2</a> ／ <a href="/hyogo/">兵庫県トップ</a>
+</main>
+<script src="/hyogo/v2-regions.js"></script>
+<script src="/v2/progressive-preview/municipality-renderer.js"></script>
+<script src="/v2/progressive-preview/map-viewport.js"></script>
+<script>
+(async()=>{'use strict';
+const config=window.KussoonHyogoV2Regions,regions=config.regions,byId=id=>document.getElementById(id),svg=byId('map'),choices=byId('rangeChoices'),status=byId('status');
+const W=850,H=700,renderer=KussoonV2MunicipalRenderer;
+let viewport=KussoonV2MapViewport.init({svg,width:W,height:H}),frameHeight=H,prefectureView=false;
+const query=new URLSearchParams(location.search),wanted=query.get('range')||query.get('studyRegion');
+const MANUAL_READINGS_BY_NAME = {
+  '神戸市東灘区':'こうべしひがしなだく',
+  '神戸市灘区':'こうべしなだく',
+  '神戸市兵庫区':'こうべしひょうごく',
+  '神戸市長田区':'こうべしながたく',
+  '神戸市須磨区':'こうべしすまく',
+  '神戸市垂水区':'こうべしたるみく',
+  '神戸市北区':'こうべしきたく',
+  '神戸市中央区':'こうべしちゅうおうく',
+  '神戸市西区':'こうべしにしく',
+  '姫路市':'ひめじし',
+  '尼崎市':'あまがさきし',
+  '明石市':'あかしし',
+  '西宮市':'にしのみやし',
+  '洲本市':'すもとし',
+  '芦屋市':'あしやし',
+  '伊丹市':'いたみし',
+  '相生市':'あいおいし',
+  '豊岡市':'とよおかし',
+  '加古川市':'かこがわし',
+  '赤穂市':'あこうし',
+  '西脇市':'にしわきし',
+  '宝塚市':'たからづかし',
+  '三木市':'みきし',
+  '高砂市':'たかさごし',
+  '川西市':'かわにしし',
+  '小野市':'おのし',
+  '三田市':'さんだし',
+  '加西市':'かさいし',
+  '丹波篠山市':'たんばささやまし',
+  '養父市':'やぶし',
+  '丹波市':'たんばし',
+  '南あわじ市':'みなみあわじし',
+  '朝来市':'あさごし',
+  '淡路市':'あわじし',
+  '宍粟市':'しそうし',
+  '加東市':'かとうし',
+  'たつの市':'たつのし',
+  '猪名川町':'いながわちょう',
+  '多可町':'たかちょう',
+  '稲美町':'いなみちょう',
+  '播磨町':'はりまちょう',
+  '市川町':'いちかわちょう',
+  '福崎町':'ふくさきちょう',
+  '神河町':'かみかわちょう',
+  '太子町':'たいしちょう',
+  '上郡町':'かみごおりちょう',
+  '佐用町':'さようちょう',
+  '香美町':'かみちょう',
+  '新温泉町':'しんおんせんちょう'
+};
+function escapeHtml(value){
+  return String(value).replace(/[&<>"']/g, ch => ({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[ch]));
+}
+const COUNTY_BY_TOWN = {
+  '猪名川町':['川辺郡','かわべぐん'],
+  '多可町':['多可郡','たかぐん'],
+  '稲美町':['加古郡','かこぐん'],
+  '播磨町':['加古郡','かこぐん'],
+  '市川町':['神崎郡','かんざきぐん'],
+  '福崎町':['神崎郡','かんざきぐん'],
+  '神河町':['神崎郡','かんざきぐん'],
+  '太子町':['揖保郡','いぼぐん'],
+  '上郡町':['赤穂郡','あこうぐん'],
+  '佐用町':['佐用郡','さようぐん'],
+  '香美町':['美方郡','みかたぐん'],
+  '新温泉町':['美方郡','みかたぐん']
+};
+function formatQuestionName(item){
+  const county = COUNTY_BY_TOWN[item.name];
+  // Keep the official quiz answer/code untouched; only the question's displayed name changes.
+  const name = county ? county[0] + item.name : item.name;
+  const townReading = MANUAL_READINGS_BY_NAME[item.name] || item.reading || '';
+  const reading = county ? county[1] + townReading : (item.reading || townReading);
+  if(!reading) return escapeHtml(name);
+  return `<ruby>${escapeHtml(name)}<rt>${escapeHtml(reading)}</rt></ruby>`;
+}
+let selectedRange=regions.some(r=>r.key===wanted)?wanted:regions[0].key;
+byId('mapRegionName').textContent=regions.find(r=>r.key===selectedRange).name;
+function updateRangeButtons(){for(const button of choices.querySelectorAll('button'))button.setAttribute('aria-pressed',String(button.dataset.key===selectedRange));}
+for(const region of regions){const button=document.createElement('button');button.type='button';button.dataset.key=region.key;button.textContent=region.name+'（'+region.codes.length+'区域）';button.addEventListener('click',()=>setRange(region.key));choices.append(button);}updateRangeButtons();
+let all=[],arcs=[],current=[],projection=null,session=null,startedOnce=false,retryOrder=[];
+function scrollToQuestion(){requestAnimationFrame(()=>byId('question').scrollIntoView({behavior:'smooth',block:'start'}));}
+function decodeArcs(t){return t.arcs.map(a=>{let x=0,y=0;return a.map(q=>{if(t.transform){x+=q[0];y+=q[1];return [x*t.transform.scale[0]+t.transform.translate[0],y*t.transform.scale[1]+t.transform.translate[1]];}return q;});});}
+function points(ids,a){const out=[];for(const id of ids){const part=id<0?a[~id].slice().reverse():a[id];out.push(...(out.length?part.slice(1):part));}return out;}
+function polys(g,a){return g.type==='Polygon'?[g.arcs.map(ids=>points(ids,a))]:g.arcs.map(poly=>poly.map(ids=>points(ids,a)));}
+function bounds(items){let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;for(const r of items)for(const poly of r.polys)for(const ring of poly)for(const [x,y] of ring){minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);}return [minX,minY,maxX,maxY];}
+function project(box){const cos=Math.cos((box[1]+box[3])*Math.PI/360),bw=Math.max((box[2]-box[0])*cos,.04),bh=Math.max(box[3]-box[1],.04),scale=Math.min((W-60)/bw,(frameHeight-60)/bh),lon=(box[0]+box[2])/2,lat=(box[1]+box[3])/2;return p=>[W/2+(p[0]-lon)*cos*scale,frameHeight/2-(p[1]-lat)*scale];}
+function render(){
+ renderer.render({map:svg,regions:all,arcs,project:projection,hideTitles:true});
+ const active=new Set(current.map(x=>x.code));
+ for(const shape of svg.querySelectorAll('path.land')){const code=shape.dataset.code;shape.classList.toggle('outside',!active.has(code));shape.querySelector('title')?.remove();shape.setAttribute('aria-label',active.has(code)?'回答する区域':'出題範囲外');}
+ if(session){
+  const target=svg.querySelector('path.land[data-code="'+session.answer+'"]');
+  if(target)target.classList.add(session.answered?'correct':'target');
+}
+}
+function fitMap(items,isPrefecture=false){
+ if(!items.length)return;
+ // Preserve the established region framing; use the visible map's real aspect
+ // ratio only for prefecture-wide display, with no space reserved for controls.
+ const rect=svg.getBoundingClientRect();
+ const targetHeight=isPrefecture&&rect.width>0&&rect.height>0
+  ?Math.max(1,Math.round(W*rect.height/rect.width)):H;
+ if(prefectureView!==isPrefecture||frameHeight!==targetHeight){
+  viewport.destroy();
+  frameHeight=targetHeight;
+  viewport=KussoonV2MapViewport.init({svg,width:W,height:frameHeight});
+ }
+ prefectureView=isPrefecture;
+ projection=project(bounds(items));
+ viewport.reset();
+ render();
+}
+function focus(){const region=regions.find(x=>x.key===selectedRange);byId('mapRegionName').textContent=region.name;current=all.filter(r=>region.codes.includes(r.code));if(!current.length)return;fitMap(current);status.textContent='';status.hidden=true;}
+function setRange(key){if(!regions.some(r=>r.key===key))return;selectedRange=key;updateRangeButtons();session=null;retryOrder=[];byId('question').style.minHeight='';byId('question').textContent='';byId('question').hidden=true;byId('feedback').textContent='';byId('answerArea').hidden=true;byId('choices').hidden=true;byId('next').hidden=true;byId('start').disabled=!all.length;byId('start').hidden=false;byId('replayArea').hidden=true;byId('quit').hidden=true;if(all.length)focus();
+ // Before the first quiz, keep the start button available. Later region taps start a new regional quiz.
+ if(startedOnce&&all.length){start();}else{
+  requestAnimationFrame(()=>byId('quizStartAnchor').scrollIntoView({behavior:'smooth',block:'start'}));
+ }}
+function shuffle(items){let a=items.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function finishQuiz(){
+ if(!session)return;
+ const question=byId('question');
+ question.style.minHeight=question.getBoundingClientRect().height+'px';
+ question.hidden=false;
+ question.textContent='終了：'+session.correct+' / '+session.order.length+'問正解';
+ // Only questions actually answered incorrectly are eligible; unattempted questions are excluded.
+ retryOrder=session.order.filter(item=>session.missedQuestionCodes.has(item.code));
+ byId('retryMissed').hidden=retryOrder.length===0;
+ byId('feedback').textContent='';
+ byId('next').hidden=true;
+ byId('choices').hidden=true;
+ byId('answerArea').hidden=true;
+ byId('start').hidden=true;
+ byId('quit').hidden=true;
+ byId('replayArea').hidden=false;
+ session=null;
+ render();
+}
+function makeOptions(item){
+ const other=shuffle(current.filter(r=>r.code!==item.code));
+ const remaining=shuffle(all.filter(r=>r.code!==item.code&&!current.some(c=>c.code===r.code)));
+ const options=[item,...other.slice(0,3)];
+ while(options.length<4&&remaining.length)options.push(remaining.shift());
+ return shuffle(options);
+}
+function show(){
+ if(!session)return;
+ if(session.index>=session.order.length){finishQuiz();return;}
+ const item=session.order[session.index];session.answer=item.code;session.answered=false;session.wrongCodes=new Set();
+ byId('question').hidden=false;
+ byId('question').textContent=(session.index+1)+' / '+session.order.length+'問：光っている場所は？';
+ byId('answerArea').hidden=false;
+ byId('feedback').textContent='';byId('next').hidden=true;
+ const choices=byId('choices');choices.replaceChildren();choices.hidden=false;
+ for(const option of makeOptions(item)){
+  const button=document.createElement('button');
+  button.type='button';button.dataset.code=option.code;
+  button.innerHTML=formatQuestionName(option);
+  button.addEventListener('click',()=>answer(option.code,button));
+  choices.append(button);
+ }
+ render();
+}
+function start(orderOverride){const order=shuffle(Array.isArray(orderOverride)?orderOverride:current);if(!order.length)return;byId('question').style.minHeight='';byId('replayArea').hidden=true;startedOnce=true;retryOrder=[];session={order,index:0,correct:0,answer:'',answered:false,wrongCodes:new Set(),firstTryCorrectCodes:new Set(),missedQuestionCodes:new Set()};byId('start').hidden=true;byId('quit').hidden=false;show();scrollToQuestion();}
+function answer(code,button){
+ if(!session||session.answered||button.disabled)return;
+ const chosen=all.find(r=>r.code===code);
+ if(!chosen)return;
+ if(code!==session.answer){
+  session.wrongCodes.add(code);
+  session.missedQuestionCodes.add(session.answer);
+  button.classList.add('wrong-choice');button.disabled=true;
+  byId('feedback').textContent='違います。\\nそこは'+chosen.name+'です。';
+  byId('next').hidden=true;
+  return;
+ }
+ session.answered=true;
+ if(session.wrongCodes.size===0){session.correct++;session.firstTryCorrectCodes.add(session.answer);}
+ button.classList.add('correct-choice');
+ for(const choice of byId('choices').querySelectorAll('button'))choice.disabled=true;
+ byId('feedback').textContent='正解です！';
+ byId('next').textContent=session.index===session.order.length-1?'結果を見る':'次の問題';
+ byId('next').hidden=false;render();
+}
+function returnToRegions(){
+ session=null;
+ retryOrder=[];
+ startedOnce=false;
+ const question=byId('question');
+ question.style.minHeight='';
+ question.textContent='';
+ question.hidden=true;
+ byId('feedback').textContent='';
+ byId('answerArea').hidden=true;
+ byId('choices').hidden=true;
+ byId('next').hidden=true;
+ byId('quit').hidden=true;
+ byId('replayArea').hidden=true;
+ byId('start').hidden=false;
+ byId('start').disabled=!all.length;
+ render();
+ window.scrollTo(0,0);
+}
+byId('start').onclick=start;byId('replay').onclick=start;byId('retryMissed').onclick=()=>start(retryOrder);byId('quit').onclick=finishQuiz;byId('returnRegions').onclick=returnToRegions;byId('next').onclick=()=>{if(!session)return;session.index++;show();};
+
+byId('plus').onclick=()=>viewport.zoomIn();byId('minus').onclick=()=>viewport.zoomOut();byId('reset').onclick=()=>fitMap(current);byId('prefReset').onclick=()=>fitMap(all,true);
+try{
+ const [manifestRes,indexRes]=await Promise.all([fetch('/v2/data/national/2026-common/national-2026-pilot/manifest.json'),fetch('/v2/progressive-preview/label-index.json')]);
+ if(!manifestRes.ok||!indexRes.ok)throw Error('全国データ索引の読み込みに失敗');
+ const manifest=await manifestRes.json(),idx=await indexRes.json(),entry=manifest.entries.find(e=>e.pref==='28');
+ if(!entry||idx.count!==1905)throw Error('全国索引の構成が不正');
+ const res=await fetch('/v2/data/national/2026-common/'+entry.source);if(!res.ok)throw Error('2026年データの読み込みに失敗');
+ const topo=await res.json(),index=new Map(idx.entries.filter(x=>x.pref==='28').map(x=>[x.code,x]));
+ const shapes=topo.objects.municipalities.geometries;arcs=decodeArcs(topo);
+ all=shapes.map(g=>{
+  const code=String(g.properties.N03_007),indexed=index.get(code);
+  const name=indexed?.fullName||indexed?.name||g.properties.N03_004;
+  const reading=indexed?.reading||indexed?.kana||indexed?.ruby||MANUAL_READINGS_BY_NAME[name]||'';
+  return {code,name,reading,polys:polys(g,arcs)};
+});
+ const keys=new Set(regions.flatMap(r=>r.codes));
+ if(all.length!==49||keys.size!==49||all.some(r=>!keys.has(r.code)||!index.has(r.code)))throw Error('地域の行政区域コードが2026年版と一致しません');
+ byId('start').disabled=false;byId('question').textContent='';byId('question').hidden=true;byId('choices').hidden=true;byId('answerArea').hidden=true;focus();
+}catch(err){console.error(err);status.hidden=false;status.textContent='読み込みエラー：'+err.message;byId('question').textContent='地図を読み込めませんでした。';}
+})();
+</script><script defer src="/common/site-footer.js"></script>
+</body></html>
