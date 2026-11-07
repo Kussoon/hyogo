@@ -93,4 +93,27 @@ assert(html.includes('function escapeHtml(value){'),'Question name and reading a
 assert(html.includes("'神戸市北区':'こうべしきたく'"),'Hyogo ward reading is available');
 assert(html.includes("'新温泉町':'しんおんせんちょう'"),'All Hyogo municipality readings are covered');
 assert(html.includes('indexed?.reading||indexed?.kana||indexed?.ruby||MANUAL_READINGS_BY_NAME[name]||'),'Indexed readings are preferred before manual fallback');
+
+const countyEntries=[...html.matchAll(/^  '([^']+町)':\['([^']+郡)','([^']+ぐん)'\],?$/gm)];
+assert.equal(countyEntries.length,12,'Every one of Hyogo’s 12 towns has a county');
+assert.equal(new Set(countyEntries.map(m=>m[1])).size,12,'No duplicate county mapping');
+assert.equal(new Set(countyEntries.map(m=>m[2])).size,8,'County mappings cover the 8 actual counties');
+const nameFormatter=html.match(/const COUNTY_BY_TOWN = \{[\s\S]*?\n\};\nfunction formatQuestionName\(item\)\{[\s\S]*?\n\}/);
+assert(nameFormatter,'County mapping and question name formatter are present');
+const format=Function('MANUAL_READINGS_BY_NAME','escapeHtml',nameFormatter[0]+';return formatQuestionName;')(
+  Object.fromEntries([
+    ['香美町','かみちょう'],['新温泉町','しんおんせんちょう'],
+    ['猪名川町','いながわちょう'],['多可町','たかちょう'],['稲美町','いなみちょう'],
+    ['播磨町','はりまちょう'],['市川町','いちかわちょう'],['福崎町','ふくさきちょう'],
+    ['神河町','かみかわちょう'],['太子町','たいしちょう'],['上郡町','かみごおりちょう'],
+    ['佐用町','さようちょう']
+  ]),
+  s=>String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))
+);
+assert.equal(format({name:'香美町',reading:'かみちょう'}),'<ruby>美方郡香美町<rt>みかたぐんかみちょう</rt></ruby>');
+assert.equal(format({name:'太子町',reading:'たいしちょう'}),'<ruby>揖保郡太子町<rt>いぼぐんたいしちょう</rt></ruby>');
+assert.equal(format({name:'神戸市北区',reading:'こうべしきたく'}),'<ruby>神戸市北区<rt>こうべしきたく</rt></ruby>');
+assert.equal(format({name:'西宮市',reading:'にしのみやし'}),'<ruby>西宮市<rt>にしのみやし</rt></ruby>');
+assert.equal(format({name:'A&B',reading:'a<b'}),'<ruby>A&amp;B<rt>a&lt;b</rt></ruby>');
+
 console.log('Hyogo V2 region overview + quiz1 static contracts: PASS');
