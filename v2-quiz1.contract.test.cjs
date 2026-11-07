@@ -56,7 +56,7 @@ freshQuiz.answer('28105');
 assert.equal(freshQuiz.session.correct,1,'First try correct earns one point');
 assert.deepEqual([...freshQuiz.session.firstTryCorrectCodes],['28105'],'First try correct code is remembered');
 assert.equal(freshButtons.next.hidden,false,'First try correct unlocks next');
-assert(html.includes('if(session.wrongCodes.size===0)session.correct++'),'Scoring only counts questions solved on the first try');
+assert(html.includes('if(session.wrongCodes.size===0){session.correct++;session.firstTryCorrectCodes.add(session.answer);}'),'Scoring only counts questions solved on the first try');
 
 assert(html.includes('min-height:39px;padding:5px 3px'),'Region buttons have a more compact height');
 assert(html.includes('font-size:clamp(11px,3.1vw,14px)'),'Region button font is reduced');
@@ -66,7 +66,7 @@ assert(html.includes("byId('answerArea').hidden=true;"),'Response area hidden ou
 // The map must not move vertically as feedback and next controls appear.
 assert(html.includes('#mapTopBar{position:absolute;z-index:3;top:10px;left:10px;right:10px;'),'Top map overlay is above map and outside normal layout');
 assert(html.includes('#answerArea{flex:1 1 auto;min-width:0;display:flex;flex-direction:row;align-items:center;'),'Feedback and next action share the same horizontal top row as region caption');
-assert(html.includes('#answerArea[hidden],#answerArea #next[hidden]{display:none}'),'Hidden controls occupy no map area');
+assert(html.includes('#answerArea[hidden],#answerArea #next[hidden],#replayArea[hidden],#quit[hidden],#retryMissed[hidden]{display:none}'),'Hidden controls occupy no map area');
 assert(html.includes('#feedback:empty{display:none}'),'Empty feedback creates no visible card');
 assert(!html.includes('grid-template-rows:4.8em 62px'),'Previous large empty spacer is removed');
 assert(html.indexOf('class="map-frame"')<html.indexOf('id="answerArea"')&&html.indexOf('id="answerArea"')<html.indexOf('class="map-controls"'),'Feedback and next button are overlaid inside the map');
@@ -132,16 +132,16 @@ assert(html.includes("status.textContent='';status.hidden=true;"),'Normal region
 assert(html.includes("status.hidden=false;status.textContent='読み込みエラー：'+err.message"),'Actual loading errors remain visible');
 assert(html.includes("question.style.minHeight=question.getBoundingClientRect().height+'px'"),'Result retains the last question panel height so the map cannot jump upwards');
 assert(html.includes("function start(orderOverride){const order=shuffle(Array.isArray(orderOverride)?orderOverride:current);if(!order.length)return;byId('question').style.minHeight=''"),'Restart clears the retained height and supports missed-only retry');
-assert(html.includes("session=null;byId('question').style.minHeight=''"),'Region change clears the retained height');
-assert(html.includes('#replayArea[hidden]{display:none}'),'Replay controls occupy no space before completion');
+assert(html.includes("session=null;retryOrder=[];byId('question').style.minHeight=''"),'Region change clears the retained height');
+assert(html.includes('#replayArea[hidden],#quit[hidden],#retryMissed[hidden]{display:none}'),'Replay controls occupy no space before completion');
 assert(html.indexOf('class="map-frame"')<html.indexOf('id="replayArea"'),'Replay button is positioned after map');
 assert(html.includes("if(session.index>=session.order.length){finishQuiz();return;}"),'Normal finish shares the same result screen with quitting');
 assert(html.includes("byId('start').hidden=true;")&&html.includes("byId('replayArea').hidden=false;"),'Completion leaves start hidden and reveals result actions');
 assert(html.includes("byId('replayArea').hidden=true;startedOnce=true;"),'Restart removes below-map replay');
-assert(html.includes("byId('replayArea').hidden=true;if(all.length)focus();"),'Changing region removes replay');
+assert(html.includes("byId('replayArea').hidden=true;byId('quit').hidden=true;if(all.length)focus();"),'Changing region removes replay');
 assert(html.includes("byId('replay').onclick=start;"),'Replay starts a new quiz');
 assert(html.includes('#replayArea{display:flex;gap:8px;flex-wrap:nowrap;align-items:stretch}'),'Result buttons display side-by-side with equal height');
-assert(html.includes('#replayArea button{flex:1 1 0;min-width:0;'),'Result actions have equal flexible widths');
+assert(html.includes('#replayArea button{display:flex;flex:1 1 0;flex-direction:column;align-items:center;justify-content:center;min-width:0;'),'Result actions have equal flexible widths');
 assert(html.includes('<button id="returnRegions" type="button">地域選択に戻る</button>'),'Return to selection button is present');
 assert(html.includes('<button id="retryMissed" type="button" hidden><span>間違えた問題だけを</span><span>もう一度</span></button>'),'Missed-question retry label has two lines');
 assert(html.includes('<button id="replay" type="button"><span>最初から</span><span>もう一度</span></button>'),'Full retry label has two lines');
