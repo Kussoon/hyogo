@@ -121,4 +121,10 @@ assert(html.includes("status.hidden=false;status.textContent='読み込みエラ
 assert(html.includes("question.style.minHeight=question.getBoundingClientRect().height+'px'"),'Result retains the last question panel height so the map cannot jump upwards');
 assert(html.includes("function start(){const order=shuffle(current);if(!order.length)return;byId('question').style.minHeight=''"),'Restart clears the retained height');
 assert(html.includes("session=null;byId('question').style.minHeight=''"),'Region change clears the retained height');
+assert(html.includes('#replayArea[hidden]{display:none}'),'Replay controls occupy no space before completion');
+assert(html.indexOf('class="map-frame"')<html.indexOf('id="replayArea"'),'Replay button is positioned after map');
+assert(html.includes("byId('start').hidden=true;byId('replayArea').hidden=false;session=null;render();return;"),'Completion never displays start button above map and exposes below-map replay');
+assert(html.includes("byId('replayArea').hidden=true;startedOnce=true;"),'Restart removes below-map replay');
+assert(html.includes("byId('replayArea').hidden=true;if(all.length)focus();"),'Changing region removes replay');
+assert(html.includes("byId('replay').onclick=start;"),'Replay starts a new quiz');
 console.log('Hyogo V2 region overview + quiz1 static contracts: PASS');
