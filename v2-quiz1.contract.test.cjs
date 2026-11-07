@@ -44,8 +44,18 @@ quiz.answer('28106');
 assert.deepEqual([...quiz.session.wrongCodes],['28101','28106'],'Multiple wrong regions remain red');
 quiz.answer('28105');
 assert.equal(buttons.next.hidden,false,'Correct answer unlocks next');
-assert.equal(quiz.session.correct,1);
+assert.equal(quiz.session.correct,0,'A question answered after one or more mistakes does not earn a point');
 assert.equal(quiz.session.answered,true);
+const freshButtons={feedback:{textContent:''},next:{hidden:true,textContent:''}};
+const freshQuiz=Function('byId','current','render',
+ 'let session={answered:false,answer:"28105",wrongCodes:new Set(),correct:0,index:0,order:[1,2]};'
+ +a[0].replace(/\nsvg\.addEventListener$/,'')+';return {answer,session};'
+)(id=>freshButtons[id],[{code:'28101',name:'神戸市東灘区'},{code:'28105',name:'神戸市兵庫区'}],()=>{});
+freshQuiz.answer('28105');
+assert.equal(freshQuiz.session.correct,1,'First try correct earns one point');
+assert.equal(freshButtons.next.hidden,false,'First try correct unlocks next');
+assert(html.includes('if(session.wrongCodes.size===0)session.correct++'),'Scoring only counts questions solved on the first try');
+
 assert(html.includes('min-height:39px;padding:5px 3px'),'Region buttons have a more compact height');
 assert(html.includes('font-size:clamp(11px,3.1vw,14px)'),'Region button font is reduced');
 assert(!html.includes('地域別の市区町村名を見て、地図上の位置を押してください。'),'Requested explanatory paragraph removed');
