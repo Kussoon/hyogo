@@ -7,10 +7,12 @@ body{margin:0}main{max-width:900px;margin:0 auto;padding:14px 12px}h1{font-size:
 button,select{font:inherit;min-height:44px;border:1px solid #9bb7cb;border-radius:9px;background:#fff;color:#163a55;padding:9px;font-weight:700}
 button:disabled{opacity:.45}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}a{color:#255677}
 #rangeChoices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0 15px}
-#rangeChoices button{min-width:0;min-height:49px;padding:8px 4px;font-size:clamp(12px,3.6vw,16px);overflow-wrap:anywhere}
+#rangeChoices button{min-width:0;min-height:39px;padding:5px 3px;font-size:clamp(11px,3.1vw,14px);line-height:1.25;overflow-wrap:anywhere}
 #rangeChoices button[aria-pressed="true"]{background:#dcecf9;border-color:#326e91;box-shadow:inset 0 0 0 1px #326e91}
 #start{width:100%;background:#e2f0f9;border-color:#94b8d0;color:#173f59;font-size:clamp(17px,4.5vw,22px);padding:15px 12px}
 #start:not(:disabled):active{background:#cce5f6}
+#next{display:block;width:100%;margin:7px 0 14px;background:#e2f0f9;border-color:#94b8d0;color:#173f59;font-size:clamp(17px,4.5vw,21px);padding:12px}
+#next[hidden]{display:none}
 .question[hidden],#feedback:empty{display:none}
 .question{font-size:clamp(22px,5vw,30px);font-weight:900;background:#e5f1f9;padding:13px;text-align:center;border-radius:12px}
 #map{display:block;width:100%;height:clamp(430px,70svh,740px);border:1px solid #bdd1dd;border-radius:12px;background:#eaf3f9;touch-action:none;user-select:none}
@@ -22,9 +24,10 @@ button:disabled{opacity:.45}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:
 <main><a href="/hyogo/v2-study-region.html">← 兵庫県10地域へ戻る</a><h1>クイズ1：地名から場所を当てる（V2試作）</h1>
 <section class="panel"><div id="rangeHeading"><strong>出題地域を選んでください</strong></div><div id="rangeChoices" role="group" aria-label="出題地域"></div>
 <p class="note">地域別の市区町村名を見て、地図上の位置を押してください。2026年版の区域データを使用します。間違えた区域は赤色で表示し、正解するまで続けられます。</p>
-<div class="actions"><button id="start" type="button" disabled>クイズを開始</button><button id="next" type="button" hidden>次の問題</button></div>
+<div class="actions"><button id="start" type="button" disabled>クイズを開始</button></div>
 <div id="question" class="question" aria-live="polite" hidden></div>
 <p id="feedback" aria-live="polite"></p>
+<button id="next" type="button" hidden>次の問題</button>
 <div class="map-frame"><svg id="map" viewBox="0 0 850 700" role="img" aria-label="名前から場所を当てる地図"></svg>
 <div class="map-controls"><button id="plus" type="button" aria-label="拡大">＋</button><button id="minus" type="button" aria-label="縮小">－</button><button id="reset" type="button">全体</button></div></div>
 <p id="status" class="note">地図を読み込んでいます。</p></section>

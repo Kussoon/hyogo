@@ -46,4 +46,8 @@ quiz.answer('28105');
 assert.equal(buttons.next.hidden,false,'Correct answer unlocks next');
 assert.equal(quiz.session.correct,1);
 assert.equal(quiz.session.answered,true);
+assert(html.includes('min-height:39px;padding:5px 3px'),'Region buttons have a more compact height');
+assert(html.includes('font-size:clamp(11px,3.1vw,14px)'),'Region button font is reduced');
+assert(html.indexOf('id="feedback"')<html.indexOf('id="next"')&&html.indexOf('id="next"')<html.indexOf('class="map-frame"'),'Next button stays between correct/wrong feedback and map');
+assert(html.includes('#next[hidden]{display:none}'),'Next button respects hidden state');
 console.log('Hyogo V2 region overview + quiz1 static contracts: PASS');
