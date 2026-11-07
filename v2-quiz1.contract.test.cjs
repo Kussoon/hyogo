@@ -28,12 +28,12 @@ assert(html.includes('session.wrongCodes.add(code)'),'Every wrong guess remains 
 assert(html.includes("'違います。そこは'+tapped.name+'です。'"),'Wrong feedback gives tapped region formal name');
 assert(html.includes('if(session.answered)svg.querySelector'),'Correct region is highlighted only after success');
 assert(html.includes("if(code!==session.answer){"),'Wrong guesses do not finish the question');
-const a=html.match(/function answer\\(code\\)\\{[\\s\\S]*?\\n\\}\\nsvg\\.addEventListener/);
+const a=html.match(/function answer\(code\)\{[\s\S]*?\n\}\nsvg\.addEventListener/);
 assert(a,'Answer controller must remain available to behavioral regression test');
 const buttons={feedback:{textContent:''},next:{hidden:true,textContent:''}};
 const quiz=Function('byId','current','render',
  'let session={answered:false,answer:"28105",wrongCodes:new Set(),correct:0,index:0,order:[1,2]};'
- +a[0].replace(/\\nsvg\\.addEventListener$/,'')+';return {answer,session};'
+ +a[0].replace(/\nsvg\.addEventListener$/,'')+';return {answer,session};'
 )(id=>buttons[id],[{code:'28101',name:'神戸市東灘区'},{code:'28105',name:'神戸市兵庫区'},{code:'28106',name:'神戸市長田区'}],()=>{});
 quiz.answer('28101');
 assert.equal(buttons.feedback.textContent,'違います。そこは神戸市東灘区です。');
