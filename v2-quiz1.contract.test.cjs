@@ -87,7 +87,7 @@ assert(html.indexOf('class="map-area-name"')<html.indexOf('id="answerArea"'),'Co
 assert(html.indexOf('id="mapTopBar"')<html.indexOf('class="map-area-name"')&&html.indexOf('class="map-area-name"')<html.indexOf('id="answerArea"'),'Caption is left of feedback and next button in same map top bar');
 
 assert(html.includes('.question ruby{ruby-position:over}'),'Question readings use ruby above the name');
-assert(html.includes('.question rt{font-size:.38em;font-weight:700;letter-spacing:.02em}'),'Question ruby text is compact');
+assert(html.includes('.question rt{font-size:.48em;font-weight:700;letter-spacing:.02em}'),'Question ruby text is enlarged for readability');
 assert(html.includes("byId('question').innerHTML=(session.index+1)+' / '+session.order.length+'問：'+formatQuestionName(item)+'はどこ？';"),'Question uses ruby formatted name');
 assert(html.includes('function escapeHtml(value){'),'Question name and reading are HTML escaped');
 assert(html.includes("'神戸市北区':'こうべしきたく'"),'Hyogo ward reading is available');
