@@ -221,11 +221,54 @@ function finishQuiz(){
  session=null;
  render();
 }
+// Border-sharing topology decides the nearest plausible distractors.
+let municipalNeighbors=new Map();
+function geometryArcIds(g){
+ const result=new Set();
+ function visit(value){
+  if(typeof value==='number'){result.add(value<0?~value:value);return;}
+  if(Array.isArray(value))for(const part of value)visit(part);
+ }
+ visit(g.arcs);return result;
+}
+function buildMunicipalNeighbors(shapes){
+ const arcOwners=new Map(),result=new Map();
+ for(const g of shapes){
+  const code=String(g.properties.N03_007);result.set(code,new Set());
+  for(const arc of geometryArcIds(g)){
+   if(!arcOwners.has(arc))arcOwners.set(arc,[]);
+   arcOwners.get(arc).push(code);
+  }
+ }
+ for(const codes of arcOwners.values())for(let i=0;i<codes.length;i++)for(let j=i+1;j<codes.length;j++){
+  const a=codes[i],b=codes[j];if(a===b)continue;
+  result.get(a).add(b);result.get(b).add(a);
+ }
+ return result;
+}
 function makeOptions(item){
- const other=shuffle(current.filter(r=>r.code!==item.code));
- const remaining=shuffle(all.filter(r=>r.code!==item.code&&!current.some(c=>c.code===r.code)));
- const options=[item,...other.slice(0,3)];
- while(options.length<4&&remaining.length)options.push(remaining.shift());
+ const byCode=new Map(all.map(r=>[r.code,r]));
+ const seen=new Set([item.code]), candidates=[];
+ let frontier=[item.code];
+ for(let depth=1;depth<=2&&candidates.length<3;depth++){
+  const following=[];
+  for(const code of frontier)for(const neighbor of municipalNeighbors.get(code)||[]){
+   if(seen.has(neighbor)||!byCode.has(neighbor))continue;
+   seen.add(neighbor);following.push(neighbor);
+  }
+  candidates.push(...shuffle(following));frontier=following;
+ }
+ const options=[item,...candidates.slice(0,3).map(code=>byCode.get(code))];
+ if(options.length<4){
+  // Only isolated municipalities without three first/second-ring neighbors
+  // use geographic proximity as the final fallback.
+  const b=bounds([item]),x=(b[0]+b[2])/2,y=(b[1]+b[3])/2;
+  const nearby=all.filter(r=>!seen.has(r.code)).map(r=>{
+   const v=bounds([r]),dx=((v[0]+v[2])/2-x)*Math.cos(y*Math.PI/180),dy=(v[1]+v[3])/2-y;
+   return {item:r,distance:dx*dx+dy*dy};
+  }).sort((a,b)=>a.distance-b.distance||a.item.code.localeCompare(b.item.code));
+  options.push(...nearby.slice(0,4-options.length).map(r=>r.item));
+ }
  return shuffle(options);
 }
 function show(){
@@ -297,6 +340,7 @@ try{
  const res=await fetch('/v2/data/national/2026-common/'+entry.source);if(!res.ok)throw Error('2026年データの読み込みに失敗');
  const topo=await res.json(),index=new Map(idx.entries.filter(x=>x.pref==='28').map(x=>[x.code,x]));
  const shapes=topo.objects.municipalities.geometries;arcs=decodeArcs(topo);
+ municipalNeighbors=buildMunicipalNeighbors(shapes);
  all=shapes.map(g=>{
   const code=String(g.properties.N03_007),indexed=index.get(code);
   const name=indexed?.fullName||indexed?.name||g.properties.N03_004;
