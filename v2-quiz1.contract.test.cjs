@@ -52,15 +52,16 @@ assert(!html.includes('地域別の市区町村名を見て、地図上の位置
 assert(html.includes("byId('answerArea').hidden=false;"),'Response area shown when a question begins, before any answer');
 assert(html.includes("byId('answerArea').hidden=true;"),'Response area hidden outside a quiz');
 // The map must not move vertically as feedback and next controls appear.
-assert(html.includes('#answerArea{position:absolute;z-index:3;top:86px;left:10px;right:10px;'),'Feedback is below area-name label and remains out of normal document flow');
+assert(html.includes('#mapTopBar{position:absolute;z-index:3;top:10px;left:10px;right:10px;'),'Top map overlay is above map and outside normal layout');
+assert(html.includes('#answerArea{flex:1 1 auto;min-width:0;display:flex;flex-direction:row;align-items:center;'),'Feedback and next action share the same horizontal top row as region caption');
 assert(html.includes('#answerArea[hidden],#answerArea #next[hidden]{display:none}'),'Hidden controls occupy no map area');
 assert(html.includes('#feedback:empty{display:none}'),'Empty feedback creates no visible card');
 assert(!html.includes('grid-template-rows:4.8em 62px'),'Previous large empty spacer is removed');
 assert(html.indexOf('class="map-frame"')<html.indexOf('id="answerArea"')&&html.indexOf('id="answerArea"')<html.indexOf('class="map-controls"'),'Feedback and next button are overlaid inside the map');
 assert(html.includes('.map-controls{position:absolute;top:auto;bottom:12px;right:9px;'),'Zoom controls are docked at the lower right');
 assert(html.includes("byId('answerArea').hidden=false;"),'Map feedback enabled at question start without moving the map');
-assert(html.includes('flex-direction:row;align-items:stretch;gap:7px;pointer-events:none'),'Correct feedback and next button are side-by-side');
-assert(html.includes('flex:1 1 0;min-width:0;margin:0;padding:9px 10px;'),'Feedback occupies equal flexible width');
+assert(html.includes('flex-direction:row;align-items:center;gap:7px;pointer-events:none'),'Correct feedback and next button are side-by-side');
+assert(html.includes('flex:1 1 0;min-width:0;margin:0;padding:9px 6px;'),'Feedback occupies flexible width with compact padding');
 assert(html.includes('#next{flex:1 1 0;min-width:0;width:auto'),'Next action occupies equal flexible width');
 assert(html.includes('#answerArea #next[hidden]{display:none}')||html.includes('#answerArea[hidden],#answerArea #next[hidden]{display:none}'),'Next button remains absent until correct answer');
 assert(html.includes("byId('next').hidden=true;"),'Next button remains hidden until correct answer');
@@ -72,6 +73,7 @@ assert(!html.includes("byId('quizStartAnchor').scrollIntoView({behavior:'smooth'
 assert(html.includes('<span>兵庫県</span><strong id="mapRegionName"></strong>'),'Two-line prefecture and region name is overlaid on map');
 assert(html.includes("byId('mapRegionName').textContent=regions.find(r=>r.key===selectedRange).name;"),'Map starts with currently selected region name');
 assert(html.includes("byId('mapRegionName').textContent=region.name;"),'Map region caption is updated on region switch');
-assert(html.includes('.map-area-name{position:absolute;z-index:2;top:10px;left:10px;'),'Prefecture and region caption stays upper-left');
+assert(html.includes('.map-area-name{flex:0 0 auto;display:flex;'),'Prefecture and region caption is the first item in the top row');
 assert(html.indexOf('class="map-area-name"')<html.indexOf('id="answerArea"'),'Correct/wrong feedback follows the region caption in the map');
+assert(html.indexOf('id="mapTopBar"')<html.indexOf('class="map-area-name"')&&html.indexOf('class="map-area-name"')<html.indexOf('id="answerArea"'),'Caption is left of feedback and next button in same map top bar');
 console.log('Hyogo V2 region overview + quiz1 static contracts: PASS');
