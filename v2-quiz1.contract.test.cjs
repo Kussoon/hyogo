@@ -172,8 +172,14 @@ assert(html.includes('if(startedOnce&&all.length){start();}else{'),'Region selec
 assert(html.includes('id="reset" class="fit-button" type="button" aria-label="地域全体"><span>地域</span><span>全体</span>'),'Region full extent is two lines');
 assert(html.includes('id="prefReset" class="fit-button" type="button" aria-label="兵庫県全体"><span>県の</span><span>全体</span>'),'Prefecture full extent is two lines beneath the region control');
 assert(html.includes("byId('reset').onclick=()=>fitMap(current);"),'Region fit projects the current region');
-assert(html.includes("byId('prefReset').onclick=()=>fitMap(all);"),'Prefecture fit projects all 49 Hyogo areas');
-assert(html.includes("projection=project(bounds(items));\n viewport.reset();\n render();"),'Fitting recalculates projection and resets viewport, not just zooming a region-only projection');
+assert(html.includes("byId('prefReset').onclick=()=>fitMap(all,true);"),'Prefecture fit projects all 49 Hyogo areas using portrait-aware framing');
+assert(html.includes("projection=project(bounds(items));\n viewport.reset();\n render();"),'Fitting recalculates projection and resets viewport');
+assert(html.includes("Math.round(W*rect.height/rect.width)"),'Prefecture full extent uses actual map frame aspect ratio');
+assert(html.includes("viewport.destroy();"),'Old viewport listeners are removed before aspect-ratio reinitialization');
+assert(html.includes("frameHeight=targetHeight;"),'Canvas height matches mode-specific map aspect');
+assert(html.includes("KussoonV2MapViewport.init({svg,width:W,height:frameHeight})"),'Viewport supports taller portrait canvas');
+assert(html.includes("const targetHeight=isPrefecture&&rect.width>0&&rect.height>0"),'Region mode keeps established 700-unit projection');
+
 assert(html.includes('current=all.filter(r=>region.codes.includes(r.code));if(!current.length)return;fitMap(current);'),'Region selection still starts zoomed to the chosen region');
 assert(html.includes('.map-controls .fit-button{display:flex;flex-direction:column;'),'Extent buttons use two stacked lines');
 console.log('Hyogo V2 region overview + quiz1 static contracts: PASS');
