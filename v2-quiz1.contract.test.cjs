@@ -64,7 +64,7 @@ assert(html.includes('flex-direction:row;align-items:center;gap:7px;pointer-even
 assert(html.includes('flex:1 1 0;min-width:0;margin:0;padding:2px 3px;'),'Feedback stays flexible without button-like padding');
 assert(html.includes('background:transparent;border:0;border-radius:0;box-shadow:none'),'Feedback has no panel, border, rounded rectangle or button shadow');
 assert(html.includes('text-shadow:0 1px 2px #fff'),'Feedback stays readable on the map with white text outline');
-assert(html.includes('font-size:clamp(17px,4.4vw,22px);line-height:1.4'),'Correct and incorrect feedback uses larger text');
+assert(html.includes('font-size:clamp(20px,5.2vw,26px);line-height:1.4'),'Correct and incorrect feedback uses larger 20–26px text');
 assert(html.includes('#next{flex:1 1 0;min-width:0;width:auto;min-height:44px;max-width:none;margin:0;background:#e2f0f9'),'Next question remains a button with its background');
 assert(html.includes("byId('feedback').textContent='正解です！';"),'Correct feedback is unchanged');
 assert(html.includes("byId('feedback').textContent='違います。そこは'+tapped.name+'です。';"),'Wrong feedback still shows tapped region name');
