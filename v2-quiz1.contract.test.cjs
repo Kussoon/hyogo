@@ -25,7 +25,7 @@ assert(html.includes('#start{width:100%;background:#e2f0f9'),'Start button uses 
 assert(html.includes('<div id="question" class="question" aria-live="polite" hidden></div>'),'Question placeholder is hidden before starting');
 assert(!html.includes('「クイズを開始」を押してください。'),'Redundant start instruction is absent');
 assert(html.includes('session.wrongCodes.add(code)'),'Every wrong guess remains highlighted');
-assert(html.includes("'違います。そこは'+tapped.name+'です。'"),'Wrong feedback gives tapped region formal name');
+assert(html.includes("'違います。\\nそこは'+tapped.name+'です。'"),'Wrong feedback places the tapped region on a new line');
 assert(html.includes('if(session.answered)svg.querySelector'),'Correct region is highlighted only after success');
 assert(html.includes("if(code!==session.answer){"),'Wrong guesses do not finish the question');
 const a=html.match(/function answer\(code\)\{[\s\S]*?\n\}\nsvg\.addEventListener/);
@@ -36,7 +36,7 @@ const quiz=Function('byId','current','render',
  +a[0].replace(/\nsvg\.addEventListener$/,'')+';return {answer,session};'
 )(id=>buttons[id],[{code:'28101',name:'神戸市東灘区'},{code:'28105',name:'神戸市兵庫区'},{code:'28106',name:'神戸市長田区'}],()=>{});
 quiz.answer('28101');
-assert.equal(buttons.feedback.textContent,'違います。そこは神戸市東灘区です。');
+assert.equal(buttons.feedback.textContent,'違います。\\nそこは神戸市東灘区です。');
 assert.deepEqual([...quiz.session.wrongCodes],['28101']);
 assert.equal(buttons.next.hidden,true,'Wrong guesses must not enable next');
 assert.equal(quiz.session.correct,0,'Wrong guesses must not score');
@@ -64,10 +64,10 @@ assert(html.includes('flex-direction:row;align-items:center;gap:7px;pointer-even
 assert(html.includes('flex:1 1 0;min-width:0;margin:0;padding:2px 3px;'),'Feedback stays flexible without button-like padding');
 assert(html.includes('background:transparent;border:0;border-radius:0;box-shadow:none'),'Feedback has no panel, border, rounded rectangle or button shadow');
 assert(html.includes('text-shadow:0 1px 2px #fff'),'Feedback stays readable on the map with white text outline');
-assert(html.includes('font-size:clamp(20px,5.2vw,26px);line-height:1.4'),'Correct and incorrect feedback uses larger 20–26px text');
+assert(html.includes('font-size:clamp(18px,4.8vw,24px);line-height:1.4;white-space:pre-line;'),'Feedback uses 18–24px text and renders explicit line breaks');
 assert(html.includes('#next{flex:1 1 0;min-width:0;width:auto;min-height:44px;max-width:none;margin:0;background:#e2f0f9'),'Next question remains a button with its background');
 assert(html.includes("byId('feedback').textContent='正解です！';"),'Correct feedback is unchanged');
-assert(html.includes("byId('feedback').textContent='違います。そこは'+tapped.name+'です。';"),'Wrong feedback still shows tapped region name');
+assert(html.includes("byId('feedback').textContent='違います。\\nそこは'+tapped.name+'です。';"),'Wrong feedback shows the tapped region on line two');
 assert(html.includes('#next{flex:1 1 0;min-width:0;width:auto'),'Next action occupies equal flexible width');
 assert(html.includes('#answerArea #next[hidden]{display:none}')||html.includes('#answerArea[hidden],#answerArea #next[hidden]{display:none}'),'Next button remains absent until correct answer');
 assert(html.includes("byId('next').hidden=true;"),'Next button remains hidden until correct answer');
@@ -85,4 +85,12 @@ assert(html.includes("byId('mapRegionName').textContent=region.name;"),'Map regi
 assert(html.includes('.map-area-name{flex:0 0 auto;display:flex;'),'Prefecture and region caption is the first item in the top row');
 assert(html.indexOf('class="map-area-name"')<html.indexOf('id="answerArea"'),'Correct/wrong feedback follows the region caption in the map');
 assert(html.indexOf('id="mapTopBar"')<html.indexOf('class="map-area-name"')&&html.indexOf('class="map-area-name"')<html.indexOf('id="answerArea"'),'Caption is left of feedback and next button in same map top bar');
+
+assert(html.includes('.question ruby{ruby-position:over}'),'Question readings use ruby above the name');
+assert(html.includes('.question rt{font-size:.38em;font-weight:700;letter-spacing:.02em}'),'Question ruby text is compact');
+assert(html.includes("byId('question').innerHTML=(session.index+1)+' / '+session.order.length+'問：'+formatQuestionName(item)+'はどこ？';"),'Question uses ruby formatted name');
+assert(html.includes('function escapeHtml(value){'),'Question name and reading are HTML escaped');
+assert(html.includes("'神戸市北区':'こうべしきたく'"),'Hyogo ward reading is available');
+assert(html.includes("'新温泉町':'しんおんせんちょう'"),'All Hyogo municipality readings are covered');
+assert(html.includes('indexed?.reading||indexed?.kana||indexed?.ruby||MANUAL_READINGS_BY_NAME[name]||'),'Indexed readings are preferred before manual fallback');
 console.log('Hyogo V2 region overview + quiz1 static contracts: PASS');
