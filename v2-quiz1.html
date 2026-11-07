@@ -154,7 +154,7 @@ function render(){
  for(const shape of svg.querySelectorAll('path.land')){const code=shape.dataset.code;shape.classList.toggle('outside',!active.has(code));shape.querySelector('title')?.remove();shape.setAttribute('aria-label',active.has(code)?'回答する区域':'出題範囲外');}
  if(session){for(const code of session.wrongCodes)svg.querySelector('path.land[data-code="'+code+'"]')?.classList.add('wrong');if(session.answered)svg.querySelector('path.land[data-code="'+session.answer+'"]')?.classList.add('correct');}
 }
-function focus(){const region=regions.find(x=>x.key===selectedRange);byId('mapRegionName').textContent=region.name;current=all.filter(r=>region.codes.includes(r.code));if(!current.length)return;projection=project(bounds(current));viewport.reset();render();byId('status').textContent=region.name+'：'+current.length+'区域を表示しています。';}
+function focus(){const region=regions.find(x=>x.key===selectedRange);byId('mapRegionName').textContent=region.name;current=all.filter(r=>region.codes.includes(r.code));if(!current.length)return;projection=project(bounds(current));viewport.reset();render();status.textContent='';status.hidden=true;}
 function setRange(key){if(!regions.some(r=>r.key===key))return;selectedRange=key;updateRangeButtons();session=null;byId('question').textContent='';byId('question').hidden=true;byId('feedback').textContent='';byId('answerArea').hidden=true;byId('next').hidden=true;byId('start').disabled=!all.length;byId('start').hidden=false;if(all.length)focus();
  // Before the first quiz, keep the start button available. Later region taps start a new regional quiz.
  if(startedOnce&&all.length){start();}else{
@@ -208,7 +208,7 @@ try{
  const keys=new Set(regions.flatMap(r=>r.codes));
  if(all.length!==49||keys.size!==49||all.some(r=>!keys.has(r.code)||!index.has(r.code)))throw Error('地域の行政区域コードが2026年版と一致しません');
  byId('start').disabled=false;byId('question').textContent='';byId('question').hidden=true;byId('answerArea').hidden=true;focus();
-}catch(err){console.error(err);byId('status').textContent='読み込みエラー：'+err.message;byId('question').textContent='地図を読み込めませんでした。';}
+}catch(err){console.error(err);status.hidden=false;status.textContent='読み込みエラー：'+err.message;byId('question').textContent='地図を読み込めませんでした。';}
 })();
 </script><script defer src="/common/site-footer.js"></script>
 </body></html>
