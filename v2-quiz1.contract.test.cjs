@@ -36,7 +36,7 @@ const quiz=Function('byId','current','render',
  +a[0].replace(/\nsvg\.addEventListener$/,'')+';return {answer,session};'
 )(id=>buttons[id],[{code:'28101',name:'神戸市東灘区'},{code:'28105',name:'神戸市兵庫区'},{code:'28106',name:'神戸市長田区'}],()=>{});
 quiz.answer('28101');
-assert.equal(buttons.feedback.textContent,'違います。\\nそこは神戸市東灘区です。');
+assert.equal(buttons.feedback.textContent,'違います。\nそこは神戸市東灘区です。');
 assert.deepEqual([...quiz.session.wrongCodes],['28101']);
 assert.equal(buttons.next.hidden,true,'Wrong guesses must not enable next');
 assert.equal(quiz.session.correct,0,'Wrong guesses must not score');
