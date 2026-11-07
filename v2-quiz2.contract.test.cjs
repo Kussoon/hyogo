@@ -20,7 +20,7 @@ const neighborSource=html.slice(html.indexOf('let municipalNeighbors=new Map();'
 assert(neighborSource.includes('buildMunicipalNeighbors(shapes)'));
 assert(html.includes('municipalNeighbors=buildMunicipalNeighbors(shapes);'));
 assert(html.includes('boundarySamples=new Map(all.map(item=>[item.code,sampleBoundary(item)]));'));
-const topology=Function('shuffle','bounds','all',neighborSource+';return {makeOptions,buildMunicipalNeighbors,setNeighbors:x=>municipalNeighbors=x,cache:()=>boundarySamples=new Map(all.map(x=>[x.code,sampleBoundary(x)])),distanceCache:()=>borderDistanceCache};');
+const topology=Function('shuffle','bounds','all','current',neighborSource+';return {makeOptions,buildMunicipalNeighbors,setNeighbors:x=>municipalNeighbors=x,cache:()=>boundarySamples=new Map(all.map(x=>[x.code,sampleBoundary(x)])),distanceCache:()=>borderDistanceCache};');
 function bounds(items){let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
  for(const r of items)for(const poly of r.polys)for(const ring of poly)for(const [x,y] of ring){
   minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);
@@ -33,7 +33,8 @@ const all=[
  square('神戸市北区',7,7),square('猪名川町',2,.2),
  ...Array.from({length:42},(_,i)=>square('遠方'+i,15+i,15+i))
 ];
-const actual=topology(x=>x.slice(),bounds,all);
+const current=[all[0],all[1],all[2]];
+const actual=topology(x=>x.slice(),bounds,all,current);
 const adj=new Map(all.map(item=>[item.code,new Set()]));
 adj.get('尼崎市').add('西宮市');adj.get('尼崎市').add('伊丹市');
 actual.setNeighbors(adj);actual.cache();
@@ -44,6 +45,26 @@ assert(picked.includes('尼崎市'),'Correct city present');
 assert(picked.includes('西宮市')&&picked.includes('伊丹市'),'Direct neighbors prioritized');
 assert(picked.includes('川西市'),'Nearby city beats remote second-hop city');
 assert(!picked.includes('神戸市北区'),'Far away municipality excluded');
+const twoAreaRegion=[square('丹波市',5,5),square('丹波篠山市',6,5)];
+const regionalAll=[...twoAreaRegion,square('朝来市',5,6),square('西脇市',7,5),square('多可町',6,6),square('遠い市',20,20)];
+const regional=topology(x=>x.slice(),bounds,regionalAll,twoAreaRegion);
+const regionalNeighbors=new Map(regionalAll.map(x=>[x.code,new Set()]));
+regionalNeighbors.get('丹波市').add('丹波篠山市');
+regionalNeighbors.get('丹波篠山市').add('丹波市');
+regional.setNeighbors(regionalNeighbors);regional.cache();
+for(const target of twoAreaRegion){
+ const options=regional.makeOptions(target).map(x=>x.code);
+ assert.equal(options.length,4,'Two-area region still has four options');
+ assert.equal(new Set(options).size,4,'Two-area choices stay unique');
+ assert(options.includes('丹波市')&&options.includes('丹波篠山市'),'Both Tamba cities always appear whichever is correct');
+ assert(!options.includes('遠い市'),'Far outside-region municipality is not preferred');
+}
+const threeAreaRegion=[regionalAll[0],regionalAll[1],regionalAll[2]];
+const regionThree=topology(x=>x.slice(),bounds,regionalAll,threeAreaRegion);
+regionThree.setNeighbors(regionalNeighbors);regionThree.cache();
+const threeChoices=regionThree.makeOptions(threeAreaRegion[0]).map(x=>x.code);
+assert(threeAreaRegion.every(x=>threeChoices.includes(x.code)),'Every peer in a 3-area region is included');
+
 assert(actual.distanceCache().size>0,'Border-distance results cached for subsequent questions');
 const cacheSize=actual.distanceCache().size;
 actual.makeOptions(all[0]);
