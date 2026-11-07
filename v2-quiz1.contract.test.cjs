@@ -146,7 +146,7 @@ assert(html.includes("byId('replay').onclick=start;"),'Replay starts a new quiz'
 assert(html.includes('#replayArea{display:flex;gap:8px;flex-wrap:nowrap;align-items:stretch}'),'Result buttons display side-by-side with equal height');
 assert(html.includes('#replayArea button{display:flex;flex:1 1 0;flex-direction:column;align-items:center;justify-content:center;min-width:0;'),'Result actions have equal flexible widths');
 assert(html.includes('<button id="returnRegions" type="button">地域選択に戻る</button>'),'Return to selection button is present');
-assert(html.includes('<button id="retryMissed" type="button" hidden><span>間違えた問題だけを</span><span>もう一度</span></button>'),'Missed-question retry label has two lines');
+assert(html.includes('<button id="retryMissed" type="button" hidden><span>間違えた問題を</span><span>もう一度</span></button>'),'Missed-question retry label has exactly two lines');
 assert(html.includes('<button id="replay" type="button"><span>最初から</span><span>もう一度</span></button>'),'Full retry label has two lines');
 assert(html.includes('#replayArea button{display:flex;flex:1 1 0;flex-direction:column;align-items:center;justify-content:center;min-width:0;min-height:68px;'),'Three buttons have the same flexible width and minimum height');
 assert(html.includes('#retryMissed[hidden]{display:none}'),'Perfect score hides missed question retry option');
@@ -182,4 +182,10 @@ assert(html.includes("const targetHeight=isPrefecture&&rect.width>0&&rect.height
 
 assert(html.includes('current=all.filter(r=>region.codes.includes(r.code));if(!current.length)return;fitMap(current);'),'Region selection still starts zoomed to the chosen region');
 assert(html.includes('.map-controls .fit-button{display:flex;flex-direction:column;'),'Extent buttons use two stacked lines');
+assert(html.includes('.map-controls button{width:50px;min-width:50px;'),'Four map controls are narrower without altering their type size');
+assert(html.includes('font-size:clamp(12px,3.1vw,16px)}'),'Map fit control text remains original size');
+assert(html.includes('font-size:clamp(10px,3.3vw,18px);line-height:1.25'),'All three result buttons use a larger responsive font');
+assert(html.includes('#retryMissed{font-size:clamp(10px,3vw,16px)!important}'),'Missed button font increases while fitting narrow phones');
+assert(html.includes('#retryMissed span,#replay span,#returnRegions{white-space:nowrap}'),'Result button labels cannot wrap to a third line');
+assert(!html.includes('<span>間違えた問題だけを</span>'),'Obsolete longer text removed');
 console.log('Hyogo V2 region overview + quiz1 static contracts: PASS');
