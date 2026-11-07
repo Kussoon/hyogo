@@ -61,6 +61,7 @@ const makeActor=Function('byId','all','render',answerSource[0]+';return {answer,
 const initial={answered:false,answer:all[1].code,wrongCodes:new Set(),missedQuestionCodes:new Set(),firstTryCorrectCodes:new Set(),correct:0,index:0,order:[all[1]]};
 const bound=Function('byId','all','render','buttons',`let session={answered:false,answer:all[1].code,wrongCodes:new Set(),missedQuestionCodes:new Set(),firstTryCorrectCodes:new Set(),correct:0,index:0,order:[all[1]]};${answerSource[0]};return {answer,session};`)(id=>elements[id],all,()=>{},buttons);
 bound.answer(all[0].code,buttons.a);
+assert.equal(elements.feedback.textContent,'違います。','Incorrect answer shows only the short feedback without suggesting a municipality name');
 assert.equal(bound.session.correct,0);
 assert.equal(buttons.a.disabled,true);
 assert.deepEqual([...bound.session.missedQuestionCodes],[all[1].code]);
@@ -69,4 +70,5 @@ assert.equal(bound.session.correct,0,'Wrong then correct earns zero');
 assert.equal(elements.next.hidden,false);
 assert.equal(buttons.b.disabled,true);
 assert.equal(elements.feedback.textContent,'正解です！');
+assert(!html.includes("そこは'+chosen.name"),'Misleading wrong-answer municipality message is absent');
 console.log('Hyogo V2 quiz2 four-choice/blink contracts: PASS');
