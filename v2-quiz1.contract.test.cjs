@@ -64,4 +64,9 @@ assert(html.includes('#feedback{flex:1 1 0;min-width:0'),'Feedback occupies equa
 assert(html.includes('#next{flex:1 1 0;min-width:0;width:auto'),'Next action occupies equal flexible width');
 assert(html.includes('#answerArea #next[hidden]{display:none}')||html.includes('#answerArea[hidden],#answerArea #next[hidden]{display:none}'),'Next button remains absent until correct answer');
 assert(html.includes("byId('next').hidden=true;"),'Next button remains hidden until correct answer');
+assert(html.includes('display:flex;align-items:center;justify-content:center;text-align:center;flex:1 1 0'),'Answer feedback centered vertically and horizontally');
+assert(html.includes('id="quizStartAnchor"'),'Region selection scroll has stable target');
+assert(html.indexOf('id="rangeChoices"')<html.indexOf('id="quizStartAnchor"')&&html.indexOf('id="quizStartAnchor"')<html.indexOf('id="start"'),'Scroll target is directly after the region selector');
+assert(html.includes("requestAnimationFrame(()=>byId('quizStartAnchor').scrollIntoView({behavior:'smooth',block:'start'}))"),'Only explicit region selection scrolls to quiz start');
+assert(!html.includes("byId('quizStartAnchor').scrollIntoView({behavior:'smooth',block:'start'});focus();"),'No automatic scrolling while initializing data');
 console.log('Hyogo V2 region overview + quiz1 static contracts: PASS');
