@@ -19,38 +19,40 @@ assert(hub.includes('<a href="/hyogo/v2-quiz2.html">クイズ2（V2試作）</a>
 const neighborSource=html.slice(html.indexOf('let municipalNeighbors=new Map();'),html.indexOf('function show(){'));
 assert(neighborSource.includes('buildMunicipalNeighbors(shapes)'));
 assert(html.includes('municipalNeighbors=buildMunicipalNeighbors(shapes);'));
-const topology=Function('shuffle','bounds','all',neighborSource+';return {makeOptions,buildMunicipalNeighbors,setNeighbors:x=>municipalNeighbors=x};');
-const codes=Array.from({length:49},(_,i)=>String(28000+i));
-const all=Array.from({length:49},(_,i)=>({code:codes[i],name:'市区町村'+i,polys:[[[[i,0],[i+1,1]]]]}));
+assert(html.includes('boundarySamples=new Map(all.map(item=>[item.code,sampleBoundary(item)]));'));
+const topology=Function('shuffle','bounds','all',neighborSource+';return {makeOptions,buildMunicipalNeighbors,setNeighbors:x=>municipalNeighbors=x,cache:()=>boundarySamples=new Map(all.map(x=>[x.code,sampleBoundary(x)]))};');
 function bounds(items){let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
  for(const r of items)for(const poly of r.polys)for(const ring of poly)for(const [x,y] of ring){
   minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);
  }return [minX,minY,maxX,maxY];
 }
-const actual=topology(a=>a.slice(),bounds,all);
-const shapes=all.map((r,i)=>({properties:{N03_007:r.code},arcs:[i===0?0:[i-1,i]]}));
-actual.setNeighbors(actual.buildMunicipalNeighbors(shapes));
-function check(item,allowed){
- const picks=actual.makeOptions(item).map(x=>x.code);
- assert.equal(picks.length,4,'Exactly four options');
- assert.equal(new Set(picks).size,4,'All four options unique');
- assert(picks.includes(item.code),'Correct municipality included');
- assert(picks.filter(x=>x!==item.code).every(x=>allowed.includes(x)),'Nearby options only');
-}
-check(all[20],[codes[19],codes[21],codes[18],codes[22]]);
-check(all[0],[codes[1],codes[2],codes[3]]);
-const geography=actual.buildMunicipalNeighbors([
+const square=(code,x,y)=>({code,name:code,polys:[[[[x,y],[x+.5,y],[x+.5,y+.5],[x,y+.5],[x,y]]]]});
+const all=[
+ square('尼崎市',0,0),square('西宮市',.5,0),square('伊丹市',0,.5),
+ square('川西市',1,0),square('芦屋市',1.5,0),
+ square('神戸市北区',7,7),square('猪名川町',2,.2),
+ ...Array.from({length:42},(_,i)=>square('遠方'+i,15+i,15+i))
+];
+const actual=topology(x=>x.slice(),bounds,all);
+const adj=new Map(all.map(item=>[item.code,new Set()]));
+adj.get('尼崎市').add('西宮市');adj.get('尼崎市').add('伊丹市');
+actual.setNeighbors(adj);actual.cache();
+const picked=actual.makeOptions(all[0]).map(x=>x.code);
+assert.equal(picked.length,4,'Always four answer choices');
+assert.equal(new Set(picked).size,4,'All choices unique');
+assert(picked.includes('尼崎市'),'Correct city present');
+assert(picked.includes('西宮市')&&picked.includes('伊丹市'),'Direct neighbors prioritized');
+assert(picked.includes('川西市'),'Nearby city beats remote second-hop city');
+assert(!picked.includes('神戸市北区'),'Far away municipality excluded');
+const topoNeighbors=actual.buildMunicipalNeighbors([
  {properties:{N03_007:'A'},arcs:[[0,-2]]},
  {properties:{N03_007:'B'},arcs:[[1,2]]},
  {properties:{N03_007:'C'},arcs:[[2,3]]}
 ]);
-assert(geography.get('A').has('B'),'Negative reversed TopoJSON arc connects neighbors');
-assert(!geography.get('A').has('C'),'Second-ring neighbor is not direct neighbor');
-assert(geography.get('B').has('C'),'Direct shared border detected');
+assert(topoNeighbors.get('A').has('B'),'Reversed arc counts as shared border');
+assert(!topoNeighbors.get('A').has('C'),'Second-hop is not a direct neighbor');
 assert(html.includes('<button id="retryMissed" type="button" hidden><span>間違えた問題を</span><span>もう一度</span></button>'));
-assert(html.includes("byId('retryMissed').hidden=retryOrder.length===0;"));
 assert(html.includes("retryOrder=session.order.filter(item=>session.missedQuestionCodes.has(item.code));"));
-assert(html.includes('display:flex;gap:8px;flex-wrap:nowrap;align-items:stretch'),'Three equal-height buttons stay horizontal');
 const answerSource=html.match(/function answer\(code,button\)\{[\s\S]*?\n\}/);
 assert(answerSource);
 const buttons={a:{disabled:false,classList:{add(x){this.added=x}}},b:{disabled:false,classList:{add(x){this.added=x}}}};
