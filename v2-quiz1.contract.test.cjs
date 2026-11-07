@@ -60,7 +60,7 @@ assert(!html.includes('grid-template-rows:4.8em 62px'),'Previous large empty spa
 assert(html.indexOf('class="map-frame"')<html.indexOf('id="answerArea"')&&html.indexOf('id="answerArea"')<html.indexOf('class="map-controls"'),'Feedback and next button are overlaid inside the map');
 assert(html.includes('.map-controls{position:absolute;top:auto;bottom:12px;right:9px;'),'Zoom controls are docked at the lower right');
 assert(html.includes("byId('answerArea').hidden=false;"),'Map feedback enabled at question start without moving the map');
-assert(html.includes('flex-direction:row;align-items:stretch;gap:7px;pointer-events:none'),'Correct feedback and next button are side-by-side');
+assert(html.includes('flex-direction:row;align-items:center;gap:7px;pointer-events:none'),'Correct feedback and next button are side-by-side');
 assert(html.includes('flex:1 1 0;min-width:0;margin:0;padding:9px 6px;'),'Feedback occupies flexible width with compact padding');
 assert(html.includes('#next{flex:1 1 0;min-width:0;width:auto'),'Next action occupies equal flexible width');
 assert(html.includes('#answerArea #next[hidden]{display:none}')||html.includes('#answerArea[hidden],#answerArea #next[hidden]{display:none}'),'Next button remains absent until correct answer');
