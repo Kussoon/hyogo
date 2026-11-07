@@ -248,7 +248,7 @@ function buildMunicipalNeighbors(shapes){
 }
 // Cache representative boundary vertices once for fast geographic ranking.
 // Distance is between municipality borders, not center points or neighbor-hop counts.
-let boundarySamples=new Map();
+let boundarySamples=new Map(),borderDistanceCache=new Map();
 function sampleBoundary(item,maxPoints=240){
  const rings=[];
  for(const polygon of item.polys)for(const ring of polygon)if(ring.length>0)rings.push(ring);
@@ -262,6 +262,8 @@ function sampleBoundary(item,maxPoints=240){
  return result;
 }
 function borderDistance(a,b){
+ const key=a.code<b.code?a.code+'|'+b.code:b.code+'|'+a.code;
+ if(borderDistanceCache.has(key))return borderDistanceCache.get(key);
  const pa=boundarySamples.get(a.code)||sampleBoundary(a);
  const pb=boundarySamples.get(b.code)||sampleBoundary(b);
  if(!pa.length||!pb.length)return Infinity;
@@ -271,6 +273,7 @@ function borderDistance(a,b){
   const dx=(ax-bx)*cos,dy=ay-by,d=dx*dx+dy*dy;
   if(d<min)min=d;
  }
+ borderDistanceCache.set(key,min);
  return min;
 }
 function makeOptions(item){
@@ -362,6 +365,7 @@ try{
   return {code,name,reading,polys:polys(g,arcs)};
 });
  boundarySamples=new Map(all.map(item=>[item.code,sampleBoundary(item)]));
+ borderDistanceCache.clear();
  const keys=new Set(regions.flatMap(r=>r.codes));
  if(all.length!==49||keys.size!==49||all.some(r=>!keys.has(r.code)||!index.has(r.code)))throw Error('地域の行政区域コードが2026年版と一致しません');
  byId('start').disabled=false;byId('question').textContent='';byId('question').hidden=true;byId('choices').hidden=true;byId('answerArea').hidden=true;focus();
