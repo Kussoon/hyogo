@@ -60,7 +60,7 @@ assert(html.indexOf('class="map-frame"')<html.indexOf('id="answerArea"')&&html.i
 assert(html.includes('right:94px'),'Feedback leaves room for right-hand zoom controls');
 assert(html.includes("byId('answerArea').hidden=false;"),'Map feedback enabled at question start without moving the map');
 assert(html.includes('flex-direction:row;align-items:stretch;gap:7px;pointer-events:none'),'Correct feedback and next button are side-by-side');
-assert(html.includes('#feedback{flex:1 1 0;min-width:0'),'Feedback occupies equal flexible width');
+assert(html.includes('flex:1 1 0;min-width:0;margin:0;padding:9px 10px;'),'Feedback occupies equal flexible width');
 assert(html.includes('#next{flex:1 1 0;min-width:0;width:auto'),'Next action occupies equal flexible width');
 assert(html.includes('#answerArea #next[hidden]{display:none}')||html.includes('#answerArea[hidden],#answerArea #next[hidden]{display:none}'),'Next button remains absent until correct answer');
 assert(html.includes("byId('next').hidden=true;"),'Next button remains hidden until correct answer');
