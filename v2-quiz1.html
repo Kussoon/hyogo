@@ -16,7 +16,7 @@ button:disabled{opacity:.45}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:
    Unlike the old reserved 4.8em + 62px rows, this cannot push the map down. */
 .question[hidden],#answerArea[hidden],#answerArea #next[hidden]{display:none}
 #answerArea{flex:1 1 auto;min-width:0;display:flex;flex-direction:row;align-items:center;gap:7px;pointer-events:none}
-#feedback{display:flex;align-items:center;justify-content:center;text-align:center;flex:1 1 0;min-width:0;margin:0;padding:2px 3px;background:transparent;border:0;border-radius:0;box-shadow:none;color:#133a52;text-shadow:0 1px 2px #fff,0 -1px 2px #fff,1px 0 2px #fff,-1px 0 2px #fff;-webkit-text-stroke:.35px #fff;font-size:clamp(13px,3.5vw,17px);line-height:1.4;max-height:6em;overflow:auto;overflow-wrap:anywhere;font-weight:900;pointer-events:none}
+#feedback{display:flex;align-items:center;justify-content:center;text-align:center;flex:1 1 0;min-width:0;margin:0;padding:2px 3px;background:transparent;border:0;border-radius:0;box-shadow:none;color:#133a52;text-shadow:0 1px 2px #fff,0 -1px 2px #fff,1px 0 2px #fff,-1px 0 2px #fff;-webkit-text-stroke:.35px #fff;font-size:clamp(17px,4.4vw,22px);line-height:1.4;max-height:6em;overflow:auto;overflow-wrap:anywhere;font-weight:900;pointer-events:none}
 #feedback:empty{display:none}
 #next{flex:1 1 0;min-width:0;width:auto;min-height:44px;max-width:none;margin:0;background:#e2f0f9;border-color:#94b8d0;color:#173f59;font-size:clamp(15px,3.9vw,19px);padding:10px 7px;box-shadow:0 2px 9px #173c5526;pointer-events:auto}
 .question{font-size:clamp(22px,5vw,30px);font-weight:900;background:#e5f1f9;padding:13px;text-align:center;border-radius:12px}
@@ -56,7 +56,8 @@ let selectedRange=regions.some(r=>r.key===wanted)?wanted:regions[0].key;
 byId('mapRegionName').textContent=regions.find(r=>r.key===selectedRange).name;
 function updateRangeButtons(){for(const button of choices.querySelectorAll('button'))button.setAttribute('aria-pressed',String(button.dataset.key===selectedRange));}
 for(const region of regions){const button=document.createElement('button');button.type='button';button.dataset.key=region.key;button.textContent=region.name+'（'+region.codes.length+'区域）';button.addEventListener('click',()=>setRange(region.key));choices.append(button);}updateRangeButtons();
-let all=[],arcs=[],current=[],projection=null,session=null;
+let all=[],arcs=[],current=[],projection=null,session=null,startedOnce=false;
+function scrollToQuestion(){requestAnimationFrame(()=>byId('question').scrollIntoView({behavior:'smooth',block:'start'}));}
 function decodeArcs(t){return t.arcs.map(a=>{let x=0,y=0;return a.map(q=>{if(t.transform){x+=q[0];y+=q[1];return [x*t.transform.scale[0]+t.transform.translate[0],y*t.transform.scale[1]+t.transform.translate[1]];}return q;});});}
 function points(ids,a){const out=[];for(const id of ids){const part=id<0?a[~id].slice().reverse():a[id];out.push(...(out.length?part.slice(1):part));}return out;}
 function polys(g,a){return g.type==='Polygon'?[g.arcs.map(ids=>points(ids,a))]:g.arcs.map(poly=>poly.map(ids=>points(ids,a)));}
@@ -70,8 +71,10 @@ function render(){
 }
 function focus(){const region=regions.find(x=>x.key===selectedRange);byId('mapRegionName').textContent=region.name;current=all.filter(r=>region.codes.includes(r.code));if(!current.length)return;projection=project(bounds(current));viewport.reset();render();byId('status').textContent=region.name+'：'+current.length+'区域を表示しています。';}
 function setRange(key){if(!regions.some(r=>r.key===key))return;selectedRange=key;updateRangeButtons();session=null;byId('question').textContent='';byId('question').hidden=true;byId('feedback').textContent='';byId('answerArea').hidden=true;byId('next').hidden=true;byId('start').disabled=!all.length;byId('start').hidden=false;if(all.length)focus();
- // Only scroll on an explicit region-button tap; never on initial page load.
- requestAnimationFrame(()=>byId('quizStartAnchor').scrollIntoView({behavior:'smooth',block:'start'}));}
+ // Before the first quiz, keep the start button available. Later region taps start a new regional quiz.
+ if(startedOnce&&all.length){start();}else{
+  requestAnimationFrame(()=>byId('quizStartAnchor').scrollIntoView({behavior:'smooth',block:'start'}));
+ }}
 function shuffle(items){let a=items.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function show(){
  if(!session)return;
@@ -81,7 +84,7 @@ function show(){
  byId('answerArea').hidden=false;
  byId('feedback').textContent='';byId('next').hidden=true;render();
 }
-function start(){const order=shuffle(current);if(!order.length)return;session={order,index:0,correct:0,answer:'',answered:false,wrongCodes:new Set()};byId('start').hidden=true;show();}
+function start(){const order=shuffle(current);if(!order.length)return;startedOnce=true;session={order,index:0,correct:0,answer:'',answered:false,wrongCodes:new Set()};byId('start').hidden=true;show();scrollToQuestion();}
 function answer(code){
  if(!session||session.answered)return;
  const tapped=current.find(r=>r.code===code);
