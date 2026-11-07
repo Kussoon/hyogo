@@ -64,6 +64,23 @@ const regionThree=topology(x=>x.slice(),bounds,regionalAll,threeAreaRegion);
 regionThree.setNeighbors(regionalNeighbors);regionThree.cache();
 const threeChoices=regionThree.makeOptions(threeAreaRegion[0]).map(x=>x.code);
 assert(threeAreaRegion.every(x=>threeChoices.includes(x.code)),'Every peer in a 3-area region is included');
+const kobeNames=['神戸市東灘区','神戸市灘区','神戸市中央区','神戸市兵庫区','神戸市長田区',
+ '神戸市須磨区','神戸市垂水区','神戸市北区','神戸市西区'];
+const kobeRegion=kobeNames.map((name,i)=>square(name,i*2,3));
+const ash={...square('芦屋市',.7,3),name:'芦屋市'};
+const kobeAll=[...kobeRegion,ash,square('西宮市',3.2,3),square('遠方',20,20)];
+const kobeQuiz=topology(x=>x.slice(),bounds,kobeAll,kobeRegion);
+const kobeNeighbors=new Map(kobeAll.map(item=>[item.code,new Set()]));
+kobeNeighbors.get('神戸市東灘区').add('神戸市灘区');
+kobeNeighbors.get('神戸市東灘区').add('神戸市北区');
+kobeNeighbors.get('神戸市東灘区').add('芦屋市');
+kobeQuiz.setNeighbors(kobeNeighbors);kobeQuiz.cache();
+const higashinadaChoices=kobeQuiz.makeOptions(kobeRegion[0]).map(x=>x.code);
+assert(higashinadaChoices.includes('芦屋市'),'Adjacent Ashiya wins over distant Kobe ward');
+assert(higashinadaChoices.includes('神戸市灘区'),'Adjacent Kobe Nada ward remains a choice');
+assert(!higashinadaChoices.includes('神戸市中央区'),'Nonadjacent Kobe Chuo ward is excluded');
+assert.equal(new Set(higashinadaChoices).size,4,'Kobe quiz choices are unique');
+
 
 assert(actual.distanceCache().size>0,'Border-distance results cached for subsequent questions');
 const cacheSize=actual.distanceCache().size;

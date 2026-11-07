@@ -279,17 +279,22 @@ function borderDistance(a,b){
 function makeOptions(item){
  const adjacent=municipalNeighbors.get(item.code)||new Set();
  const sameRegion=new Set(current.map(r=>r.code));
+ // In 2- or 3-area regions, keep every regional peer to prevent an
+ // obvious answer by elimination. In larger regions, actual shared borders
+ // outrank distant peers even when the border crosses a region boundary.
+ const smallRegion=current.length<=3;
  const candidates=all.filter(other=>other.code!==item.code).map(other=>({
   item:other,
-  // Region peers must appear before outside-region distractors, even in 2-area 丹波.
   sameRegion:sameRegion.has(other.code),
   direct:adjacent.has(other.code),
   distance:borderDistance(item,other)
  }));
- candidates.sort((a,b)=>Number(b.sameRegion)-Number(a.sameRegion)
+ candidates.sort((a,b)=>
+  (smallRegion?(Number(b.sameRegion)-Number(a.sameRegion)):0)
   ||Number(b.direct)-Number(a.direct)
+  ||Number(b.sameRegion)-Number(a.sameRegion)
   ||a.distance-b.distance||a.item.code.localeCompare(b.item.code));
- // Shuffle positions only; do not weaken region/neighbor priority.
+ // Shuffle positions only; do not weaken the geographic candidate ranking.
  return shuffle([item,...candidates.slice(0,3).map(x=>x.item)]);
 }
 function show(){
