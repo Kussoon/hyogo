@@ -158,7 +158,7 @@ function answer(code){
  if(!tapped)return;
  if(code!==session.answer){
   session.wrongCodes.add(code);
-  byId('feedback').textContent='違います。\\nそこは'+tapped.name+'です。';
+  byId('feedback').textContent='違います。\nそこは'+tapped.name+'です。';
   // Keep all previously mistaken areas red and do not reveal the answer.
   byId('next').hidden=true;
   render();
