@@ -98,4 +98,14 @@ assert.equal(elements.next.hidden,false);
 assert.equal(buttons.b.disabled,true);
 assert.equal(elements.feedback.textContent,'正解です！');
 assert(!html.includes("そこは'+chosen.name"),'Misleading wrong-answer municipality message is absent');
+const questionPos=html.indexOf('id="question"');
+const mapPos=html.indexOf('<div class="map-frame">');
+const choicesPos=html.indexOf('<div id="choices"');
+const resultPos=html.indexOf('<div id="replayArea"');
+assert(questionPos>=0&&mapPos>questionPos&&choicesPos>mapPos&&resultPos>choicesPos,
+ 'Question, map, answers, and results appear in that order');
+assert.equal((html.match(/id="choices"/g)||[]).length,1,'Only one choices container exists');
+assert(html.includes('#choices[hidden]{display:none}'),'No blank answer-choice row before quiz starts');
+assert(html.includes("choices.replaceChildren();choices.hidden=false;"),'Choices appear below map after start');
+assert(html.includes("byId('choices').hidden=true;"),'Choices hidden when quiz stops or results display');
 console.log('Hyogo V2 quiz2 four-choice/blink contracts: PASS');
