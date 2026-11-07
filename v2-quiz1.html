@@ -12,22 +12,25 @@ button:disabled{opacity:.45}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:
 #start{width:100%;background:#e2f0f9;border-color:#94b8d0;color:#173f59;font-size:clamp(17px,4.5vw,22px);padding:15px 12px}
 #start:not(:disabled):active{background:#cce5f6}
 #next{display:block;width:100%;margin:7px 0 14px;background:#e2f0f9;border-color:#94b8d0;color:#173f59;font-size:clamp(17px,4.5vw,21px);padding:12px}
-#next[hidden]{display:none}
-.question[hidden],#feedback:empty{display:none}
+.question[hidden],#answerArea[hidden]{display:none}
+/* Reserve both response and next-action slots BEFORE the first answer. */
+#answerArea{display:grid;grid-template-rows:4.8em 62px;align-items:start}
+#answerArea #feedback{margin:0;line-height:1.5;max-height:4.8em;overflow:auto;overflow-wrap:anywhere}
+#answerArea #next{height:54px;margin:4px 0 4px}
+#answerArea #next[hidden]{display:block;visibility:hidden;pointer-events:none}
 .question{font-size:clamp(22px,5vw,30px);font-weight:900;background:#e5f1f9;padding:13px;text-align:center;border-radius:12px}
 #map{display:block;width:100%;height:clamp(430px,70svh,740px);border:1px solid #bdd1dd;border-radius:12px;background:#eaf3f9;touch-action:none;user-select:none}
 .map-frame{position:relative}.map-controls{position:absolute;top:9px;right:9px;display:grid;gap:6px}
 .map-controls button{min-width:58px;box-shadow:0 2px 8px #1b455a22}
 .land{fill:#d9dea5;stroke:none;cursor:pointer}.land.outside{fill:#cbd7db;cursor:default}.land.correct{fill:#8ed6a7}.land.wrong{fill:#f0aaa0}.borders{fill:none;stroke:white;stroke-width:1.2;vector-effect:non-scaling-stroke;pointer-events:none}
-#feedback{min-height:2em;font-weight:800;line-height:1.6}.note{font-size:13px;color:#486679;line-height:1.7}
+#feedback{font-weight:800}.note{font-size:13px;color:#486679;line-height:1.7}
 </style></head><body>
 <main><a href="/hyogo/v2-study-region.html">← 兵庫県10地域へ戻る</a><h1>クイズ1：地名から場所を当てる（V2試作）</h1>
 <section class="panel"><div id="rangeHeading"><strong>出題地域を選んでください</strong></div><div id="rangeChoices" role="group" aria-label="出題地域"></div>
-<p class="note">地域別の市区町村名を見て、地図上の位置を押してください。2026年版の区域データを使用します。間違えた区域は赤色で表示し、正解するまで続けられます。</p>
 <div class="actions"><button id="start" type="button" disabled>クイズを開始</button></div>
 <div id="question" class="question" aria-live="polite" hidden></div>
-<p id="feedback" aria-live="polite"></p>
-<button id="next" type="button" hidden>次の問題</button>
+<div id="answerArea" hidden><p id="feedback" aria-live="polite"></p>
+<button id="next" type="button" hidden>次の問題</button></div>
 <div class="map-frame"><svg id="map" viewBox="0 0 850 700" role="img" aria-label="名前から場所を当てる地図"></svg>
 <div class="map-controls"><button id="plus" type="button" aria-label="拡大">＋</button><button id="minus" type="button" aria-label="縮小">－</button><button id="reset" type="button">全体</button></div></div>
 <p id="status" class="note">地図を読み込んでいます。</p></section>
@@ -57,13 +60,14 @@ function render(){
  if(session){for(const code of session.wrongCodes)svg.querySelector('path.land[data-code="'+code+'"]')?.classList.add('wrong');if(session.answered)svg.querySelector('path.land[data-code="'+session.answer+'"]')?.classList.add('correct');}
 }
 function focus(){const region=regions.find(x=>x.key===selectedRange);current=all.filter(r=>region.codes.includes(r.code));if(!current.length)return;projection=project(bounds(current));viewport.reset();render();byId('status').textContent=region.name+'：'+current.length+'区域を表示しています。';}
-function setRange(key){if(!regions.some(r=>r.key===key))return;selectedRange=key;updateRangeButtons();session=null;byId('question').textContent='';byId('question').hidden=true;byId('feedback').textContent='';byId('next').hidden=true;byId('start').disabled=!all.length;byId('start').hidden=false;if(all.length)focus();}
+function setRange(key){if(!regions.some(r=>r.key===key))return;selectedRange=key;updateRangeButtons();session=null;byId('question').textContent='';byId('question').hidden=true;byId('feedback').textContent='';byId('answerArea').hidden=true;byId('next').hidden=true;byId('start').disabled=!all.length;byId('start').hidden=false;if(all.length)focus();}
 function shuffle(items){let a=items.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function show(){
  if(!session)return;
- if(session.index>=session.order.length){byId('question').hidden=false;byId('question').textContent='終了：'+session.correct+' / '+session.order.length+'問正解';byId('feedback').textContent='もう一度挑戦できます。';byId('next').hidden=true;byId('start').hidden=false;byId('start').disabled=false;session=null;render();return;}
+ if(session.index>=session.order.length){byId('question').hidden=false;byId('question').textContent='終了：'+session.correct+' / '+session.order.length+'問正解';byId('feedback').textContent='もう一度挑戦できます。';byId('next').hidden=true;byId('answerArea').hidden=true;byId('start').hidden=false;byId('start').disabled=false;session=null;render();return;}
  const item=session.order[session.index];session.answer=item.code;session.answered=false;session.wrongCodes=new Set();
  byId('question').hidden=false;byId('question').textContent=(session.index+1)+' / '+session.order.length+'問：'+item.name+'はどこ？';
+ byId('answerArea').hidden=false;
  byId('feedback').textContent='';byId('next').hidden=true;render();
 }
 function start(){const order=shuffle(current);if(!order.length)return;session={order,index:0,correct:0,answer:'',answered:false,wrongCodes:new Set()};byId('start').hidden=true;show();}
@@ -99,7 +103,7 @@ try{
  all=shapes.map(g=>{const code=String(g.properties.N03_007),indexed=index.get(code);return {code,name:indexed?.fullName||indexed?.name||g.properties.N03_004,polys:polys(g,arcs)};});
  const keys=new Set(regions.flatMap(r=>r.codes));
  if(all.length!==49||keys.size!==49||all.some(r=>!keys.has(r.code)||!index.has(r.code)))throw Error('地域の行政区域コードが2026年版と一致しません');
- byId('start').disabled=false;byId('question').textContent='';byId('question').hidden=true;focus();
+ byId('start').disabled=false;byId('question').textContent='';byId('question').hidden=true;byId('answerArea').hidden=true;focus();
 }catch(err){console.error(err);byId('status').textContent='読み込みエラー：'+err.message;byId('question').textContent='地図を読み込めませんでした。';}
 })();
 </script><script defer src="/common/site-footer.js"></script>
