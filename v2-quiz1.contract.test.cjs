@@ -118,4 +118,7 @@ assert.equal(format({name:'A&B',reading:'a<b'}),'<ruby>A&amp;B<rt>a&lt;b</rt></r
 
 assert(html.includes("status.textContent='';status.hidden=true;"),'Normal region count status under map is hidden');
 assert(html.includes("status.hidden=false;status.textContent='読み込みエラー：'+err.message"),'Actual loading errors remain visible');
+assert(html.includes("question.style.minHeight=question.getBoundingClientRect().height+'px'"),'Result retains the last question panel height so the map cannot jump upwards');
+assert(html.includes("function start(){const order=shuffle(current);if(!order.length)return;byId('question').style.minHeight=''"),'Restart clears the retained height');
+assert(html.includes("session=null;byId('question').style.minHeight=''"),'Region change clears the retained height');
 console.log('Hyogo V2 region overview + quiz1 static contracts: PASS');
