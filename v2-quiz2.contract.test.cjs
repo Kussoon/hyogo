@@ -1,0 +1,51 @@
+'use strict';
+const fs=require('node:fs');
+const path=require('node:path');
+const assert=require('node:assert/strict');
+const html=fs.readFileSync(path.join(__dirname,'v2-quiz2.html'),'utf8');
+const hub=fs.readFileSync(path.join(__dirname,'v2-study-region.html'),'utf8');
+assert(html.includes('クイズ2：光っている場所は？（V2試作）'));
+assert(html.includes('function makeOptions(item)'));
+assert(html.includes('.land.target{animation:hyogoQuiz2Pulse 1s steps(1,end) infinite}'));
+assert(html.includes("target.classList.add(session.answered?'correct':'target')"));
+assert(html.includes("button.addEventListener('click',()=>answer(option.code,button))"));
+assert(html.includes('grid-template-columns:repeat(2,minmax(0,1fr))'),'Answer options use two columns');
+assert(html.includes('formatQuestionName(option)'),'Options include readings and counties');
+assert(html.includes("session.missedQuestionCodes.add(session.answer)"),'Only actual missed questions enter retry ledger');
+assert(html.includes('if(session.wrongCodes.size===0){session.correct++'),'First-attempt scoring remains in force');
+assert(html.includes("byId('prefReset').onclick=()=>fitMap(all,true)"),'Province-wide fit remains');
+assert(html.includes("byId('reset').onclick=()=>fitMap(current)"),'Region fit remains');
+assert(hub.includes('<a href="/hyogo/v2-quiz2.html">クイズ2（V2試作）</a>'),'Region learning page links quiz 2');
+const optionsSource=html.match(/function makeOptions\(item\)\{[\s\S]*?\n\}/);
+assert(optionsSource);
+function testOptions(current,all,correct){
+ const make=Function('shuffle','current','all',optionsSource[0]+';return makeOptions;')(a=>a.slice(),current,all);
+ const list=make(correct);
+ assert.equal(list.length,4,'Always present exactly four answer options');
+ assert.equal(new Set(list.map(x=>x.code)).size,4,'Four choices are unique');
+ assert.equal(list.filter(x=>x.code===correct.code).length,1,'Correct area appears exactly once');
+ return list;
+}
+const all=Array.from({length:49},(_,i)=>({code:String(28000+i),name:'市区町村'+i}));
+testOptions(all.slice(0,9),all,all[2]);
+testOptions(all.slice(9,11),all,all[9]); // 丹波: only two areas, other two from the prefecture
+testOptions(all.slice(11,16),all,all[14]);
+const answerSource=html.match(/function answer\(code,button\)\{[\s\S]*?\n\}/);
+assert(answerSource);
+const buttons={a:{disabled:false,classList:{add(x){this.added=x}}},b:{disabled:false,classList:{add(x){this.added=x}}}};
+const elements={feedback:{textContent:''},next:{hidden:true,textContent:''},choices:{querySelectorAll:()=>Object.values(buttons)}};
+const actor=Function('byId','all','render',answerSource[0]+';return answer;')(id=>elements[id],all,()=>{});
+ // answer() is bound to a session in its source context; exercise via a controlled closure instead.
+const makeActor=Function('byId','all','render',answerSource[0]+';return {answer,session};');
+const initial={answered:false,answer:all[1].code,wrongCodes:new Set(),missedQuestionCodes:new Set(),firstTryCorrectCodes:new Set(),correct:0,index:0,order:[all[1]]};
+const bound=Function('byId','all','render','buttons',`let session={answered:false,answer:all[1].code,wrongCodes:new Set(),missedQuestionCodes:new Set(),firstTryCorrectCodes:new Set(),correct:0,index:0,order:[all[1]]};${answerSource[0]};return {answer,session};`)(id=>elements[id],all,()=>{},buttons);
+bound.answer(all[0].code,buttons.a);
+assert.equal(bound.session.correct,0);
+assert.equal(buttons.a.disabled,true);
+assert.deepEqual([...bound.session.missedQuestionCodes],[all[1].code]);
+bound.answer(all[1].code,buttons.b);
+assert.equal(bound.session.correct,0,'Wrong then correct earns zero');
+assert.equal(elements.next.hidden,false);
+assert.equal(buttons.b.disabled,true);
+assert.equal(elements.feedback.textContent,'正解です！');
+console.log('Hyogo V2 quiz2 four-choice/blink contracts: PASS');
