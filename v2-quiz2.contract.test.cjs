@@ -20,7 +20,7 @@ const neighborSource=html.slice(html.indexOf('let municipalNeighbors=new Map();'
 assert(neighborSource.includes('buildMunicipalNeighbors(shapes)'));
 assert(html.includes('municipalNeighbors=buildMunicipalNeighbors(shapes);'));
 assert(html.includes('boundarySamples=new Map(all.map(item=>[item.code,sampleBoundary(item)]));'));
-const topology=Function('shuffle','bounds','all',neighborSource+';return {makeOptions,buildMunicipalNeighbors,setNeighbors:x=>municipalNeighbors=x,cache:()=>boundarySamples=new Map(all.map(x=>[x.code,sampleBoundary(x)]))};');
+const topology=Function('shuffle','bounds','all',neighborSource+';return {makeOptions,buildMunicipalNeighbors,setNeighbors:x=>municipalNeighbors=x,cache:()=>boundarySamples=new Map(all.map(x=>[x.code,sampleBoundary(x)])),distanceCache:()=>borderDistanceCache};');
 function bounds(items){let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
  for(const r of items)for(const poly of r.polys)for(const ring of poly)for(const [x,y] of ring){
   minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);
@@ -44,6 +44,10 @@ assert(picked.includes('尼崎市'),'Correct city present');
 assert(picked.includes('西宮市')&&picked.includes('伊丹市'),'Direct neighbors prioritized');
 assert(picked.includes('川西市'),'Nearby city beats remote second-hop city');
 assert(!picked.includes('神戸市北区'),'Far away municipality excluded');
+assert(actual.distanceCache().size>0,'Border-distance results cached for subsequent questions');
+const cacheSize=actual.distanceCache().size;
+actual.makeOptions(all[0]);
+assert.equal(actual.distanceCache().size,cacheSize,'Repeated question reuses distance cache');
 const topoNeighbors=actual.buildMunicipalNeighbors([
  {properties:{N03_007:'A'},arcs:[[0,-2]]},
  {properties:{N03_007:'B'},arcs:[[1,2]]},
