@@ -81,7 +81,7 @@ assert(html.includes('#next{flex:1 1 0;min-width:0;width:auto;min-height:44px;ma
 assert(html.includes("byId('feedback').textContent='正解です！';"),'Correct feedback is unchanged');
 assert(html.includes("byId('feedback').textContent='違います。\\nそこは'+tapped.name+'です。';"),'Wrong feedback shows the tapped region on line two');
 assert(html.includes('#next{flex:1 1 0;min-width:0;width:auto'),'Next action occupies equal flexible width');
-assert(html.includes('#answerArea #next[hidden]{display:none}')||html.includes('#answerArea[hidden],#answerArea #next[hidden]{display:none}'),'Next button remains absent until correct answer');
+assert(html.includes('#answerArea #next[hidden],#replayArea[hidden],#quit[hidden],#retryMissed[hidden]{display:none}'),'Next button remains absent until correct answer');
 assert(html.includes("byId('next').hidden=true;"),'Next button remains hidden until correct answer');
 assert(html.includes('display:flex;align-items:center;justify-content:center;text-align:center;flex:1 1 0'),'Answer feedback centered vertically and horizontally');
 assert(html.includes('id="quizStartAnchor"'),'Region selection scroll has stable target');
