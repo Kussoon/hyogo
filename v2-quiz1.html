@@ -155,7 +155,7 @@ function render(){
  if(session){for(const code of session.wrongCodes)svg.querySelector('path.land[data-code="'+code+'"]')?.classList.add('wrong');if(session.answered)svg.querySelector('path.land[data-code="'+session.answer+'"]')?.classList.add('correct');}
 }
 function focus(){const region=regions.find(x=>x.key===selectedRange);byId('mapRegionName').textContent=region.name;current=all.filter(r=>region.codes.includes(r.code));if(!current.length)return;projection=project(bounds(current));viewport.reset();render();status.textContent='';status.hidden=true;}
-function setRange(key){if(!regions.some(r=>r.key===key))return;selectedRange=key;updateRangeButtons();session=null;byId('question').textContent='';byId('question').hidden=true;byId('feedback').textContent='';byId('answerArea').hidden=true;byId('next').hidden=true;byId('start').disabled=!all.length;byId('start').hidden=false;if(all.length)focus();
+function setRange(key){if(!regions.some(r=>r.key===key))return;selectedRange=key;updateRangeButtons();session=null;byId('question').style.minHeight='';byId('question').textContent='';byId('question').hidden=true;byId('feedback').textContent='';byId('answerArea').hidden=true;byId('next').hidden=true;byId('start').disabled=!all.length;byId('start').hidden=false;if(all.length)focus();
  // Before the first quiz, keep the start button available. Later region taps start a new regional quiz.
  if(startedOnce&&all.length){start();}else{
   requestAnimationFrame(()=>byId('quizStartAnchor').scrollIntoView({behavior:'smooth',block:'start'}));
@@ -163,13 +163,13 @@ function setRange(key){if(!regions.some(r=>r.key===key))return;selectedRange=key
 function shuffle(items){let a=items.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function show(){
  if(!session)return;
- if(session.index>=session.order.length){byId('question').hidden=false;byId('question').textContent='終了：'+session.correct+' / '+session.order.length+'問正解';byId('feedback').textContent='もう一度挑戦できます。';byId('next').hidden=true;byId('answerArea').hidden=true;byId('start').hidden=false;byId('start').disabled=false;session=null;render();return;}
+ if(session.index>=session.order.length){const question=byId('question');question.style.minHeight=question.getBoundingClientRect().height+'px';question.hidden=false;question.textContent='終了：'+session.correct+' / '+session.order.length+'問正解';byId('feedback').textContent='もう一度挑戦できます。';byId('next').hidden=true;byId('answerArea').hidden=true;byId('start').hidden=false;byId('start').disabled=false;session=null;render();return;}
  const item=session.order[session.index];session.answer=item.code;session.answered=false;session.wrongCodes=new Set();
  byId('question').hidden=false;byId('question').innerHTML=(session.index+1)+' / '+session.order.length+'問：'+formatQuestionName(item)+'はどこ？';
  byId('answerArea').hidden=false;
  byId('feedback').textContent='';byId('next').hidden=true;render();
 }
-function start(){const order=shuffle(current);if(!order.length)return;startedOnce=true;session={order,index:0,correct:0,answer:'',answered:false,wrongCodes:new Set()};byId('start').hidden=true;show();scrollToQuestion();}
+function start(){const order=shuffle(current);if(!order.length)return;byId('question').style.minHeight='';startedOnce=true;session={order,index:0,correct:0,answer:'',answered:false,wrongCodes:new Set()};byId('start').hidden=true;show();scrollToQuestion();}
 function answer(code){
  if(!session||session.answered)return;
  const tapped=current.find(r=>r.code===code);
