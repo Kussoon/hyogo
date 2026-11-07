@@ -52,12 +52,12 @@ assert(!html.includes('地域別の市区町村名を見て、地図上の位置
 assert(html.includes("byId('answerArea').hidden=false;"),'Response area shown when a question begins, before any answer');
 assert(html.includes("byId('answerArea').hidden=true;"),'Response area hidden outside a quiz');
 // The map must not move vertically as feedback and next controls appear.
-assert(html.includes('#answerArea{position:absolute;z-index:3;top:10px;left:10px;right:94px;'),'Feedback is an absolute overlay, not a layout row');
+assert(html.includes('#answerArea{position:absolute;z-index:3;top:86px;left:10px;right:10px;'),'Feedback is below area-name label and remains out of normal document flow');
 assert(html.includes('#answerArea[hidden],#answerArea #next[hidden]{display:none}'),'Hidden controls occupy no map area');
 assert(html.includes('#feedback:empty{display:none}'),'Empty feedback creates no visible card');
 assert(!html.includes('grid-template-rows:4.8em 62px'),'Previous large empty spacer is removed');
 assert(html.indexOf('class="map-frame"')<html.indexOf('id="answerArea"')&&html.indexOf('id="answerArea"')<html.indexOf('class="map-controls"'),'Feedback and next button are overlaid inside the map');
-assert(html.includes('right:94px'),'Feedback leaves room for right-hand zoom controls');
+assert(html.includes('.map-controls{position:absolute;top:auto;bottom:12px;right:9px;'),'Zoom controls are docked at the lower right');
 assert(html.includes("byId('answerArea').hidden=false;"),'Map feedback enabled at question start without moving the map');
 assert(html.includes('flex-direction:row;align-items:stretch;gap:7px;pointer-events:none'),'Correct feedback and next button are side-by-side');
 assert(html.includes('flex:1 1 0;min-width:0;margin:0;padding:9px 10px;'),'Feedback occupies equal flexible width');
@@ -69,4 +69,9 @@ assert(html.includes('id="quizStartAnchor"'),'Region selection scroll has stable
 assert(html.indexOf('id="rangeChoices"')<html.indexOf('id="quizStartAnchor"')&&html.indexOf('id="quizStartAnchor"')<html.indexOf('id="start"'),'Scroll target is directly after the region selector');
 assert(html.includes("requestAnimationFrame(()=>byId('quizStartAnchor').scrollIntoView({behavior:'smooth',block:'start'}))"),'Only explicit region selection scrolls to quiz start');
 assert(!html.includes("byId('quizStartAnchor').scrollIntoView({behavior:'smooth',block:'start'});focus();"),'No automatic scrolling while initializing data');
+assert(html.includes('<span>兵庫県</span><strong id="mapRegionName"></strong>'),'Two-line prefecture and region name is overlaid on map');
+assert(html.includes("byId('mapRegionName').textContent=regions.find(r=>r.key===selectedRange).name;"),'Map starts with currently selected region name');
+assert(html.includes("byId('mapRegionName').textContent=region.name;"),'Map region caption is updated on region switch');
+assert(html.includes('.map-area-name{position:absolute;z-index:2;top:10px;left:10px;'),'Prefecture and region caption stays upper-left');
+assert(html.indexOf('class="map-area-name"')<html.indexOf('id="answerArea"'),'Correct/wrong feedback follows the region caption in the map');
 console.log('Hyogo V2 region overview + quiz1 static contracts: PASS');
