@@ -210,6 +210,7 @@ function answer(code){
 svg.addEventListener('click',e=>{const node=e.target.closest('path.land');if(node)answer(node.dataset.code);});
 function returnToRegions(){
  session=null;
+ startedOnce=false;
  const question=byId('question');
  question.style.minHeight='';
  question.textContent='';
