@@ -50,4 +50,12 @@ assert(html.includes('min-height:39px;padding:5px 3px'),'Region buttons have a m
 assert(html.includes('font-size:clamp(11px,3.1vw,14px)'),'Region button font is reduced');
 assert(html.indexOf('id="feedback"')<html.indexOf('id="next"')&&html.indexOf('id="next"')<html.indexOf('class="map-frame"'),'Next button stays between correct/wrong feedback and map');
 assert(html.includes('#next[hidden]{display:none}'),'Next button respects hidden state');
+assert(!html.includes('地域別の市区町村名を見て、地図上の位置を押してください。'),'Requested explanatory paragraph removed');
+assert(html.includes('<div id="answerArea" hidden>'),'Reserved feedback/next container exists');
+assert(html.includes('#answerArea{display:grid;grid-template-rows:4.8em 62px'),'Feedback and next-button layout heights stay stable');
+assert(html.includes('#answerArea #next[hidden]{display:block;visibility:hidden;pointer-events:none}'),'Invisible next button keeps reserved space');
+assert(html.includes("byId('answerArea').hidden=false;"),'Response area shown when a question begins, before any answer');
+assert(html.includes("byId('answerArea').hidden=true;"),'Response area hidden outside a quiz');
+assert(!html.includes('#feedback:empty{display:none}'),'Empty feedback never collapses the response space');
+assert(html.indexOf('id="question"')<html.indexOf('id="answerArea"')&&html.indexOf('id="answerArea"')<html.indexOf('class="map-frame"'),'Response slot stays between question and map');
 console.log('Hyogo V2 region overview + quiz1 static contracts: PASS');
