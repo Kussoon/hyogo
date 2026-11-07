@@ -49,7 +49,7 @@ assert.equal(quiz.session.answered,true);
 assert.equal(quiz.session.firstTryCorrectCodes.size,0,'Wrong-then-correct is not counted as first-try correct');
 const freshButtons={feedback:{textContent:''},next:{hidden:true,textContent:''}};
 const freshQuiz=Function('byId','current','render',
- 'let session={answered:false,answer:"28105",wrongCodes:new Set(),correct:0,index:0,order:[1,2]};'
+ 'let session={answered:false,answer:"28105",wrongCodes:new Set(),firstTryCorrectCodes:new Set(),correct:0,index:0,order:[1,2]};'
  +a[0].replace(/\nsvg\.addEventListener$/,'')+';return {answer,session};'
 )(id=>freshButtons[id],[{code:'28101',name:'神戸市東灘区'},{code:'28105',name:'神戸市兵庫区'}],()=>{});
 freshQuiz.answer('28105');
