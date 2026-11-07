@@ -298,7 +298,7 @@ function answer(code,button){
   session.wrongCodes.add(code);
   session.missedQuestionCodes.add(session.answer);
   button.classList.add('wrong-choice');button.disabled=true;
-  byId('feedback').textContent='違います。\nそこは'+chosen.name+'です。';
+  byId('feedback').textContent='違います。';
   byId('next').hidden=true;
   return;
  }
