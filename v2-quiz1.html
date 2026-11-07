@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>兵庫県V2・クイズ1試作（名前から場所）｜Kussoon</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;color:#193a51;background:#eff6fb}*{box-sizing:border-box}
+body{margin:0}main{max-width:900px;margin:0 auto;padding:14px 12px}h1{font-size:clamp(23px,5vw,30px)}.panel{background:#fff;border:1px solid #bed3df;border-radius:14px;padding:14px;margin:12px 0}
+button,select{font:inherit;min-height:44px;border:1px solid #9bb7cb;border-radius:9px;background:#fff;color:#163a55;padding:9px;font-weight:700}
+button:disabled{opacity:.45}label{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}a{color:#255677}
+.question{font-size:clamp(22px,5vw,30px);font-weight:900;background:#e5f1f9;padding:13px;text-align:center;border-radius:12px}
+#map{display:block;width:100%;height:clamp(430px,70svh,740px);border:1px solid #bdd1dd;border-radius:12px;background:#eaf3f9;touch-action:none;user-select:none}
+.map-frame{position:relative}.map-controls{position:absolute;top:9px;right:9px;display:grid;gap:6px}
+.map-controls button{min-width:58px;box-shadow:0 2px 8px #1b455a22}
+.land{fill:#d9dea5;stroke:none;cursor:pointer}.land.outside{fill:#cbd7db;cursor:default}.land.correct{fill:#8ed6a7}.land.wrong{fill:#f0aaa0}.borders{fill:none;stroke:white;stroke-width:1.2;vector-effect:non-scaling-stroke;pointer-events:none}
+#feedback{min-height:2em;font-weight:800;line-height:1.6}.note{font-size:13px;color:#486679;line-height:1.7}
+</style></head><body>
+<main><a href="/hyogo/v2-study-region.html">← 兵庫県10地域へ戻る</a><h1>クイズ1：地名から場所を当てる（V2試作）</h1>
+<section class="panel"><label>出題地域 <select id="range"></select></label>
+<p class="note">地域別の市区町村名を見て、地図上の位置を押してください。2026年版の区域データを使用します。回答後に正解を色で示します。</p>
+<div class="actions"><button id="start" type="button" disabled>クイズを開始</button><button id="next" type="button" hidden>次の問題</button></div>
+<div id="question" class="question" aria-live="polite">出題範囲を準備しています。</div>
+<p id="feedback" aria-live="polite"></p>
+<div class="map-frame"><svg id="map" viewBox="0 0 850 700" role="img" aria-label="名前から場所を当てる地図"></svg>
+<div class="map-controls"><button id="plus" type="button" aria-label="拡大">＋</button><button id="minus" type="button" aria-label="縮小">－</button><button id="reset" type="button">全体</button></div></div>
+<p id="status" class="note">地図を読み込んでいます。</p></section>
+<a href="/hyogo/quiz1.html">従来のクイズ1</a> ／ <a href="/hyogo/">兵庫県トップ</a>
+</main>
+<script src="/hyogo/v2-regions.js"></script>
+<script src="/v2/progressive-preview/municipality-renderer.js"></script>
+<script src="/v2/progressive-preview/map-viewport.js"></script>
+<script>
+(async()=>{'use strict';
+const config=window.KussoonHyogoV2Regions,regions=config.regions,byId=id=>document.getElementById(id),svg=byId('map'),select=byId('range'),status=byId('status');
+const W=850,H=700,viewport=KussoonV2MapViewport.init({svg,width:W,height:H}),renderer=KussoonV2MunicipalRenderer;
+for(const region of regions){select.add(new Option(region.name+'（'+region.codes.length+'区域）',region.key));}
+const query=new URLSearchParams(location.search),wanted=query.get('range')||query.get('studyRegion');
+if(regions.some(r=>r.key===wanted))select.value=wanted;
+let all=[],arcs=[],current=[],projection=null,session=null;
+function decodeArcs(t){return t.arcs.map(a=>{let x=0,y=0;return a.map(q=>{if(t.transform){x+=q[0];y+=q[1];return [x*t.transform.scale[0]+t.transform.translate[0],y*t.transform.scale[1]+t.transform.translate[1]];}return q;});});}
+function points(ids,a){const out=[];for(const id of ids){const part=id<0?a[~id].slice().reverse():a[id];out.push(...(out.length?part.slice(1):part));}return out;}
+function polys(g,a){return g.type==='Polygon'?[g.arcs.map(ids=>points(ids,a))]:g.arcs.map(poly=>poly.map(ids=>points(ids,a)));}
+function bounds(items){let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;for(const r of items)for(const poly of r.polys)for(const ring of poly)for(const [x,y] of ring){minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);}return [minX,minY,maxX,maxY];}
+function project(box){const cos=Math.cos((box[1]+box[3])*Math.PI/360),bw=Math.max((box[2]-box[0])*cos,.04),bh=Math.max(box[3]-box[1],.04),scale=Math.min((W-60)/bw,(H-60)/bh),lon=(box[0]+box[2])/2,lat=(box[1]+box[3])/2;return p=>[W/2+(p[0]-lon)*cos*scale,H/2-(p[1]-lat)*scale];}
+function render(){
+ renderer.render({map:svg,regions:all,arcs,project:projection,hideTitles:true});
+ const active=new Set(current.map(x=>x.code));
+ for(const shape of svg.querySelectorAll('path.land')){const code=shape.dataset.code;shape.classList.toggle('outside',!active.has(code));shape.querySelector('title')?.remove();shape.setAttribute('aria-label',active.has(code)?'回答する区域':'出題範囲外');}
+ if(session?.answered){svg.querySelector('path.land[data-code="'+session.answer+'"]')?.classList.add('correct');if(session.chosen!==session.answer)svg.querySelector('path.land[data-code="'+session.chosen+'"]')?.classList.add('wrong');}
+}
+function focus(){current=all.filter(r=>config.regions.find(x=>x.key===select.value).codes.includes(r.code));if(!current.length)return;projection=project(bounds(current));viewport.reset();render();byId('status').textContent=regions.find(r=>r.key===select.value).name+'：'+current.length+'区域を表示しています。';}
+function shuffle(items){let a=items.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function show(){
+ if(!session)return;
+ if(session.index>=session.order.length){byId('question').textContent='終了：'+session.correct+' / '+session.order.length+'問正解';byId('feedback').textContent='別の地域を選んで再挑戦できます。';byId('next').hidden=true;byId('start').disabled=false;session=null;return;}
+ const item=session.order[session.index];session.answer=item.code;session.answered=false;session.chosen='';
+ byId('question').textContent=(session.index+1)+' / '+session.order.length+'問：'+item.name+'はどこ？';
+ byId('feedback').textContent='地図の区域をタップしてください。';byId('next').hidden=true;render();
+}
+function start(){const order=shuffle(current);if(!order.length)return;session={order,index:0,correct:0,answer:'',chosen:'',answered:false};byId('start').disabled=true;show();}
+function answer(code){if(!session||session.answered||!current.some(r=>r.code===code))return;session.answered=true;session.chosen=code;if(code===session.answer)session.correct++;
+ byId('feedback').textContent=code===session.answer?'正解です！':'不正解です。正解は緑色の区域です。';
+ byId('next').textContent=session.index===session.order.length-1?'結果を見る':'次の問題';byId('next').hidden=false;render();}
+svg.addEventListener('click',e=>{const node=e.target.closest('path.land');if(node)answer(node.dataset.code);});
+byId('start').onclick=start;byId('next').onclick=()=>{if(!session)return;session.index++;show();};
+select.onchange=()=>{session=null;byId('question').textContent='「クイズを開始」を押してください。';byId('feedback').textContent='';byId('next').hidden=true;byId('start').disabled=false;focus();};
+byId('plus').onclick=()=>viewport.zoomIn();byId('minus').onclick=()=>viewport.zoomOut();byId('reset').onclick=()=>viewport.reset();
+try{
+ const [manifestRes,indexRes]=await Promise.all([fetch('/v2/data/national/2026-common/national-2026-pilot/manifest.json'),fetch('/v2/progressive-preview/label-index.json')]);
+ if(!manifestRes.ok||!indexRes.ok)throw Error('全国データ索引の読み込みに失敗');
+ const manifest=await manifestRes.json(),idx=await indexRes.json(),entry=manifest.entries.find(e=>e.pref==='28');
+ if(!entry||idx.count!==1905)throw Error('全国索引の構成が不正');
+ const res=await fetch('/v2/data/national/2026-common/'+entry.source);if(!res.ok)throw Error('2026年データの読み込みに失敗');
+ const topo=await res.json(),index=new Map(idx.entries.filter(x=>x.pref==='28').map(x=>[x.code,x]));
+ const shapes=topo.objects.municipalities.geometries;arcs=decodeArcs(topo);
+ all=shapes.map(g=>{const code=String(g.properties.N03_007),indexed=index.get(code);return {code,name:indexed?.fullName||indexed?.name||g.properties.N03_004,polys:polys(g,arcs)};});
+ const keys=new Set(regions.flatMap(r=>r.codes));
+ if(all.length!==49||keys.size!==49||all.some(r=>!keys.has(r.code)||!index.has(r.code)))throw Error('地域の行政区域コードが2026年版と一致しません');
+ byId('start').disabled=false;byId('question').textContent='「クイズを開始」を押してください。';focus();
+}catch(err){console.error(err);byId('status').textContent='読み込みエラー：'+err.message;byId('question').textContent='地図を読み込めませんでした。';}
+})();
+</script><script defer src="/common/site-footer.js"></script>
+</body></html>
