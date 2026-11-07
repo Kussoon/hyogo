@@ -174,9 +174,8 @@ function finishQuiz(){
  question.style.minHeight=question.getBoundingClientRect().height+'px';
  question.hidden=false;
  question.textContent='終了：'+session.correct+' / '+session.order.length+'問正解';
- // Any question not answered correctly on its first try is eligible for a focused retry.
- // This includes questions left unanswered by "ここでやめる".
- retryOrder=session.order.filter(item=>!session.firstTryCorrectCodes.has(item.code));
+ // Only questions actually answered incorrectly are eligible; unattempted questions are excluded.
+ retryOrder=session.order.filter(item=>session.missedQuestionCodes.has(item.code));
  byId('retryMissed').hidden=retryOrder.length===0;
  byId('feedback').textContent='';
  byId('next').hidden=true;
@@ -195,13 +194,14 @@ function show(){
  byId('answerArea').hidden=false;
  byId('feedback').textContent='';byId('next').hidden=true;render();
 }
-function start(orderOverride){const order=shuffle(Array.isArray(orderOverride)?orderOverride:current);if(!order.length)return;byId('question').style.minHeight='';byId('replayArea').hidden=true;startedOnce=true;retryOrder=[];session={order,index:0,correct:0,answer:'',answered:false,wrongCodes:new Set(),firstTryCorrectCodes:new Set()};byId('start').hidden=true;byId('quit').hidden=false;show();scrollToQuestion();}
+function start(orderOverride){const order=shuffle(Array.isArray(orderOverride)?orderOverride:current);if(!order.length)return;byId('question').style.minHeight='';byId('replayArea').hidden=true;startedOnce=true;retryOrder=[];session={order,index:0,correct:0,answer:'',answered:false,wrongCodes:new Set(),firstTryCorrectCodes:new Set(),missedQuestionCodes:new Set()};byId('start').hidden=true;byId('quit').hidden=false;show();scrollToQuestion();}
 function answer(code){
  if(!session||session.answered)return;
  const tapped=current.find(r=>r.code===code);
  if(!tapped)return;
  if(code!==session.answer){
   session.wrongCodes.add(code);
+  session.missedQuestionCodes.add(session.answer);
   byId('feedback').textContent='違います。\nそこは'+tapped.name+'です。';
   // Keep all previously mistaken areas red and do not reveal the answer.
   byId('next').hidden=true;
