@@ -49,7 +49,7 @@ assert.equal(quiz.session.answered,true);
 assert(html.includes('min-height:39px;padding:5px 3px'),'Region buttons have a more compact height');
 assert(html.includes('font-size:clamp(11px,3.1vw,14px)'),'Region button font is reduced');
 assert(html.indexOf('id="feedback"')<html.indexOf('id="next"')&&html.indexOf('id="next"')<html.indexOf('class="map-frame"'),'Next button stays between correct/wrong feedback and map');
-assert(html.includes('#next[hidden]{display:none}'),'Next button respects hidden state');
+assert(html.includes('#answerArea #next[hidden]{display:block;visibility:hidden;pointer-events:none}'),'Hidden next button remains invisible but reserves stable layout');
 assert(!html.includes('地域別の市区町村名を見て、地図上の位置を押してください。'),'Requested explanatory paragraph removed');
 assert(html.includes('<div id="answerArea" hidden>'),'Reserved feedback/next container exists');
 assert(html.includes('#answerArea{display:grid;grid-template-rows:4.8em 62px'),'Feedback and next-button layout heights stay stable');
