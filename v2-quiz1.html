@@ -202,7 +202,7 @@ function answer(code){
   render();
   return;
  }
- session.answered=true;session.correct++;
+ session.answered=true;if(session.wrongCodes.size===0)session.correct++;
  byId('feedback').textContent='正解です！';
  byId('next').textContent=session.index===session.order.length-1?'結果を見る':'次の問題';
  byId('next').hidden=false;render();
