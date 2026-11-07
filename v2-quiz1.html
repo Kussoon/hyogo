@@ -9,13 +9,14 @@ button:disabled{opacity:.45}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:
 #rangeChoices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0 15px}
 #rangeChoices button{min-width:0;min-height:39px;padding:5px 3px;font-size:clamp(11px,3.1vw,14px);line-height:1.25;overflow-wrap:anywhere}
 #rangeChoices button[aria-pressed="true"]{background:#dcecf9;border-color:#326e91;box-shadow:inset 0 0 0 1px #326e91}
+#quizStartAnchor{scroll-margin-top:8px}
 #start{width:100%;background:#e2f0f9;border-color:#94b8d0;color:#173f59;font-size:clamp(17px,4.5vw,22px);padding:15px 12px}
 #start:not(:disabled):active{background:#cce5f6}
 /* Quiz feedback floats inside the map, outside normal document flow.
    Unlike the old reserved 4.8em + 62px rows, this cannot push the map down. */
 .question[hidden],#answerArea[hidden],#answerArea #next[hidden]{display:none}
 #answerArea{position:absolute;z-index:3;top:10px;left:10px;right:94px;display:flex;flex-direction:row;align-items:stretch;gap:7px;pointer-events:none}
-#feedback{flex:1 1 0;min-width:0;margin:0;padding:9px 10px;border-radius:10px;background:#fffffff0;border:1px solid #b5cfdf;box-shadow:0 2px 9px #173c5526;font-size:clamp(13px,3.5vw,17px);line-height:1.4;max-height:6em;overflow:auto;overflow-wrap:anywhere;font-weight:800;pointer-events:none}
+#feedback{display:flex;align-items:center;justify-content:center;text-align:center;flex:1 1 0;min-width:0;margin:0;padding:9px 10px;border-radius:10px;background:#fffffff0;border:1px solid #b5cfdf;box-shadow:0 2px 9px #173c5526;font-size:clamp(13px,3.5vw,17px);line-height:1.4;max-height:6em;overflow:auto;overflow-wrap:anywhere;font-weight:800;pointer-events:none}
 #feedback:empty{display:none}
 #next{flex:1 1 0;min-width:0;width:auto;min-height:44px;max-width:none;margin:0;background:#e2f0f9;border-color:#94b8d0;color:#173f59;font-size:clamp(15px,3.9vw,19px);padding:10px 7px;box-shadow:0 2px 9px #173c5526;pointer-events:auto}
 .question{font-size:clamp(22px,5vw,30px);font-weight:900;background:#e5f1f9;padding:13px;text-align:center;border-radius:12px}
@@ -27,6 +28,7 @@ button:disabled{opacity:.45}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:
 </style></head><body>
 <main><a href="/hyogo/v2-study-region.html">← 兵庫県10地域へ戻る</a><h1>クイズ1：地名から場所を当てる（V2試作）</h1>
 <section class="panel"><div id="rangeHeading"><strong>出題地域を選んでください</strong></div><div id="rangeChoices" role="group" aria-label="出題地域"></div>
+<div id="quizStartAnchor"></div>
 <div class="actions"><button id="start" type="button" disabled>クイズを開始</button></div>
 <div id="question" class="question" aria-live="polite" hidden></div>
 <div class="map-frame"><svg id="map" viewBox="0 0 850 700" role="img" aria-label="名前から場所を当てる地図"></svg>
@@ -60,7 +62,9 @@ function render(){
  if(session){for(const code of session.wrongCodes)svg.querySelector('path.land[data-code="'+code+'"]')?.classList.add('wrong');if(session.answered)svg.querySelector('path.land[data-code="'+session.answer+'"]')?.classList.add('correct');}
 }
 function focus(){const region=regions.find(x=>x.key===selectedRange);current=all.filter(r=>region.codes.includes(r.code));if(!current.length)return;projection=project(bounds(current));viewport.reset();render();byId('status').textContent=region.name+'：'+current.length+'区域を表示しています。';}
-function setRange(key){if(!regions.some(r=>r.key===key))return;selectedRange=key;updateRangeButtons();session=null;byId('question').textContent='';byId('question').hidden=true;byId('feedback').textContent='';byId('answerArea').hidden=true;byId('next').hidden=true;byId('start').disabled=!all.length;byId('start').hidden=false;if(all.length)focus();}
+function setRange(key){if(!regions.some(r=>r.key===key))return;selectedRange=key;updateRangeButtons();session=null;byId('question').textContent='';byId('question').hidden=true;byId('feedback').textContent='';byId('answerArea').hidden=true;byId('next').hidden=true;byId('start').disabled=!all.length;byId('start').hidden=false;if(all.length)focus();
+ // Only scroll on an explicit region-button tap; never on initial page load.
+ requestAnimationFrame(()=>byId('quizStartAnchor').scrollIntoView({behavior:'smooth',block:'start'}));}
 function shuffle(items){let a=items.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function show(){
  if(!session)return;
