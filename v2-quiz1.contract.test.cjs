@@ -139,4 +139,9 @@ assert(html.includes("byId('quit').onclick=finishQuiz;"),'Quit invokes the same 
 assert(html.includes("byId('returnRegions').onclick=returnToRegions;"),'Return action wired');
 assert(html.includes('window.scrollTo(0,0);'),'Return scrolls immediately to top');
 assert(html.includes("question.textContent='終了：'+session.correct+' / '+session.order.length+'問正解';"),'Partial score uses total number of region questions');
+// Returning to region selection must restore the original two-step start flow.
+const returnBlock=html.match(/function returnToRegions\(\)\{[\s\S]*?\n\}/);
+assert(returnBlock,'Region selection return handler exists');
+assert(returnBlock[0].includes('startedOnce=false;'),'Return action resets auto-start state');
+assert(html.includes('if(startedOnce&&all.length){start();}else{'),'Region selection waits for the explicit start button after reset');
 console.log('Hyogo V2 region overview + quiz1 static contracts: PASS');
