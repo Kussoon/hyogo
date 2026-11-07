@@ -114,10 +114,28 @@ function escapeHtml(value){
     "'":'&#39;'
   }[ch]));
 }
+const COUNTY_BY_TOWN = {
+  '猪名川町':['川辺郡','かわべぐん'],
+  '多可町':['多可郡','たかぐん'],
+  '稲美町':['加古郡','かこぐん'],
+  '播磨町':['加古郡','かこぐん'],
+  '市川町':['神崎郡','かんざきぐん'],
+  '福崎町':['神崎郡','かんざきぐん'],
+  '神河町':['神崎郡','かんざきぐん'],
+  '太子町':['揖保郡','いぼぐん'],
+  '上郡町':['赤穂郡','あこうぐん'],
+  '佐用町':['佐用郡','さようぐん'],
+  '香美町':['美方郡','みかたぐん'],
+  '新温泉町':['美方郡','みかたぐん']
+};
 function formatQuestionName(item){
-  const reading = item.reading || MANUAL_READINGS_BY_NAME[item.name] || '';
-  if(!reading) return escapeHtml(item.name);
-  return `<ruby>${escapeHtml(item.name)}<rt>${escapeHtml(reading)}</rt></ruby>`;
+  const county = COUNTY_BY_TOWN[item.name];
+  // Keep the official quiz answer/code untouched; only the question's displayed name changes.
+  const name = county ? county[0] + item.name : item.name;
+  const townReading = MANUAL_READINGS_BY_NAME[item.name] || item.reading || '';
+  const reading = county ? county[1] + townReading : (item.reading || townReading);
+  if(!reading) return escapeHtml(name);
+  return `<ruby>${escapeHtml(name)}<rt>${escapeHtml(reading)}</rt></ruby>`;
 }
 let selectedRange=regions.some(r=>r.key===wanted)?wanted:regions[0].key;
 byId('mapRegionName').textContent=regions.find(r=>r.key===selectedRange).name;
