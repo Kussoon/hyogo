@@ -16,10 +16,12 @@ button:disabled{opacity:.45}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:
    Unlike the old reserved 4.8em + 62px rows, this cannot push the map down. */
 .question[hidden],#answerArea[hidden],#answerArea #next[hidden]{display:none}
 #answerArea{flex:1 1 auto;min-width:0;display:flex;flex-direction:row;align-items:center;gap:7px;pointer-events:none}
-#feedback{display:flex;align-items:center;justify-content:center;text-align:center;flex:1 1 0;min-width:0;margin:0;padding:2px 3px;background:transparent;border:0;border-radius:0;box-shadow:none;color:#133a52;text-shadow:0 1px 2px #fff,0 -1px 2px #fff,1px 0 2px #fff,-1px 0 2px #fff;-webkit-text-stroke:.35px #fff;font-size:clamp(20px,5.2vw,26px);line-height:1.4;max-height:6em;overflow:auto;overflow-wrap:anywhere;font-weight:900;pointer-events:none}
+#feedback{display:flex;align-items:center;justify-content:center;text-align:center;flex:1 1 0;min-width:0;margin:0;padding:2px 3px;background:transparent;border:0;border-radius:0;box-shadow:none;color:#133a52;text-shadow:0 1px 2px #fff,0 -1px 2px #fff,1px 0 2px #fff,-1px 0 2px #fff;-webkit-text-stroke:.35px #fff;font-size:clamp(18px,4.8vw,24px);line-height:1.4;white-space:pre-line;max-height:6em;overflow:auto;overflow-wrap:anywhere;font-weight:900;pointer-events:none}
 #feedback:empty{display:none}
 #next{flex:1 1 0;min-width:0;width:auto;min-height:44px;max-width:none;margin:0;background:#e2f0f9;border-color:#94b8d0;color:#173f59;font-size:clamp(15px,3.9vw,19px);padding:10px 7px;box-shadow:0 2px 9px #173c5526;pointer-events:auto}
 .question{font-size:clamp(22px,5vw,30px);font-weight:900;background:#e5f1f9;padding:13px;text-align:center;border-radius:12px}
+.question ruby{ruby-position:over}
+.question rt{font-size:.38em;font-weight:700;letter-spacing:.02em}
 #map{display:block;width:100%;height:clamp(430px,70svh,740px);border:1px solid #bdd1dd;border-radius:12px;background:#eaf3f9;touch-action:none;user-select:none}
 .map-frame{position:relative}
 #mapTopBar{position:absolute;z-index:3;top:10px;left:10px;right:10px;display:flex;align-items:center;gap:8px;pointer-events:none}
@@ -52,6 +54,71 @@ button:disabled{opacity:.45}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:
 const config=window.KussoonHyogoV2Regions,regions=config.regions,byId=id=>document.getElementById(id),svg=byId('map'),choices=byId('rangeChoices'),status=byId('status');
 const W=850,H=700,viewport=KussoonV2MapViewport.init({svg,width:W,height:H}),renderer=KussoonV2MunicipalRenderer;
 const query=new URLSearchParams(location.search),wanted=query.get('range')||query.get('studyRegion');
+const MANUAL_READINGS_BY_NAME = {
+  '神戸市東灘区':'こうべしひがしなだく',
+  '神戸市灘区':'こうべしなだく',
+  '神戸市兵庫区':'こうべしひょうごく',
+  '神戸市長田区':'こうべしながたく',
+  '神戸市須磨区':'こうべしすまく',
+  '神戸市垂水区':'こうべしたるみく',
+  '神戸市北区':'こうべしきたく',
+  '神戸市中央区':'こうべしちゅうおうく',
+  '神戸市西区':'こうべしにしく',
+  '姫路市':'ひめじし',
+  '尼崎市':'あまがさきし',
+  '明石市':'あかしし',
+  '西宮市':'にしのみやし',
+  '洲本市':'すもとし',
+  '芦屋市':'あしやし',
+  '伊丹市':'いたみし',
+  '相生市':'あいおいし',
+  '豊岡市':'とよおかし',
+  '加古川市':'かこがわし',
+  '赤穂市':'あこうし',
+  '西脇市':'にしわきし',
+  '宝塚市':'たからづかし',
+  '三木市':'みきし',
+  '高砂市':'たかさごし',
+  '川西市':'かわにしし',
+  '小野市':'おのし',
+  '三田市':'さんだし',
+  '加西市':'かさいし',
+  '丹波篠山市':'たんばささやまし',
+  '養父市':'やぶし',
+  '丹波市':'たんばし',
+  '南あわじ市':'みなみあわじし',
+  '朝来市':'あさごし',
+  '淡路市':'あわじし',
+  '宍粟市':'しそうし',
+  '加東市':'かとうし',
+  'たつの市':'たつのし',
+  '猪名川町':'いながわちょう',
+  '多可町':'たかちょう',
+  '稲美町':'いなみちょう',
+  '播磨町':'はりまちょう',
+  '市川町':'いちかわちょう',
+  '福崎町':'ふくさきちょう',
+  '神河町':'かみかわちょう',
+  '太子町':'たいしちょう',
+  '上郡町':'かみごおりちょう',
+  '佐用町':'さようちょう',
+  '香美町':'かみちょう',
+  '新温泉町':'しんおんせんちょう'
+};
+function escapeHtml(value){
+  return String(value).replace(/[&<>"']/g, ch => ({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[ch]));
+}
+function formatQuestionName(item){
+  const reading = item.reading || MANUAL_READINGS_BY_NAME[item.name] || '';
+  if(!reading) return escapeHtml(item.name);
+  return `<ruby>${escapeHtml(item.name)}<rt>${escapeHtml(reading)}</rt></ruby>`;
+}
 let selectedRange=regions.some(r=>r.key===wanted)?wanted:regions[0].key;
 byId('mapRegionName').textContent=regions.find(r=>r.key===selectedRange).name;
 function updateRangeButtons(){for(const button of choices.querySelectorAll('button'))button.setAttribute('aria-pressed',String(button.dataset.key===selectedRange));}
@@ -80,7 +147,7 @@ function show(){
  if(!session)return;
  if(session.index>=session.order.length){byId('question').hidden=false;byId('question').textContent='終了：'+session.correct+' / '+session.order.length+'問正解';byId('feedback').textContent='もう一度挑戦できます。';byId('next').hidden=true;byId('answerArea').hidden=true;byId('start').hidden=false;byId('start').disabled=false;session=null;render();return;}
  const item=session.order[session.index];session.answer=item.code;session.answered=false;session.wrongCodes=new Set();
- byId('question').hidden=false;byId('question').textContent=(session.index+1)+' / '+session.order.length+'問：'+item.name+'はどこ？';
+ byId('question').hidden=false;byId('question').innerHTML=(session.index+1)+' / '+session.order.length+'問：'+formatQuestionName(item)+'はどこ？';
  byId('answerArea').hidden=false;
  byId('feedback').textContent='';byId('next').hidden=true;render();
 }
@@ -91,7 +158,7 @@ function answer(code){
  if(!tapped)return;
  if(code!==session.answer){
   session.wrongCodes.add(code);
-  byId('feedback').textContent='違います。そこは'+tapped.name+'です。';
+  byId('feedback').textContent='違います。\\nそこは'+tapped.name+'です。';
   // Keep all previously mistaken areas red and do not reveal the answer.
   byId('next').hidden=true;
   render();
@@ -114,7 +181,12 @@ try{
  const res=await fetch('/v2/data/national/2026-common/'+entry.source);if(!res.ok)throw Error('2026年データの読み込みに失敗');
  const topo=await res.json(),index=new Map(idx.entries.filter(x=>x.pref==='28').map(x=>[x.code,x]));
  const shapes=topo.objects.municipalities.geometries;arcs=decodeArcs(topo);
- all=shapes.map(g=>{const code=String(g.properties.N03_007),indexed=index.get(code);return {code,name:indexed?.fullName||indexed?.name||g.properties.N03_004,polys:polys(g,arcs)};});
+ all=shapes.map(g=>{
+  const code=String(g.properties.N03_007),indexed=index.get(code);
+  const name=indexed?.fullName||indexed?.name||g.properties.N03_004;
+  const reading=indexed?.reading||indexed?.kana||indexed?.ruby||MANUAL_READINGS_BY_NAME[name]||'';
+  return {code,name,reading,polys:polys(g,arcs)};
+});
  const keys=new Set(regions.flatMap(r=>r.codes));
  if(all.length!==49||keys.size!==49||all.some(r=>!keys.has(r.code)||!index.has(r.code)))throw Error('地域の行政区域コードが2026年版と一致しません');
  byId('start').disabled=false;byId('question').textContent='';byId('question').hidden=true;byId('answerArea').hidden=true;focus();
