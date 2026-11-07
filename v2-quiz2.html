@@ -246,30 +246,47 @@ function buildMunicipalNeighbors(shapes){
  }
  return result;
 }
+// Cache representative boundary vertices once for fast geographic ranking.
+// Distance is between municipality borders, not center points or neighbor-hop counts.
+let boundarySamples=new Map(),borderDistanceCache=new Map();
+function sampleBoundary(item,maxPoints=240){
+ const rings=[];
+ for(const polygon of item.polys)for(const ring of polygon)if(ring.length>0)rings.push(ring);
+ const count=rings.reduce((sum,ring)=>sum+ring.length,0);
+ const step=Math.max(1,Math.ceil(count/maxPoints));
+ const result=[];
+ let n=0;
+ for(const ring of rings)for(const point of ring){
+  if(n++%step===0)result.push(point);
+ }
+ return result;
+}
+function borderDistance(a,b){
+ const key=a.code<b.code?a.code+'|'+b.code:b.code+'|'+a.code;
+ if(borderDistanceCache.has(key))return borderDistanceCache.get(key);
+ const pa=boundarySamples.get(a.code)||sampleBoundary(a);
+ const pb=boundarySamples.get(b.code)||sampleBoundary(b);
+ if(!pa.length||!pb.length)return Infinity;
+ const cos=Math.cos((bounds([a])[1]+bounds([a])[3]+bounds([b])[1]+bounds([b])[3])*Math.PI/720);
+ let min=Infinity;
+ for(const [ax,ay] of pa)for(const [bx,by] of pb){
+  const dx=(ax-bx)*cos,dy=ay-by,d=dx*dx+dy*dy;
+  if(d<min)min=d;
+ }
+ borderDistanceCache.set(key,min);
+ return min;
+}
 function makeOptions(item){
- const byCode=new Map(all.map(r=>[r.code,r]));
- const seen=new Set([item.code]), candidates=[];
- let frontier=[item.code];
- for(let depth=1;depth<=2&&candidates.length<3;depth++){
-  const following=[];
-  for(const code of frontier)for(const neighbor of municipalNeighbors.get(code)||[]){
-   if(seen.has(neighbor)||!byCode.has(neighbor))continue;
-   seen.add(neighbor);following.push(neighbor);
-  }
-  candidates.push(...shuffle(following));frontier=following;
- }
- const options=[item,...candidates.slice(0,3).map(code=>byCode.get(code))];
- if(options.length<4){
-  // Only isolated municipalities without three first/second-ring neighbors
-  // use geographic proximity as the final fallback.
-  const b=bounds([item]),x=(b[0]+b[2])/2,y=(b[1]+b[3])/2;
-  const nearby=all.filter(r=>!seen.has(r.code)).map(r=>{
-   const v=bounds([r]),dx=((v[0]+v[2])/2-x)*Math.cos(y*Math.PI/180),dy=(v[1]+v[3])/2-y;
-   return {item:r,distance:dx*dx+dy*dy};
-  }).sort((a,b)=>a.distance-b.distance||a.item.code.localeCompare(b.item.code));
-  options.push(...nearby.slice(0,4-options.length).map(r=>r.item));
- }
- return shuffle(options);
+ const adjacent=municipalNeighbors.get(item.code)||new Set();
+ const candidates=all.filter(other=>other.code!==item.code).map(other=>({
+  item:other,
+  // Shared borders always beat non-adjacent municipalities.
+  direct:adjacent.has(other.code),
+  distance:borderDistance(item,other)
+ }));
+ candidates.sort((a,b)=>Number(b.direct)-Number(a.direct)||a.distance-b.distance||a.item.code.localeCompare(b.item.code));
+ // Shuffle the four visible positions, not their geographic proximity ranking.
+ return shuffle([item,...candidates.slice(0,3).map(x=>x.item)]);
 }
 function show(){
  if(!session)return;
@@ -347,6 +364,8 @@ try{
   const reading=indexed?.reading||indexed?.kana||indexed?.ruby||MANUAL_READINGS_BY_NAME[name]||'';
   return {code,name,reading,polys:polys(g,arcs)};
 });
+ boundarySamples=new Map(all.map(item=>[item.code,sampleBoundary(item)]));
+ borderDistanceCache.clear();
  const keys=new Set(regions.flatMap(r=>r.codes));
  if(all.length!==49||keys.size!==49||all.some(r=>!keys.has(r.code)||!index.has(r.code)))throw Error('地域の行政区域コードが2026年版と一致しません');
  byId('start').disabled=false;byId('question').textContent='';byId('question').hidden=true;byId('choices').hidden=true;byId('answerArea').hidden=true;focus();
