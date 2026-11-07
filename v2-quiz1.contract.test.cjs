@@ -61,7 +61,12 @@ assert(html.indexOf('class="map-frame"')<html.indexOf('id="answerArea"')&&html.i
 assert(html.includes('.map-controls{position:absolute;top:auto;bottom:12px;right:9px;'),'Zoom controls are docked at the lower right');
 assert(html.includes("byId('answerArea').hidden=false;"),'Map feedback enabled at question start without moving the map');
 assert(html.includes('flex-direction:row;align-items:center;gap:7px;pointer-events:none'),'Correct feedback and next button are side-by-side');
-assert(html.includes('flex:1 1 0;min-width:0;margin:0;padding:9px 6px;'),'Feedback occupies flexible width with compact padding');
+assert(html.includes('flex:1 1 0;min-width:0;margin:0;padding:2px 3px;'),'Feedback stays flexible without button-like padding');
+assert(html.includes('background:transparent;border:0;border-radius:0;box-shadow:none'),'Feedback has no panel, border, rounded rectangle or button shadow');
+assert(html.includes('text-shadow:0 1px 2px #fff'),'Feedback stays readable on the map with white text outline');
+assert(html.includes('#next{flex:1 1 0;min-width:0;width:auto;min-height:44px;max-width:none;margin:0;background:#e2f0f9'),'Next question remains a button with its background');
+assert(html.includes("byId('feedback').textContent='正解です！';"),'Correct feedback is unchanged');
+assert(html.includes("byId('feedback').textContent='違います。そこは'+tapped.name+'です。';"),'Wrong feedback still shows tapped region name');
 assert(html.includes('#next{flex:1 1 0;min-width:0;width:auto'),'Next action occupies equal flexible width');
 assert(html.includes('#answerArea #next[hidden]{display:none}')||html.includes('#answerArea[hidden],#answerArea #next[hidden]{display:none}'),'Next button remains absent until correct answer');
 assert(html.includes("byId('next').hidden=true;"),'Next button remains hidden until correct answer');
