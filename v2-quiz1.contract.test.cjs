@@ -64,6 +64,7 @@ assert(html.includes('flex-direction:row;align-items:center;gap:7px;pointer-even
 assert(html.includes('flex:1 1 0;min-width:0;margin:0;padding:2px 3px;'),'Feedback stays flexible without button-like padding');
 assert(html.includes('background:transparent;border:0;border-radius:0;box-shadow:none'),'Feedback has no panel, border, rounded rectangle or button shadow');
 assert(html.includes('text-shadow:0 1px 2px #fff'),'Feedback stays readable on the map with white text outline');
+assert(html.includes('font-size:clamp(17px,4.4vw,22px);line-height:1.4'),'Correct and incorrect feedback uses larger text');
 assert(html.includes('#next{flex:1 1 0;min-width:0;width:auto;min-height:44px;max-width:none;margin:0;background:#e2f0f9'),'Next question remains a button with its background');
 assert(html.includes("byId('feedback').textContent='正解です！';"),'Correct feedback is unchanged');
 assert(html.includes("byId('feedback').textContent='違います。そこは'+tapped.name+'です。';"),'Wrong feedback still shows tapped region name');
@@ -73,7 +74,10 @@ assert(html.includes("byId('next').hidden=true;"),'Next button remains hidden un
 assert(html.includes('display:flex;align-items:center;justify-content:center;text-align:center;flex:1 1 0'),'Answer feedback centered vertically and horizontally');
 assert(html.includes('id="quizStartAnchor"'),'Region selection scroll has stable target');
 assert(html.indexOf('id="rangeChoices"')<html.indexOf('id="quizStartAnchor"')&&html.indexOf('id="quizStartAnchor"')<html.indexOf('id="start"'),'Scroll target is directly after the region selector');
-assert(html.includes("requestAnimationFrame(()=>byId('quizStartAnchor').scrollIntoView({behavior:'smooth',block:'start'}))"),'Only explicit region selection scrolls to quiz start');
+assert(html.includes("requestAnimationFrame(()=>byId('quizStartAnchor').scrollIntoView({behavior:'smooth',block:'start'}))"),'Initial region selection scrolls to quiz start');
+assert(html.includes("byId('question').scrollIntoView({behavior:'smooth',block:'start'})"),'Starting quiz scrolls to question and map');
+assert(html.includes('if(startedOnce&&all.length){start();}'),'Subsequent regional choice starts quiz and scrolls to question');
+assert(html.includes('startedOnce=true;session={order'),'Quiz-start state is tracked after first start');
 assert(!html.includes("byId('quizStartAnchor').scrollIntoView({behavior:'smooth',block:'start'});focus();"),'No automatic scrolling while initializing data');
 assert(html.includes('<span>兵庫県</span><strong id="mapRegionName"></strong>'),'Two-line prefecture and region name is overlaid on map');
 assert(html.includes("byId('mapRegionName').textContent=regions.find(r=>r.key===selectedRange).name;"),'Map starts with currently selected region name');
