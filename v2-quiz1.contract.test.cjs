@@ -116,4 +116,6 @@ assert.equal(format({name:'神戸市北区',reading:'こうべしきたく'}),'<
 assert.equal(format({name:'西宮市',reading:'にしのみやし'}),'<ruby>西宮市<rt>にしのみやし</rt></ruby>');
 assert.equal(format({name:'A&B',reading:'a<b'}),'<ruby>A&amp;B<rt>a&lt;b</rt></ruby>');
 
+assert(html.includes("status.textContent='';status.hidden=true;"),'Normal region count status under map is hidden');
+assert(html.includes("status.hidden=false;status.textContent='読み込みエラー：'+err.message"),'Actual loading errors remain visible');
 console.log('Hyogo V2 region overview + quiz1 static contracts: PASS');
