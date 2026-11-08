@@ -125,4 +125,6 @@ assert.equal((html.match(/id="choices"/g)||[]).length,1,'Only one choices contai
 assert(html.includes('#choices[hidden]{display:none}'),'No blank answer-choice row before quiz starts');
 assert(html.includes("choices.replaceChildren();choices.hidden=false;"),'Choices appear below map after start');
 assert(html.includes("byId('choices').hidden=true;"),'Choices hidden when quiz stops or results display');
+assert(html.includes('KussoonV2MapViewport.init({svg,width:W,height:H,minZoom:0.25})'),'Initial regional map permits zoom-out');
+assert(html.includes('KussoonV2MapViewport.init({svg,width:W,height:frameHeight,minZoom:0.25})'),'Reinitialized viewport permits zoom-out');
 console.log('Hyogo V2 quiz2 four-choice/blink contracts: PASS');
