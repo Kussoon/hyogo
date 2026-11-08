@@ -62,7 +62,7 @@ button:disabled{opacity:.45}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:
 (async()=>{'use strict';
 const config=window.KussoonHyogoV2Regions,regions=config.regions,byId=id=>document.getElementById(id),svg=byId('map'),choices=byId('rangeChoices'),status=byId('status');
 const W=850,H=700,renderer=KussoonV2MunicipalRenderer;
-let viewport=KussoonV2MapViewport.init({svg,width:W,height:H}),frameHeight=H,prefectureView=false;
+let viewport=KussoonV2MapViewport.init({svg,width:W,height:H,minZoom:0.25}),frameHeight=H,prefectureView=false;
 const query=new URLSearchParams(location.search),wanted=query.get('range')||query.get('studyRegion');
 const MANUAL_READINGS_BY_NAME = {
   '神戸市東灘区':'こうべしひがしなだく',
@@ -174,7 +174,7 @@ function fitMap(items,isPrefecture=false){
  if(prefectureView!==isPrefecture||frameHeight!==targetHeight){
   viewport.destroy();
   frameHeight=targetHeight;
-  viewport=KussoonV2MapViewport.init({svg,width:W,height:frameHeight});
+  viewport=KussoonV2MapViewport.init({svg,width:W,height:frameHeight,minZoom:0.25});
  }
  prefectureView=isPrefecture;
  projection=project(bounds(items));
