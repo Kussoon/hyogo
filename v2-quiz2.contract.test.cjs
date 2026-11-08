@@ -127,4 +127,7 @@ assert(html.includes("choices.replaceChildren();choices.hidden=false;"),'Choices
 assert(html.includes("byId('choices').hidden=true;"),'Choices hidden when quiz stops or results display');
 assert(html.includes('KussoonV2MapViewport.init({svg,width:W,height:H,minZoom:0.25})'),'Initial regional map permits zoom-out');
 assert(html.includes('KussoonV2MapViewport.init({svg,width:W,height:frameHeight,minZoom:0.25})'),'Reinitialized viewport permits zoom-out');
+assert(html.includes("const ruby=document.createElement('ruby');ruby.textContent=region.name;"),'Region buttons render furigana');
+assert(html.includes("rt.textContent=region.reading"),'Region readings are displayed');
+assert(html.includes('#rangeChoices button rt{font-size:.7em'),'Regional ruby has visible size');
 console.log('Hyogo V2 quiz2 four-choice/blink contracts: PASS');
