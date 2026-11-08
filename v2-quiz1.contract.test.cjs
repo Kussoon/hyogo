@@ -189,4 +189,7 @@ assert(html.includes('font-size:clamp(10px,3.3vw,18px);line-height:1.25'),'All t
 assert(html.includes('#retryMissed{font-size:clamp(10px,3vw,16px)!important}'),'Missed button font increases while fitting narrow phones');
 assert(html.includes('#retryMissed span,#replay span,#returnRegions{white-space:nowrap}'),'Result button labels cannot wrap to a third line');
 assert(!html.includes('<span>間違えた問題だけを</span>'),'Obsolete longer text removed');
+assert(html.includes("const ruby=document.createElement('ruby');ruby.textContent=region.name;"),'Region buttons render furigana');
+assert(html.includes("rt.textContent=region.reading"),'Region readings are displayed');
+assert(html.includes('#rangeChoices button rt{font-size:.7em'),'Regional ruby has visible size');
 console.log('Hyogo V2 region overview + quiz1 static contracts: PASS');
