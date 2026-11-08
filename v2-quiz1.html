@@ -8,6 +8,8 @@ button,select{font:inherit;min-height:44px;border:1px solid #9bb7cb;border-radiu
 button:disabled{opacity:.45}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}a{color:#255677}
 #rangeChoices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0 15px}
 #rangeChoices button{min-width:0;min-height:39px;padding:5px 3px;font-size:clamp(11px,3.1vw,14px);line-height:1.25;overflow-wrap:anywhere}
+#rangeChoices button ruby{ruby-align:center;white-space:nowrap}
+#rangeChoices button rt{font-size:.7em;font-weight:650;letter-spacing:.01em}
 #rangeChoices button[aria-pressed="true"]{background:#dcecf9;border-color:#326e91;box-shadow:inset 0 0 0 1px #326e91}
 #quizStartAnchor{scroll-margin-top:8px}
 #start{width:100%;background:#e2f0f9;border-color:#94b8d0;color:#173f59;font-size:clamp(17px,4.5vw,22px);padding:15px 12px}
@@ -150,7 +152,13 @@ function formatQuestionName(item){
 let selectedRange=regions.some(r=>r.key===wanted)?wanted:regions[0].key;
 byId('mapRegionName').textContent=regions.find(r=>r.key===selectedRange).name;
 function updateRangeButtons(){for(const button of choices.querySelectorAll('button'))button.setAttribute('aria-pressed',String(button.dataset.key===selectedRange));}
-for(const region of regions){const button=document.createElement('button');button.type='button';button.dataset.key=region.key;button.textContent=region.name+'（'+region.codes.length+'区域）';button.addEventListener('click',()=>setRange(region.key));choices.append(button);}updateRangeButtons();
+for(const region of regions){
+ const button=document.createElement('button');button.type='button';button.dataset.key=region.key;
+ const ruby=document.createElement('ruby');ruby.textContent=region.name;
+ if(region.reading){const rt=document.createElement('rt');rt.textContent=region.reading;ruby.append(rt);}
+ button.append(ruby,document.createTextNode('（'+region.codes.length+'区域）'));
+ button.addEventListener('click',()=>setRange(region.key));choices.append(button);
+}updateRangeButtons();
 let all=[],arcs=[],current=[],projection=null,session=null,startedOnce=false,retryOrder=[];
 function scrollToQuestion(){requestAnimationFrame(()=>byId('question').scrollIntoView({behavior:'smooth',block:'start'}));}
 function decodeArcs(t){return t.arcs.map(a=>{let x=0,y=0;return a.map(q=>{if(t.transform){x+=q[0];y+=q[1];return [x*t.transform.scale[0]+t.transform.translate[0],y*t.transform.scale[1]+t.transform.translate[1]];}return q;});});}
