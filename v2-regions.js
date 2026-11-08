@@ -4,6 +4,7 @@ const regions=Object.freeze([
  {
   "key": "kobe",
   "name": "神戸",
+  "reading": "こうべ",
   "codes": [
    "28101",
    "28102",
@@ -19,6 +20,7 @@ const regions=Object.freeze([
  {
   "key": "hanshin-s",
   "name": "阪神南",
+  "reading": "はんしんみなみ",
   "codes": [
    "28202",
    "28204",
@@ -28,6 +30,7 @@ const regions=Object.freeze([
  {
   "key": "hanshin-n",
   "name": "阪神北",
+  "reading": "はんしんきた",
   "codes": [
    "28207",
    "28214",
@@ -39,6 +42,7 @@ const regions=Object.freeze([
  {
   "key": "higashi",
   "name": "東播磨",
+  "reading": "ひがしはりま",
   "codes": [
    "28203",
    "28210",
@@ -50,6 +54,7 @@ const regions=Object.freeze([
  {
   "key": "kita",
   "name": "北播磨",
+  "reading": "きたはりま",
   "codes": [
    "28213",
    "28215",
@@ -62,6 +67,7 @@ const regions=Object.freeze([
  {
   "key": "naka",
   "name": "中播磨",
+  "reading": "なかはりま",
   "codes": [
    "28201",
    "28442",
@@ -72,6 +78,7 @@ const regions=Object.freeze([
  {
   "key": "nishi",
   "name": "西播磨",
+  "reading": "にしはりま",
   "codes": [
    "28208",
    "28212",
@@ -85,6 +92,7 @@ const regions=Object.freeze([
  {
   "key": "tajima",
   "name": "但馬",
+  "reading": "たじま",
   "codes": [
    "28209",
    "28222",
@@ -96,6 +104,7 @@ const regions=Object.freeze([
  {
   "key": "tamba",
   "name": "丹波",
+  "reading": "たんば",
   "codes": [
    "28221",
    "28223"
@@ -104,6 +113,7 @@ const regions=Object.freeze([
  {
   "key": "awaji",
   "name": "淡路",
+  "reading": "あわじ",
   "codes": [
    "28205",
    "28224",
