@@ -177,7 +177,8 @@ assert(html.includes("projection=project(bounds(items));\n viewport.reset();\n r
 assert(html.includes("Math.round(W*rect.height/rect.width)"),'Prefecture full extent uses actual map frame aspect ratio');
 assert(html.includes("viewport.destroy();"),'Old viewport listeners are removed before aspect-ratio reinitialization');
 assert(html.includes("frameHeight=targetHeight;"),'Canvas height matches mode-specific map aspect');
-assert(html.includes("KussoonV2MapViewport.init({svg,width:W,height:frameHeight})"),'Viewport supports taller portrait canvas');
+assert(html.includes("KussoonV2MapViewport.init({svg,width:W,height:frameHeight,minZoom:0.25})"),'Viewport supports taller portrait canvas and zoom-out');
+assert(html.includes('KussoonV2MapViewport.init({svg,width:W,height:H,minZoom:0.25})'),'Initial region view supports zoom out');
 assert(html.includes("const targetHeight=isPrefecture&&rect.width>0&&rect.height>0"),'Region mode keeps established 700-unit projection');
 
 assert(html.includes('current=all.filter(r=>region.codes.includes(r.code));if(!current.length)return;fitMap(current);'),'Region selection still starts zoomed to the chosen region');
