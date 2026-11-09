@@ -121,7 +121,57 @@ const regions=Object.freeze([
   ]
  }
 ].map(item=>Object.freeze({...item,codes:Object.freeze(item.codes)})));
+const countyByTown=Object.freeze({
+  "猪名川町": [
+    "川辺郡",
+    "かわべぐん"
+  ],
+  "多可町": [
+    "多可郡",
+    "たかぐん"
+  ],
+  "稲美町": [
+    "加古郡",
+    "かこぐん"
+  ],
+  "播磨町": [
+    "加古郡",
+    "かこぐん"
+  ],
+  "市川町": [
+    "神崎郡",
+    "かんざきぐん"
+  ],
+  "福崎町": [
+    "神崎郡",
+    "かんざきぐん"
+  ],
+  "神河町": [
+    "神崎郡",
+    "かんざきぐん"
+  ],
+  "太子町": [
+    "揖保郡",
+    "いぼぐん"
+  ],
+  "上郡町": [
+    "赤穂郡",
+    "あこうぐん"
+  ],
+  "佐用町": [
+    "佐用郡",
+    "さようぐん"
+  ],
+  "香美町": [
+    "美方郡",
+    "みかたぐん"
+  ],
+  "新温泉町": [
+    "美方郡",
+    "みかたぐん"
+  ]
+});
 const all=regions.flatMap(item=>item.codes);
 if(regions.length!==10||all.length!==49||new Set(all).size!==49||all.some(code=>!/^28\d{3}$/.test(code)))throw Error('Hyogo region configuration is not a 49-code partition');
-global.KussoonHyogoV2Regions=Object.freeze({pref:'28',regions});
+global.KussoonHyogoV2Regions=Object.freeze({pref:'28',regions,countyByTown});
 })(window);
