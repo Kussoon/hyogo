@@ -12,6 +12,8 @@ p{line-height:1.6}.panel{background:#fff;border:1px solid #c1d5e2;border-radius:
 .region-label{pointer-events:none;text-anchor:middle;dominant-baseline:central;font-size:17px;font-weight:800;fill:#173950;stroke:#fff;stroke-width:4px;paint-order:stroke;stroke-linejoin:round}
 #buttons{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin:10px 0}
 #buttons a{display:block;padding:10px 3px;background:#f4faff;color:#153b55;border:1px solid #a5bfce;border-radius:9px;text-align:center;text-decoration:none;font-weight:750;font-size:clamp(12px,3.4vw,16px)}
+#buttons ruby{ruby-position:over;white-space:nowrap}
+#buttons rt{font-size:.65em;font-weight:700}
 .map-frame{position:relative}.map-controls{position:absolute;right:12px;top:12px;display:grid;gap:7px;z-index:2}
 .map-controls button{font:inherit;background:#fff;border:1px solid #b2c8d7;border-radius:9px;padding:9px 13px;min-width:54px;font-weight:800;font-size:19px;box-shadow:0 2px 8px #163c5522}
 .map-controls button:last-child{font-size:13px}#status{font-size:13px;color:#43677f;min-height:24px}.note{font-size:13px;color:#456b82}
@@ -34,7 +36,12 @@ p{line-height:1.6}.panel{background:#fff;border:1px solid #c1d5e2;border-radius:
 (async function(){'use strict';
 const {regions}=window.KussoonHyogoV2Regions,svg=d3.select('#map'),status=document.getElementById('status'),nav=document.getElementById('buttons');
 const url=key=>'/v2/national/study-region-trial/index.html?studyPref=28&studyRegion='+encodeURIComponent(key);
-for(const region of regions){const a=document.createElement('a');a.href=url(region.key);a.textContent=region.name;nav.append(a);}
+for(const region of regions){
+ const a=document.createElement('a'),ruby=document.createElement('ruby');
+ a.href=url(region.key);ruby.textContent=region.name;
+ if(region.reading){const rt=document.createElement('rt');rt.textContent=region.reading;ruby.append(rt);}
+ a.append(ruby);nav.append(a);
+}
 try{
  const manifestResponse=await fetch('/v2/data/national/2026-common/national-2026-pilot/manifest.json');
  if(!manifestResponse.ok)throw Error('manifest HTTP '+manifestResponse.status);
