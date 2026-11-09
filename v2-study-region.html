@@ -31,7 +31,7 @@ button[aria-pressed="true"]{background:#d9ecf7;border:2px solid #34799d}
 (async function(){'use strict';
 const box=document.getElementById('regions'),list=document.getElementById('items'),heading=document.getElementById('selection'),status=document.getElementById('status');
 try{
- const regions=window.KussoonHyogoV2Regions.regions;
+ const {regions,countyByTown}=window.KussoonHyogoV2Regions;
  const response=await fetch('/v2/progressive-preview/label-index.json');
  if(!response.ok)throw Error('市区町村データを読み込めません');
  const idx=await response.json(),hyogo=idx.entries.filter(e=>e.pref==='28');
@@ -44,9 +44,9 @@ try{
   heading.textContent=region.name+'：'+region.codes.length+'区域';
   list.replaceChildren();
   for(const code of region.codes){
-   const entry=byCode.get(code),tile=make('div','');tile.className='item';
-   const ruby=document.createElement('ruby');ruby.append(make('span',entry.fullName||entry.name));
-   if(entry.reading)ruby.append(make('rt',entry.reading));
+   const entry=byCode.get(code),county=countyByTown[entry.name],tile=make('div','');tile.className='item';
+   const ruby=document.createElement('ruby');ruby.append(make('span',(county?county[0]:'')+(entry.fullName||entry.name)));
+   if(entry.reading)ruby.append(make('rt',(county?county[1]:'')+entry.reading));
    tile.append(ruby);list.append(tile);
   }
  }
