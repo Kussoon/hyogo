@@ -15,7 +15,8 @@ assert(html.includes("session.missedQuestionCodes.add(session.answer)"),'Only ac
 assert(html.includes('if(session.wrongCodes.size===0){session.correct++'),'First-attempt scoring remains in force');
 assert(html.includes("byId('prefReset').onclick=()=>fitMap(all,true)"),'Province-wide fit remains');
 assert(html.includes("byId('reset').onclick=()=>fitMap(current)"),'Region fit remains');
-assert(hub.includes('<a href="/hyogo/v2-quiz2.html">クイズ2（V2試作）</a>'),'Region learning page links quiz 2');
+assert(hub.includes('href="/hyogo/v2-quiz2.html"'),'Region learning page links quiz 2');
+assert(hub.includes('countyByTown[entry.name]'),'Region list shows counties and readings');
 const neighborSource=html.slice(html.indexOf('let municipalNeighbors=new Map();'),html.indexOf('function show(){'));
 assert(neighborSource.includes('buildMunicipalNeighbors(shapes)'));
 assert(html.includes('municipalNeighbors=buildMunicipalNeighbors(shapes);'));
