@@ -1,0 +1,16 @@
+'use strict';
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const path = require('node:path');
+const root = __dirname, window = {};
+vm.runInNewContext(fs.readFileSync(path.join(root, 'v2-regions.js'), 'utf8'), {window});
+const regions = window.KussoonHyogoV2Regions.regions;
+assert.equal(regions.length, 10);
+assert.equal(regions.flatMap(region => region.codes).length, 49);
+for (const region of regions) assert.ok(region.name && /^[ぁ-ゖー]+$/.test(region.reading), region.key);
+const html = fs.readFileSync(path.join(root, 'v2-study-region.html'), 'utf8');
+assert.match(html, /const a=document\.createElement\('a'\),ruby=document\.createElement\('ruby'\)/);
+assert.match(html, /rt\.textContent=region\.reading;ruby\.append\(rt\)/);
+assert.match(html, /a\.append\(ruby\);nav\.append\(a\)/);
+console.log('Hyogo 10 region readings in study choices: OK');
